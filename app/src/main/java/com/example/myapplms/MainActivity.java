@@ -8,6 +8,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.myapplms.ui.notification.NotificationsFragment;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -20,5 +22,11 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    // Dùng luôn cái R.id.main của bạn làm nơi chứa giao diện mới
+                    .replace(R.id.main, new NotificationsFragment())
+                    .commit();
+        }
     }
 }

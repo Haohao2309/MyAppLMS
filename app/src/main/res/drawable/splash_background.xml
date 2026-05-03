@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 1. Màu nền của màn hình Splash -->
+    <item android:drawable="@color/primary" />
+
+    <!-- 2. Logo hiển thị ở giữa màn hình -->
+    <!-- Tạm thời dùng icon mặc định của Android. Sau này có logo app bạn thay vào chữ ic_launcher -->
+    <item android:gravity="center">
+        <bitmap
+            android:gravity="center"
+            android:src="@mipmap/ic_launcher" />
+    </item>
+
+</layer-list>
