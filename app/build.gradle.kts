@@ -57,8 +57,8 @@ dependencies {
 // Thư viện Gson
     implementation("com.google.code.gson:gson:2.10.1")
 
-    // 1. Thư viện OkHttp Logging Interceptor
-    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+    // 1. Thư viện OkHttp Logging Intercepto
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
 // 2. Thư viện Dagger Hilt (Dành cho dự án viết bằng Java)
     implementation("com.google.dagger:hilt-android:2.59.2")
