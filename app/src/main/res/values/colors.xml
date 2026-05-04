@@ -1,5 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- Primary Colors -->
+    <color name="primary">#6366F1</color>
+    <color name="primary_dark">#4F46E5</color>
+    <color name="primary_light">#818CF8</color>
+
+    <!-- Accent Colors -->
+    <color name="accent">#F59E0B</color>
+    <color name="accent_dark">#D97706</color>
+
+    <!-- Background Colors -->
+    <color name="background">#F9FAFB</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_variant">#F3F4F6</color>
+
+    <!-- Text Colors -->
+    <color name="text_primary">#111827</color>
+    <color name="text_secondary">#6B7280</color>
+    <color name="text_hint">#9CA3AF</color>
+
+    <!-- Status Colors -->
+    <color name="success">#10B981</color>
+    <color name="error">#EF4444</color>
+    <color name="warning">#F59E0B</color>
+    <color name="info">#3B82F6</color>
+
+    <!-- Other Colors -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="transparent">#00000000</color>
+    <color name="divider">#E5E7EB</color>
+
+    <!-- ============================================== -->
+    <!-- 2. BẢNG MÀU BỔ SUNG TỪ FIGMA (Cho UI mới)      -->
+    <!-- ============================================== -->
+    <!-- Bảng màu Xám (Tailwind Gray) -->
+    <color name="gray_50">#F9FAFB</color>
+    <color name="gray_100">#F3F4F6</color>
+    <color name="gray_200">#E5E7EB</color>
+    <color name="gray_300">#D1D5DB</color>
+    <color name="gray_400">#9CA3AF</color>
+    <color name="gray_500">#6B7280</color>
+    <color name="gray_600">#4B5563</color>
+    <color name="gray_700">#374151</color>
+    <color name="gray_800">#1F2937</color>
+    <color name="gray_900">#111827</color>
+
+    <!-- Bảng màu Tím (Tailwind Indigo) -->
+    <color name="indigo_100">#E0E7FF</color>
+    <color name="indigo_600">#4F46E5</color>
+
+
+    <!-- ============================================== -->
+    <!-- 3. MÀU NGỮ NGHĨA CHO THÔNG BÁO (Notifications) -->
+    <!-- ============================================== -->
+    <!-- Achievement (Vàng/Amber) -->
+    <color name="achievement_bg">#FEF3C7</color>
+    <color name="achievement_icon">#D97706</color>
+
+    <!-- Grade (Tím/Purple) -->
+    <color name="grade_bg">#EDE9FE</color>
+    <color name="grade_icon">#7C3AED</color>
+
+    <!-- Message (Xanh lá/Emerald) -->
+    <color name="message_bg">#D1FAE5</color>
+    <color name="message_icon">#059669</color>
 </resources>
