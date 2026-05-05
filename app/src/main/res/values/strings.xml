@@ -72,6 +72,12 @@
     <string name="loading">Loading…</string>
     <string name="error">Error</string>
     <string name="success">Success</string>
+    <string name="badge_instructor">Instructor</string>
+    <string name="badge_author">Tác giả</string>
+    <string name="content_description_avatar">Avatar người dùng</string>
+    <string name="content_description_like">Lượt thích</string>
+    <string name="content_description_reply">Phản hồi</string>
+    <string name="content_description_more">Thêm</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
