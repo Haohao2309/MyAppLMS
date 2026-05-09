@@ -95,7 +95,7 @@ public class LoginActivity extends AppCompatActivity {
         switch (role) {
             case "TEACHER": intent = new Intent(this, TeacherMainActivity.class); break;
             case "ADMIN":   intent = new Intent(this, AdminMainActivity.class);   break;
-            default:        intent = new Intent(this, StudentMainActivity.class); break;
+            default:        intent = new Intent(this, Explore_list_Course.class); break;
         }
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
