@@ -37,7 +37,7 @@ public class TokenAuthenticator implements Authenticator {
 
         if (refreshResponse.isSuccessful() && refreshResponse.body() != null) {
             AuthResponse body = refreshResponse.body();
-            sessionManager.saveSession(body.accessToken, body.refreshToken, body.role, body.userId, body.fullName);
+            sessionManager.saveSession(body.accessToken, body.refreshToken, body.role, body.userId, body.email);
 
             return response.request().newBuilder()
                     .header("Authorization", "Bearer " + body.accessToken)

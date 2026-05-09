@@ -2,10 +2,13 @@ package com.example.myapplms.ui.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,8 +26,18 @@ public class LoginActivity extends AppCompatActivity {
 
     private AuthViewModel viewModel;
     private EditText etEmail, etPassword;
+
+    private ImageView ivTogglePassword;
+    private TextView tabStudent, tabInstructor;
+    private TextView tvForgotPassword, tvSignUpFree;
+    private boolean isPasswordVisible = false;
+    private String selectedRole = "Student";
     private Button btnLogin;
     private ProgressBar progressBar;
+
+    private static final String STUDENT_EMAIL    = "student@learnhub.com";
+    private static final String INSTRUCTOR_EMAIL = "instructor@learnhub.com";
+    private static final String DEMO_PASSWORD    = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,19 +60,98 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        etEmail     = findViewById(R.id.et_email);
-        etPassword  = findViewById(R.id.et_password);
-        btnLogin    = findViewById(R.id.btn_login);
+        etEmail     = findViewById(R.id.edtEmail);
+        etPassword  = findViewById(R.id.edtPassword);
+        ivTogglePassword = findViewById(R.id.ivTogglePassword);
+        tabStudent       = findViewById(R.id.tabStudent);
+        tabInstructor    = findViewById(R.id.tabInstructor);
+        tvForgotPassword = findViewById(R.id.tvForgotPassword);
+        tvSignUpFree     = findViewById(R.id.tvSignUpFree);
+        btnLogin    = findViewById(R.id.btnLogin);
         progressBar = findViewById(R.id.progress_bar);
-
         btnLogin.setOnClickListener(v -> attemptLogin());
-
+        setupTabListeners();
+        setupPasswordToggle();
+        setupLinks();
         observeLoginResult();
+    }
+
+
+    private void setupTabListeners() {
+        tabStudent.setOnClickListener(v    -> selectTab("Student"));
+        tabInstructor.setOnClickListener(v -> selectTab("Instructor"));
+    }
+
+    private void selectTab(String role) {
+        selectedRole = role;
+
+        // Reset all tabs
+        resetTab(tabStudent);
+        resetTab(tabInstructor);
+
+
+        // Highlight selected
+        TextView selectedTab;
+        String prefillEmail;
+        switch (role) {
+            case "Instructor":
+                selectedTab  = tabInstructor;
+                prefillEmail = INSTRUCTOR_EMAIL;
+                break;
+
+            default: // Student
+                selectedTab  = tabStudent;
+                prefillEmail = STUDENT_EMAIL;
+                break;
+        }
+
+        selectedTab.setBackgroundResource(R.drawable.bg_tab_selected);
+        selectedTab.setTextColor(getResources().getColor(R.color.purple_primary, null));
+        selectedTab.setTextSize(14);
+
+        // Auto-fill demo email
+        etEmail.setHint(prefillEmail);
+        etPassword.setText(DEMO_PASSWORD);
+    }
+
+    private void resetTab(TextView tab) {
+        tab.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+        tab.setTextColor(getResources().getColor(R.color.text_grey, null));
+    }
+
+    private void setupPasswordToggle() {
+        ivTogglePassword.setOnClickListener(v -> {
+            isPasswordVisible = !isPasswordVisible;
+            if (isPasswordVisible) {
+                etPassword.setInputType(
+                        InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                ivTogglePassword.setImageResource(R.drawable.ic_eye_off);
+            } else {
+                etPassword.setInputType(
+                        InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                ivTogglePassword.setImageResource(R.drawable.ic_eye);
+            }
+            // Keep cursor at end
+            etPassword.setSelection(etPassword.getText().length());
+        });
+    }
+
+    private void setupLinks() {
+        tvForgotPassword.setOnClickListener(v -> {
+            Intent in = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
+            startActivity(in);
+        });
+
+        tvSignUpFree.setOnClickListener(v -> {
+            Intent in = new Intent(LoginActivity.this, RegisterActivity.class);
+            startActivity(in);
+        });
     }
 
     private void attemptLogin() {
         String email    = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
+
 
         if (email.isEmpty())    { etEmail.setError("Nhập tài khoản");       return; }
         if (password.isEmpty()) { etPassword.setError("Nhập mật khẩu"); return; }
