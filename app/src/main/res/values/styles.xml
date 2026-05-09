@@ -86,4 +86,20 @@
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">@color/text_hint</item>
     </style>
+
+<!--    Otp Box style-->
+    <style name="OtpBox">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">52dp</item>
+        <item name="android:layout_marginStart">4dp</item>
+        <item name="android:layout_marginEnd">4dp</item>
+        <item name="android:background">@drawable/bg_otp_box</item>
+        <item name="android:gravity">center</item>
+        <item name="android:inputType">number</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_dark</item>
+        <item name="android:maxLength">1</item>
+        <item name="android:textAlignment">center</item>
+    </style>
 </resources>
