@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <!-- Màu mặc định là xám nhạt, code Java Adapter sẽ tự động nhuộm màu lại -->
-    <solid android:color="@color/gray_100" />
-    <corners android:radius="12dp" /> <!-- Bo góc giống rounded-xl của Tailwind -->
+    <solid android:color="#E8EAFF" />
+    <corners android:radius="12dp" />
 </shape>
