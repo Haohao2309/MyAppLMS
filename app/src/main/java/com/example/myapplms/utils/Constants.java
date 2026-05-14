@@ -5,4 +5,5 @@ public class Constants {
     //192.168.0.105
     //192.168.1.86 may that cua Hao
     // 10.0.2.2:8080 may ao
+    //10.34.190.165 4g cua Hao
 }
