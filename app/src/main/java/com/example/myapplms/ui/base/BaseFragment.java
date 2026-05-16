@@ -41,8 +41,8 @@ public abstract class BaseFragment<VB extends ViewBinding> extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         // Gọi hàm setup logic riêng của từng Fragment con
         setupViews();
-        observeViewModel();
         setupListeners();
+        observeViewModel();
     }
 
     /**

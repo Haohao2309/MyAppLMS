@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.myapplms.databinding.FragmentProfileBinding;
+import com.example.myapplms.ui.StudentMainActivity;
 import com.example.myapplms.ui.base.BaseFragment;
 
 public class ProfileFragment extends BaseFragment<FragmentProfileBinding> {
@@ -39,9 +40,13 @@ public class ProfileFragment extends BaseFragment<FragmentProfileBinding> {
 
         // Bắt sự kiện Đăng xuất
         getBinding().btnLogout.setOnClickListener(v -> {
-            // Thực hiện xóa Token, Room DB ở đây
-            showToast("Logging out...");
-            // Chuyển hướng về LoginActivity
+            // Kiểm tra xem Fragment này đang nằm trong StudentMainActivity không
+            if (getActivity() instanceof StudentMainActivity) {
+                // Ép kiểu và gọi hàm hiển thị Dialog đăng xuất từ Activity
+                ((StudentMainActivity) getActivity()).showLogoutDialog();
+            }
+            // Lưu ý: Sau này nếu bạn gắn ProfileFragment vào TeacherMainActivity,
+            // bạn chỉ cần thêm cục "else if" tương tự vào đây là xong!
         });
     }
 }

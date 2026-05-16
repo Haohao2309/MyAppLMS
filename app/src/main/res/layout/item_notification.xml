@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    FILE: res/layout/item_notification.xml
+    HÀNH ĐỘNG: THAY THẾ TOÀN BỘ nội dung file hiện tại.
+
+    THAY ĐỔI SO VỚI BẢN CŨ:
+    - Thẻ Card (ConstraintLayout) KHÔNG còn hard-code background nữa.
+      Background sẽ được Adapter set ĐỘNG dựa vào isRead() → xem NotificationAdapter.java
+    - Thêm android:id="@+id/cardNotification" để Adapter tham chiếu được.
+    - Thêm elevation nhẹ cho card chưa đọc (set động từ Adapter).
+-->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -7,48 +17,60 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <!-- Header Ngày (Sẽ được Adapter ẩn/hiện động) -->
+    <!-- Header Ngày (Adapter ẩn/hiện động) -->
     <TextView
         android:id="@+id/tvDateGroup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="8dp"
         android:textColor="@color/gray_400"
-        android:textSize="14sp"
-        tools:text="Today" />
+        android:textSize="12sp"
+        android:textAllCaps="true"
+        android:letterSpacing="0.08"
+        android:textStyle="bold"
+        tools:text="TODAY" />
 
-    <!-- Thẻ Thông Báo -->
+    <!--
+        CARD THÔNG BÁO
+        - android:id="@+id/cardNotification" → Adapter dùng để setBackground() động
+        - KHÔNG set android:background ở đây — để Adapter quyết định dựa vào isRead()
+        - android:foreground → ripple effect khi click
+    -->
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cardNotification"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
-        android:background="@drawable/bg_notification_card"
-        android:padding="20dp">
+        android:layout_marginBottom="10dp"
+        android:padding="16dp"
+        android:foreground="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true">
 
         <!-- Icon Container tròn -->
         <FrameLayout
             android:id="@+id/iconContainer"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
             android:background="@drawable/bg_icon_container"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
                 android:id="@+id/ivIcon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
                 android:layout_gravity="center"
                 tools:src="@drawable/ic_star" />
         </FrameLayout>
 
-        <!-- Chấm báo chưa đọc -->
+        <!-- Chấm báo chưa đọc (góc trên phải) -->
         <View
             android:id="@+id/viewUnreadDot"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
             android:background="@drawable/bg_dot_indigo"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/tvTitle" />
 
@@ -57,10 +79,10 @@
             android:id="@+id/tvTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="14dp"
             android:layout_marginEnd="12dp"
             android:textColor="@color/gray_900"
-            android:textSize="16sp"
+            android:textSize="15sp"
             app:layout_constraintEnd_toStartOf="@+id/viewUnreadDot"
             app:layout_constraintStart_toEndOf="@+id/iconContainer"
             app:layout_constraintTop_toTopOf="parent"
@@ -71,26 +93,28 @@
             android:id="@+id/tvBody"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:lineSpacingExtra="4dp"
+            android:layout_marginTop="4dp"
+            android:lineSpacingExtra="3dp"
+            android:maxLines="2"
+            android:ellipsize="end"
             android:textColor="@color/gray_500"
-            android:textSize="14sp"
+            android:textSize="13sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/tvTitle"
             app:layout_constraintTop_toBottomOf="@+id/tvTitle"
-            tools:text="You've completed 5 lessons in a row! You earned the 'On a Roll' badge." />
+            tools:text="You've completed 5 lessons in a row and earned the 'On a Roll' badge." />
 
         <!-- Thời gian -->
         <TextView
             android:id="@+id/tvTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="8dp"
             android:textColor="@color/gray_400"
-            android:textSize="12sp"
+            android:textSize="11sp"
             app:layout_constraintStart_toStartOf="@+id/tvTitle"
             app:layout_constraintTop_toBottomOf="@+id/tvBody"
-            tools:text="Just now" />
+            tools:text="2 min ago" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>
