@@ -1,0 +1,180 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-mono,monospace)}
+.wrap{padding:16px 12px;font-size:12px;line-height:1.6;color:var(--color-text-primary)}
+.hdr{font-size:13px;font-weight:600;margin-bottom:10px;color:var(--color-text-primary)}
+.sub{font-size:11px;color:var(--color-text-secondary);margin-bottom:16px}
+.row{display:flex;align-items:center;gap:4px;padding:2px 0;white-space:nowrap;cursor:default}
+.row:hover{background:var(--color-background-secondary);border-radius:4px}
+.conn{color:var(--color-border-secondary);user-select:none;font-family:monospace;flex-shrink:0}
+.tog{font-size:9px;color:var(--color-text-tertiary);width:10px;text-align:center;flex-shrink:0;cursor:pointer}
+.nm{color:var(--color-text-primary);font-weight:500}
+.file{color:var(--color-text-secondary);font-weight:400}
+.cmt{color:var(--color-text-tertiary);font-size:11px;margin-left:6px}
+.bdg{display:inline-block;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:600;margin-left:5px;vertical-align:middle;line-height:14px}
+.b-data{background:#E6F1FB;color:#0C447C}
+.b-ui{background:#FAECE7;color:#712B13}
+.b-vm{background:#FBEAF0;color:#72243E}
+.b-di{background:#EAF3DE;color:#27500A}
+.b-util{background:#FAEEDA;color:#633806}
+.b-model{background:#E1F5EE;color:#085041}
+.b-test{background:#F1EFE8;color:#444441}
+.b-res{background:#FCEBEB;color:#791F1F}
+.children{display:block}
+.collapsed{display:none}
+.diff-badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;font-weight:600;margin-left:6px;vertical-align:middle;background:#EAF3DE;color:#27500A}
+.new-badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;font-weight:600;margin-left:6px;vertical-align:middle;background:#FAEEDA;color:#633806}
+</style>
+<div class="wrap">
+<div class="hdr">lms-backend/ <span style="font-weight:400;font-size:11px;color:var(--color-text-secondary)">— IntelliJ IDEA · Spring Boot · Maven</span></div>
+<div class="sub">📦 = package (Java) · 🔧 = config · ☕ = .java · 📄 = resource · 🗂 = thư mục thường</div>
+<div id="tree"></div>
+</div>
+<script>
+const data=[
+  {n:'.gitignore',t:'f',c:'target/, *.iml, .idea/'},
+  {n:'README.md',t:'f',c:'setup, run, API docs'},
+  {n:'pom.xml',t:'f',c:'Spring Boot parent, dependencies'},
+  {n:'src/',t:'d',o:true,children:[
+    {n:'main/',t:'d',o:true,children:[
+      {n:'java/com/yourdomain/lms/',t:'d',o:true,children:[
+        {n:'LmsApplication.java',t:'f',c:'@SpringBootApplication — entry point'},
+        {n:'config/',t:'d',b:'b-di',bt:'CONFIG',o:true,c:'Cấu hình toàn cục',children:[
+          {n:'SecurityConfig.java',t:'f',c:'JWT filter chain, CORS, role-based access'},
+          {n:'SwaggerConfig.java',t:'f',c:'OpenAPI / Springdoc'},
+          {n:'WebMvcConfig.java',t:'f',c:'CORS mapping, interceptors'},
+        ]},
+        {n:'controller/',t:'d',b:'b-ui',bt:'REST',o:true,c:'Tầng Presentation — @RestController',children:[
+          {n:'AuthController.java',t:'f',c:'POST /api/auth/login, /refresh, /logout'},
+          {n:'CourseController.java',t:'f',c:'GET/POST/PUT/DELETE /api/courses'},
+          {n:'StudentController.java',t:'f',c:'/api/students — enroll, progress'},
+          {n:'TeacherController.java',t:'f',c:'/api/teachers — manage class, grade'},
+          {n:'AdminController.java',t:'f',c:'/api/admin — user mgmt, roles'},
+          {n:'AssignmentController.java',t:'f',c:'/api/assignments — submit, grade'},
+        ]},
+        {n:'service/',t:'d',b:'b-vm',bt:'SERVICE',o:true,c:'Business logic — @Service',children:[
+          {n:'AuthService.java',t:'f',c:'login, register, JWT issue'},
+          {n:'CourseService.java',t:'f'},
+          {n:'StudentService.java',t:'f'},
+          {n:'TeacherService.java',t:'f'},
+          {n:'AdminService.java',t:'f'},
+          {n:'AssignmentService.java',t:'f'},
+        ]},
+        {n:'repository/',t:'d',b:'b-data',bt:'DATA',o:true,c:'Spring Data JPA — @Repository',children:[
+          {n:'UserRepository.java',t:'f',c:'extends JpaRepository<User, Long>'},
+          {n:'CourseRepository.java',t:'f'},
+          {n:'AssignmentRepository.java',t:'f'},
+          {n:'EnrollmentRepository.java',t:'f',c:'findByCourseAndStudent(...)'},
+        ]},
+        {n:'entity/',t:'d',b:'b-model',bt:'ENTITY',o:true,c:'@Entity — ánh xạ DB table',children:[
+          {n:'User.java',t:'f',c:'@Table("users") — role, email, password'},
+          {n:'Course.java',t:'f'},
+          {n:'Assignment.java',t:'f'},
+          {n:'Enrollment.java',t:'f',c:'@ManyToMany — student ↔ course'},
+          {n:'Submission.java',t:'f',c:'bài nộp, score, feedback'},
+        ]},
+        {n:'dto/',t:'d',b:'b-util',bt:'DTO',o:true,c:'Request / Response bodies',children:[
+          {n:'request/',t:'d',o:true,children:[
+            {n:'LoginRequest.java',t:'f'},
+            {n:'RegisterRequest.java',t:'f'},
+            {n:'SubmitAssignmentRequest.java',t:'f'},
+          ]},
+          {n:'response/',t:'d',o:true,children:[
+            {n:'AuthResponse.java',t:'f',c:'accessToken, refreshToken, role'},
+            {n:'CourseResponse.java',t:'f'},
+            {n:'UserResponse.java',t:'f'},
+          ]},
+        ]},
+        {n:'security/',t:'d',b:'b-di',bt:'SEC',o:true,c:'JWT + Spring Security',children:[
+          {n:'JwtTokenProvider.java',t:'f',c:'generateToken, validateToken, parse'},
+          {n:'JwtAuthenticationFilter.java',t:'f',c:'OncePerRequestFilter — đính kèm Principal'},
+          {n:'UserDetailsServiceImpl.java',t:'f',c:'loadUserByUsername → Spring Security'},
+        ]},
+        {n:'exception/',t:'d',b:'b-res',bt:'ERR',o:false,children:[
+          {n:'GlobalExceptionHandler.java',t:'f',c:'@ControllerAdvice — handle 4xx/5xx'},
+          {n:'ResourceNotFoundException.java',t:'f'},
+          {n:'UnauthorizedException.java',t:'f'},
+        ]},
+        {n:'util/',t:'d',b:'b-util',bt:'UTILS',o:false,children:[
+          {n:'Constants.java',t:'f',c:'JWT_SECRET, ROLES, expiry...'},
+          {n:'DateUtils.java',t:'f',c:'parse deadline, format timestamp'},
+          {n:'PageUtils.java',t:'f',c:'Pageable helper — limit/offset'},
+        ]},
+      ]},
+    ]},
+    {n:'resources/',t:'d',o:true,children:[
+      {n:'application.yml',t:'f',c:'DB url, JWT secret, port — dùng yml thay .properties'},
+      {n:'application-dev.yml',t:'f',c:'H2 in-memory cho dev/test'},
+      {n:'application-prod.yml',t:'f',c:'MySQL/PostgreSQL, secrets from env'},
+      {n:'db/migration/',t:'d',o:false,c:'Flyway / Liquibase migrations',children:[
+        {n:'V1__create_users.sql',t:'f'},
+        {n:'V2__create_courses.sql',t:'f'},
+        {n:'V3__add_enrollment.sql',t:'f'},
+      ]},
+    ]},
+    {n:'test/',t:'d',b:'b-test',bt:'TEST',o:false,children:[
+      {n:'java/com/yourdomain/lms/',t:'d',o:false,children:[
+        {n:'service/',t:'d',c:'AuthServiceTest, CourseServiceTest (JUnit5 + Mockito)'},
+        {n:'controller/',t:'d',c:'MockMvc integration tests'},
+        {n:'repository/',t:'d',c:'@DataJpaTest — in-memory H2'},
+      ]},
+    ]},
+  ]},
+];
+
+function icon(n,t){
+  if(t==='d')return'📦';
+  if(n.endsWith('.java'))return'☕';
+  if(n.endsWith('.xml')||n.endsWith('.yml')||n.endsWith('.yaml'))return'🔧';
+  if(n.endsWith('.sql'))return'🗄';
+  if(n.endsWith('.md'))return'📄';
+  return'·';
+}
+
+function build(nodes,depth){
+  const ul=document.createElement('div');
+  ul.className='children';
+  nodes.forEach((n,i)=>{
+    const isLast=i===nodes.length-1;
+    const row=document.createElement('div');
+    row.className='row';
+    const conn=document.createElement('span');
+    conn.className='conn';
+    conn.style.paddingLeft=(depth*14)+'px';
+    conn.textContent=depth===0?'':(isLast?'└─ ':'├─ ');
+    row.appendChild(conn);
+    if(n.t==='d'){
+      const tog=document.createElement('span');
+      tog.className='tog';
+      tog.textContent=n.o===false?'▶':'▼';
+      row.appendChild(tog);
+    }
+    const ic=document.createElement('span');
+    ic.textContent=icon(n.n,n.t)+' ';
+    ic.style.fontSize='11px';
+    row.appendChild(ic);
+    const lbl=document.createElement('span');
+    const nm=document.createElement('span');
+    nm.className='nm '+(n.t==='f'?'file':'');
+    nm.textContent=n.n;
+    lbl.appendChild(nm);
+    if(n.b){const b=document.createElement('span');b.className='bdg '+n.b;b.textContent=n.bt;lbl.appendChild(b);}
+    if(n.c){const c=document.createElement('span');c.className='cmt';c.textContent='// '+n.c;lbl.appendChild(c);}
+    row.appendChild(lbl);
+    ul.appendChild(row);
+    if(n.children){
+      const kids=build(n.children,depth+1);
+      if(n.o===false)kids.classList.add('collapsed');
+      ul.appendChild(kids);
+      row.style.cursor='pointer';
+      row.addEventListener('click',()=>{
+        const col=kids.classList.toggle('collapsed');
+        row.querySelector('.tog').textContent=col?'▶':'▼';
+      });
+    }
+  });
+  return ul;
+}
+document.getElementById('tree').appendChild(build(data,0));
+</script>
