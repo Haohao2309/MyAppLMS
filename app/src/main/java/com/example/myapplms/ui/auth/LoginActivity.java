@@ -16,7 +16,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.myapplms.LMSApplication;
 import com.example.myapplms.R;
-import com.example.myapplms.TeacherMainActivity;
+import com.example.myapplms.ui.TeacherMainActivity;
 import com.example.myapplms.data.repository.AuthRepository;
 import com.example.myapplms.ui.AdminMainActivity;
 import com.example.myapplms.ui.StudentMainActivity;
