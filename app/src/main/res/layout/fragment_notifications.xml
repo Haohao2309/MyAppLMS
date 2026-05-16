@@ -51,7 +51,8 @@
             android:src="@drawable/ic_settings"
             app:tint="@color/gray_600"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:contentDescription="Settings" />
 
         <TextView
             android:id="@+id/btnMarkAllRead"
@@ -102,7 +103,8 @@
             android:layout_width="64dp"
             android:layout_height="64dp"
             android:src="@drawable/ic_bell_outline"
-            app:tint="@color/gray_200" />
+            app:tint="@color/gray_200"
+            android:contentDescription="Empty" />
 
         <TextView
             android:layout_width="wrap_content"

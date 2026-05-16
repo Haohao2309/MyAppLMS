@@ -10,7 +10,7 @@ public class SessionManager {
     private static final String KEY_REFRESH   = "refresh_token";
     private static final String KEY_ROLE      = "role";
     private static final String KEY_USER_ID   = "user_id";
-    private static final String KEY_FULL_NAME = "full_name";
+    private static final String KEY_EMAIL = "email";
 
     private final SharedPreferences prefs;
 
@@ -20,13 +20,13 @@ public class SessionManager {
     }
 
     public void saveSession(String accessToken, String refreshToken,
-                            String role, String userId, String fullName) {
+                            String role, String userId, String email) {
         prefs.edit()
                 .putString(KEY_ACCESS,    accessToken)
                 .putString(KEY_REFRESH,   refreshToken)
                 .putString(KEY_ROLE,      role)
                 .putString(KEY_USER_ID,   userId)
-                .putString(KEY_FULL_NAME, fullName)
+                .putString(KEY_EMAIL, email)
                 .apply();
     }
 
@@ -34,7 +34,7 @@ public class SessionManager {
     public String getRefreshToken() { return prefs.getString(KEY_REFRESH,   null); }
     public String getRole()         { return prefs.getString(KEY_ROLE,      null); }
     public String getUserId()       { return prefs.getString(KEY_USER_ID,   null); }
-    public String getFullName()     { return prefs.getString(KEY_FULL_NAME, null); }
+    public String getKeyEmail()     { return prefs.getString(KEY_EMAIL, null); }
 
     public boolean isLoggedIn() {
         return getAccessToken() != null;

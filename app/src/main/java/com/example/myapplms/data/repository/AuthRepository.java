@@ -36,13 +36,13 @@ public class AuthRepository {
                         body.refreshToken,
                         body.role,
                         body.userId,
-                        body.fullName
+                        body.email
                 );
                 return Resource.success(body);
             }
 
             if (response.code() == 401) {
-                return Resource.error("Email hoặc mật khẩu không đúng", null);
+                return Resource.error("Email hoặc mật khẩu không đúng 123", null);
             }
             return Resource.error("Lỗi server: " + response.code(), null);
 
