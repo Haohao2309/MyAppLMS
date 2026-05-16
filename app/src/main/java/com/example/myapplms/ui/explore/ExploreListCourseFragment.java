@@ -1,46 +1,48 @@
-package com.example.myapplms.ui.auth;
+package com.example.myapplms.ui.explore;
 
-import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
+import android.view.LayoutInflater;
+import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplms.Course;
 import com.example.myapplms.CourseAdapter;
 import com.example.myapplms.R;
+import com.example.myapplms.databinding.FragmentExploreListCourseBinding;
+import com.example.myapplms.ui.base.BaseFragment;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Explore_list_Course extends AppCompatActivity {
+public class ExploreListCourseFragment extends BaseFragment<FragmentExploreListCourseBinding> {
 
-    private RecyclerView rvCourses;
     private CourseAdapter adapter;
     private List<Course> courseList;
 
+    @NonNull
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_explore_list_course);
+    protected FragmentExploreListCourseBinding inflateBinding(@NonNull LayoutInflater inflater, @Nullable ViewGroup container) {
+        return FragmentExploreListCourseBinding.inflate(inflater, container, false);
+    }
 
-        initViews();
-        setupRecyclerView();
+    @Override
+    protected void setupViews() {
+        // Khởi tạo danh sách
+        courseList = new ArrayList<>();
+        adapter = new CourseAdapter(courseList);
+        
+        // Thiết lập RecyclerView
+        getBinding().rvCourses.setLayoutManager(new LinearLayoutManager(getContext()));
+        getBinding().rvCourses.setAdapter(adapter);
+        
+        // Load dữ liệu mẫu
         loadSampleData();
     }
 
-    private void initViews() {
-        rvCourses = findViewById(R.id.rvCourses);
-    }
-
-    private void setupRecyclerView() {
-        courseList = new ArrayList<>();
-        adapter = new CourseAdapter(courseList);
-        rvCourses.setLayoutManager(new LinearLayoutManager(this));
-        rvCourses.setAdapter(adapter);
-    }
-
     private void loadSampleData() {
-        // Thêm dữ liệu mẫu giống trong ảnh
+        // Dữ liệu mẫu khớp với giao diện yêu cầu
         courseList.add(new Course(
                 "E-Learning Platform Overview",
                 "by Dr. Sarah Chen",
@@ -51,7 +53,7 @@ public class Explore_list_Course extends AppCompatActivity {
                 "FREE",
                 "Development",
                 "Beginner",
-                R.drawable.ic_launcher_background // Thay bằng ảnh thật nếu có
+                R.drawable.ic_launcher_background
         ));
 
         courseList.add(new Course(
@@ -81,5 +83,16 @@ public class Explore_list_Course extends AppCompatActivity {
         ));
 
         adapter.notifyDataSetChanged();
+        
+        // Cập nhật số lượng khóa học tìm thấy
+        getBinding().tvCourseCount.setText(courseList.size() + " courses found");
+    }
+
+    @Override
+    protected void setupListeners() {
+        // Các sự kiện click vào lọc, tìm kiếm có thể thêm ở đây
+        getBinding().layoutSearch.setOnClickListener(v -> {
+            // Xử lý tìm kiếm
+        });
     }
 }

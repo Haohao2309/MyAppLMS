@@ -16,10 +16,10 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.myapplms.LMSApplication;
 import com.example.myapplms.R;
+import com.example.myapplms.TeacherMainActivity;
 import com.example.myapplms.data.repository.AuthRepository;
 import com.example.myapplms.ui.AdminMainActivity;
 import com.example.myapplms.ui.StudentMainActivity;
-import com.example.myapplms.ui.TeacherMainActivity;
 
 // KHÔNG cần @AndroidEntryPoint
 public class LoginActivity extends AppCompatActivity {
@@ -79,7 +79,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void setupTabListeners() {
         tabStudent.setOnClickListener(v    -> selectTab("Student"));
-        tabInstructor.setOnClickListener(v -> selectTab("Instructor"));
+        tabInstructor.setOnClickListener(v -> selectTab("TEACHER"));
     }
 
     private void selectTab(String role) {
@@ -94,7 +94,7 @@ public class LoginActivity extends AppCompatActivity {
         TextView selectedTab;
         String prefillEmail;
         switch (role) {
-            case "Instructor":
+            case "TEACHER":
                 selectedTab  = tabInstructor;
                 prefillEmail = INSTRUCTOR_EMAIL;
                 break;
