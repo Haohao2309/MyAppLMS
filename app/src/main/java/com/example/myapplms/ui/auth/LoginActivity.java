@@ -20,6 +20,7 @@ import com.example.myapplms.data.repository.AuthRepository;
 import com.example.myapplms.ui.AdminMainActivity;
 import com.example.myapplms.ui.StudentMainActivity;
 import com.example.myapplms.ui.TeacherMainActivity;
+import com.example.myapplms.ui.community.CommunityActivity;
 
 // KHÔNG cần @AndroidEntryPoint
 public class LoginActivity extends AppCompatActivity {
@@ -187,7 +188,7 @@ public class LoginActivity extends AppCompatActivity {
         switch (role) {
             case "TEACHER": intent = new Intent(this, TeacherMainActivity.class); break;
             case "ADMIN":   intent = new Intent(this, AdminMainActivity.class);   break;
-            default:        intent = new Intent(this, StudentMainActivity.class); break;
+            default:        intent = new Intent(this, CommunityActivity.class); break;
         }
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

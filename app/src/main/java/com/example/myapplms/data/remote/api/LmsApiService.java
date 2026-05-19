@@ -1,13 +1,24 @@
 package com.example.myapplms.data.remote.api;
 
-
+import com.example.myapplms.data.remote.dto.request.CreateCommentRequest;
+import com.example.myapplms.data.remote.dto.request.CreatePostRequest;
 import com.example.myapplms.data.remote.dto.request.LoginRequest;
 import com.example.myapplms.data.remote.dto.request.RefreshTokenRequest;
 import com.example.myapplms.data.remote.dto.response.AuthResponse;
+import com.example.myapplms.data.remote.dto.response.CommentResponse;
+import com.example.myapplms.data.remote.dto.response.CommunityActionResponse;
+import com.example.myapplms.data.remote.dto.response.PostDetailResponse;
+import com.example.myapplms.data.remote.dto.response.PostResponse;
+
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
+import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface LmsApiService {
 
@@ -19,4 +30,41 @@ public interface LmsApiService {
 
     @POST("auth/logout")
     Call<Void> logout(@Body RefreshTokenRequest request);
+
+    // ── Community API ───────────────────────────────────────
+
+    @GET("community/posts")
+    Call<List<PostResponse>> getPosts(
+            @Query("category") String category,
+            @Query("q") String query,
+            @Query("page") Integer page,
+            @Query("size") Integer size
+    );
+
+    @GET("community/posts/{id}")
+    Call<PostDetailResponse> getPostDetail(@Path("id") String id);
+
+    @POST("community/posts")
+    Call<PostResponse> createPost(
+            @Query("category") String category,
+            @Body CreatePostRequest request
+    );
+
+    @DELETE("community/posts/{id}")
+    Call<CommunityActionResponse> deletePost(@Path("id") String postId);
+
+    @POST("community/posts/{id}/like")
+    Call<CommunityActionResponse> toggleLike(@Path("id") String postId);
+
+    @POST("community/posts/{id}/comments")
+    Call<CommentResponse> addComment(
+            @Path("id") String postId,
+            @Body CreateCommentRequest request
+    );
+
+    @DELETE("community/posts/{postId}/comments/{commentId}")
+    Call<CommunityActionResponse> deleteComment(
+            @Path("postId") String postId,
+            @Path("commentId") String commentId
+    );
 }

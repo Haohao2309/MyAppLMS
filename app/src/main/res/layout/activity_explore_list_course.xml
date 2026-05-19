@@ -226,9 +226,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
-        app:itemIconTint="@color/gray_500"
+        app:itemIconTint="@color/nav_item_color"
         app:itemRippleColor="@color/indigo_100"
-        app:itemTextColor="@color/gray_500"
+        app:itemTextColor="@color/nav_item_color"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:menu="@menu/bottom__nav_menu" />

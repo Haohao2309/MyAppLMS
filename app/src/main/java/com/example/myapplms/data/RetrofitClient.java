@@ -1,4 +1,5 @@
 package com.example.myapplms.data;
+
 import com.example.myapplms.data.remote.api.LmsApiService;
 import com.example.myapplms.data.remote.interceptor.AuthInterceptor;
 import com.example.myapplms.data.remote.interceptor.TokenAuthenticator;
@@ -14,6 +15,8 @@ public class RetrofitClient {
 
     private static RetrofitClient instance;
     private final LmsApiService apiService;
+    // THÊM: Biến lưu service không cần auth
+    private final LmsApiService publicApiService;
 
     private RetrofitClient(SessionManager sessionManager) {
         // Logging
@@ -34,12 +37,23 @@ public class RetrofitClient {
                 .build();
 
         apiService = retrofit.create(LmsApiService.class);
+
+        // THÊM: Khởi tạo publicApiService ngay trong constructor
+        publicApiService = getApiServiceWithoutAuth();
     }
 
-    // Retrofit không có interceptor — dùng riêng cho TokenAuthenticator
+    // Retrofit không có interceptor — dùng riêng cho TokenAuthenticator và test Public
     private LmsApiService getApiServiceWithoutAuth() {
+        // THÊM: Vẫn cần Logging để bạn theo dõi lỗi trong Logcat
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient publicClient = new OkHttpClient.Builder()
+                .addInterceptor(logging)
+                .build();
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(Constants.BASE_URL)
+                .client(publicClient) // THÊM: gắn client có logging vào
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         return retrofit.create(LmsApiService.class);
@@ -54,5 +68,10 @@ public class RetrofitClient {
 
     public LmsApiService getApiService() {
         return apiService;
+    }
+
+    // THÊM: Method này giúp bạn gọi API Community khi chưa có Token mà không bị Interceptor can thiệp
+    public LmsApiService getPublicApiService() {
+        return publicApiService;
     }
 }
