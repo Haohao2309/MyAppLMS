@@ -22,14 +22,25 @@ public class ExploreViewModel extends ViewModel {
         this.courseRepository = courseRepository;
     }
 
+
     public void loadCourses() {
         // Observe LiveData từ Repository rồi forward vào _courses
         // Không gán lại _courses = ... vì Fragment đang observe đối tượng này rồi
         courseRepository.getCourses().observeForever(result -> _courses.setValue(result));
+    }
+    public void loadCourses(Integer teacherId) {
+        // Observe LiveData từ Repository rồi forward vào _courses
+        // Không gán lại _courses = ... vì Fragment đang observe đối tượng này rồi
+        courseRepository.getCoursesByTeacherId(teacherId).observeForever(result -> _courses.setValue(result));
     }
 
     // Giữ lại getter cũ để không phải sửa Fragment
     public LiveData<Resource<List<Course>>> getCourses() {
         return _courses;
     }
+    public LiveData<Resource<List<Course>>> getCoursesByTeacherId(Integer teacherId) {
+        return _courses;
+    }
+
+
 }

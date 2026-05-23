@@ -17,6 +17,7 @@ import com.example.myapplms.data.repository.CourseRepository;
 import com.example.myapplms.databinding.FragmentExploreListCourseBinding;
 import com.example.myapplms.model.Course;
 import com.example.myapplms.ui.base.BaseFragment;
+import com.example.myapplms.utils.SessionManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,8 @@ public class ExploreListCourseFragment extends BaseFragment<FragmentExploreListC
     private ExploreViewModel viewModel;
     private CourseAdapter adapter;
     private final List<Course> courseList = new ArrayList<>();
+    private SessionManager sessionManager;
+    private Integer teacherId;
 
     @NonNull
     @Override
@@ -46,27 +49,33 @@ public class ExploreListCourseFragment extends BaseFragment<FragmentExploreListC
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState); // setupViews() chạy ở đây trong BaseFragment
-
+        sessionManager = new SessionManager(requireContext());
+        teacherId = sessionManager.getTeacherId();
         // Khởi tạo ViewModel SAU khi setupViews() đã chạy
         LMSApplication app = (LMSApplication) requireActivity().getApplication();
         CourseRepository repository = new CourseRepository(app.getRetrofitClient().getApiService());
         viewModel = new ViewModelProvider(this, new ExploreViewModelFactory(repository))
                 .get(ExploreViewModel.class);
 
-        // Observe TRƯỚC khi load — tránh miss data
         observeCourses();
 
+        if (teacherId != null) {
+            viewModel.loadCourses(teacherId);
+        } else {
+            viewModel.loadCourses();
+        }
+
         // Load data từ API
-        viewModel.loadCourses();
+
+
     }
 
     private void observeCourses() {
+        // ✅ Đổi từ getCoursesByTeacherId() → getCourses()
         viewModel.getCourses().observe(getViewLifecycleOwner(), result -> {
             switch (result.status) {
                 case LOADING:
-                    // Có thể thêm ProgressBar ở đây nếu cần
                     break;
-
                 case SUCCESS:
                     if (result.data != null) {
                         courseList.clear();
@@ -77,14 +86,12 @@ public class ExploreListCourseFragment extends BaseFragment<FragmentExploreListC
                         );
                     }
                     break;
-
                 case ERROR:
                     Toast.makeText(getContext(), result.message, Toast.LENGTH_SHORT).show();
                     break;
             }
         });
     }
-
     @Override
     protected void setupListeners() {
         getBinding().layoutSearch.setOnClickListener(v ->

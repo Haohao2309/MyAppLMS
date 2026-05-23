@@ -32,6 +32,8 @@ public interface LmsApiService {
     Call<TeacherResponse> getTeacherbyId(@Path("id") Integer id); // Bắt buộc phải có @Path("id")
     @GET("v1/courses")
     Call<List<CourseResponse>> getCourses();
+    @GET("v1/courses/teacher/{id}")
+    Call<List<CourseResponse>> getCoursesByTeacherId(@Path("id") Integer id);
 
 }
 
