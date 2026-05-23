@@ -4,7 +4,9 @@ package com.example.myapplms.data.remote.api;
 import com.example.myapplms.data.remote.dto.request.LoginRequest;
 import com.example.myapplms.data.remote.dto.request.RefreshTokenRequest;
 import com.example.myapplms.data.remote.dto.response.AuthResponse;
+import com.example.myapplms.data.remote.dto.response.CourseResponse;
 import com.example.myapplms.data.remote.dto.response.TeacherResponse;
+import com.example.myapplms.model.Course;
 
 import java.util.List;
 
@@ -28,5 +30,8 @@ public interface LmsApiService {
     Call<List<TeacherResponse>> getTeachers();
     @GET("teachers/{id}")
     Call<TeacherResponse> getTeacherbyId(@Path("id") Integer id); // Bắt buộc phải có @Path("id")
+    @GET("v1/courses")
+    Call<List<CourseResponse>> getCourses();
+
 }
 

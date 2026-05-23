@@ -19,6 +19,7 @@ public class TeacherRepository {
         try {
             Response<TeacherResponse> response = lmsApi.getTeacherbyId(id).execute();
             if (response.isSuccessful() && response.body() != null) {
+                System.out.println(response.body().getDegree());
                 return Resource.success(response.body());
             }
             return Resource.error("Lỗi: " + response.code(), null);
