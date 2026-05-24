@@ -1,6 +1,7 @@
-package com.example.myapplms;
+package com.example.myapplms.model;
 
 public class Course {
+    private Integer courseId;
     private String name;
     private String instructor;
     private String rating;
@@ -12,7 +13,8 @@ public class Course {
     private String level;
     private int imageResId;
 
-    public Course(String name, String instructor, String rating, String students, String lessons, String duration, String price, String category, String level, int imageResId) {
+    public Course(Integer courseId, String name, String instructor, String rating, String students, String lessons, String duration, String price, String category, String level, int imageResId) {
+        this.courseId = courseId;
         this.name = name;
         this.instructor = instructor;
         this.rating = rating;
@@ -25,6 +27,7 @@ public class Course {
         this.imageResId = imageResId;
     }
 
+    public Integer getCourseId() { return courseId; }
     public String getName() { return name; }
     public String getInstructor() { return instructor; }
     public String getRating() { return rating; }
