@@ -36,7 +36,9 @@ public class AuthRepository {
                         body.refreshToken,
                         body.role,
                         body.userId,
-                        body.email
+                        body.email,
+                        body.teacherId,
+                        body.studentId
                 );
                 return Resource.success(body);
             }

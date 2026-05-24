@@ -28,8 +28,7 @@ public class ExploreListCourseFragment extends BaseFragment<FragmentExploreListC
     private ExploreViewModel viewModel;
     private CourseAdapter adapter;
     private final List<Course> courseList = new ArrayList<>();
-    private SessionManager sessionManager;
-    private Integer teacherId;
+
 
     @NonNull
     @Override
@@ -49,8 +48,9 @@ public class ExploreListCourseFragment extends BaseFragment<FragmentExploreListC
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState); // setupViews() chạy ở đây trong BaseFragment
-        sessionManager = new SessionManager(requireContext());
-        teacherId = sessionManager.getTeacherId();
+
+        SessionManager sessionManager = new SessionManager(requireContext());
+        Integer teacherId = sessionManager.getTeacherId();
         // Khởi tạo ViewModel SAU khi setupViews() đã chạy
         LMSApplication app = (LMSApplication) requireActivity().getApplication();
         CourseRepository repository = new CourseRepository(app.getRetrofitClient().getApiService());

@@ -38,9 +38,6 @@ public class ExploreViewModel extends ViewModel {
     public LiveData<Resource<List<Course>>> getCourses() {
         return _courses;
     }
-    public LiveData<Resource<List<Course>>> getCoursesByTeacherId(Integer teacherId) {
-        return _courses;
-    }
 
 
 }
