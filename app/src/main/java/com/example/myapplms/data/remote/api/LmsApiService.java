@@ -9,7 +9,9 @@ import com.example.myapplms.data.remote.dto.response.AuthResponse;
 import com.example.myapplms.data.remote.dto.response.NotificationResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentCheckoutResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentWebhookResponse;
+import com.example.myapplms.data.remote.dto.response.CourseResponse;
 import com.example.myapplms.data.remote.dto.response.TeacherResponse;
+import com.example.myapplms.model.Course;
 
 import java.util.List;
 
@@ -47,5 +49,10 @@ public interface LmsApiService {
 
     @PATCH("/api/notifications/{id}/read")
     Call<Void> markAsRead(@Path("id") String id);
+    @GET("v1/courses")
+    Call<List<CourseResponse>> getCourses();
+    @GET("v1/courses/teacher/{id}")
+    Call<List<CourseResponse>> getCoursesByTeacherId(@Path("id") Integer id);
+
 }
 

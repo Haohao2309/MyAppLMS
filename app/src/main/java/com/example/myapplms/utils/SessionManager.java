@@ -11,6 +11,7 @@ public class SessionManager {
     private static final String KEY_ROLE      = "role";
     private static final String KEY_USER_ID   = "user_id";
     private static final String KEY_EMAIL = "email";
+    private static final String KEY_TEACHER_ID = "teacher_id";
 
     private final SharedPreferences prefs;
 
@@ -30,6 +31,14 @@ public class SessionManager {
                 .apply();
     }
 
+    public void saveTeacherId(Integer teacherId) {
+        prefs.edit().putInt(KEY_TEACHER_ID, teacherId).apply();
+    }
+
+    public Integer getTeacherId() {
+        int id = prefs.getInt(KEY_TEACHER_ID, -1);
+        return id == -1 ? null : id;
+    }
     public String getAccessToken()  { return prefs.getString(KEY_ACCESS,    null); }
     public String getRefreshToken() { return prefs.getString(KEY_REFRESH,   null); }
     public String getRole()         { return prefs.getString(KEY_ROLE,      null); }

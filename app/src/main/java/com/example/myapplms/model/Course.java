@@ -1,41 +1,59 @@
 package com.example.myapplms.model;
 
-public class Course {
-    private Integer courseId;
-    private String name;
-    private String instructor;
-    private String rating;
-    private String students;
-    private String lessons;
-    private String duration;
-    private String price;
-    private String category;
-    private String level;
-    private int imageResId;
 
-    public Course(Integer courseId, String name, String instructor, String rating, String students, String lessons, String duration, String price, String category, String level, int imageResId) {
-        this.courseId = courseId;
-        this.name = name;
+import com.example.myapplms.R;
+import com.example.myapplms.data.remote.dto.response.CourseResponse;
+import java.util.Locale;
+
+public class Course {
+    public int id;
+    public String title;
+    public String instructor;
+    public String rating;
+    public String students;
+    public String lessons;
+    public String duration;
+    public String priceText;
+    public String category;
+    public String level;
+    public int imageRes; // Tạm dùng int vì dùng ảnh local, sau này đổi thành String cho URL
+
+    public Course(int id, String title, String instructor, String rating, String students,
+                  String lessons, String duration, String priceText, String category,
+                  String level, int imageRes) {
+        this.id = id;
+        this.title = title;
         this.instructor = instructor;
         this.rating = rating;
         this.students = students;
         this.lessons = lessons;
         this.duration = duration;
-        this.price = price;
+        this.priceText = priceText;
         this.category = category;
         this.level = level;
-        this.imageResId = imageResId;
+        this.imageRes = imageRes;
     }
 
-    public Integer getCourseId() { return courseId; }
-    public String getName() { return name; }
-    public String getInstructor() { return instructor; }
-    public String getRating() { return rating; }
-    public String getStudents() { return students; }
-    public String getLessons() { return lessons; }
-    public String getDuration() { return duration; }
-    public String getPrice() { return price; }
-    public String getCategory() { return category; }
-    public String getLevel() { return level; }
-    public int getImageResId() { return imageResId; }
+    // Mapper: Chuyển DTO thành Domain Model
+    public static Course fromResponse(CourseResponse res) {
+        String displayPrice = (res.price == null || res.price <= 0)
+                ? "FREE"
+                : String.format(Locale.US, "$%.2f", res.price);
+
+        String instructorName = res.teacherName != null ? "by " + res.teacherName : "by Unknown";
+
+        return new Course(
+                res.courseId != null ? res.courseId : 0,
+                res.title,
+                instructorName,
+                "4.5 (1k+)",     // Fake data vì DB chưa có
+                "10k students",  // Fake data
+                "12 lessons",    // Fake data
+                "2h 00m",        // Fake data
+                displayPrice,
+                res.categoryName != null ? res.categoryName : "General",
+                "Beginner",      // Fake data
+                R.drawable.ic_launcher_background // Ảnh mặc định
+        );
+    }
 }

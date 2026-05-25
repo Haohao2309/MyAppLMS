@@ -111,12 +111,12 @@ public class ProfileFragment extends BaseFragment<FragmentProfileBinding> {
             authViewModel.logout();
         });
     }
+    public Integer currentTeacherId = null; // ✅ thêm field này
 
     // -------------------------------------------------------------------------
     // Observers
     // -------------------------------------------------------------------------
 
-    /** Quan sát thông tin giáo viên và cập nhật UI. */
     private void observeTeacher() {
         teacherViewModel.teacher.observe(getViewLifecycleOwner(), resource -> {
             if (resource == null) return;
@@ -134,6 +134,8 @@ public class ProfileFragment extends BaseFragment<FragmentProfileBinding> {
                 case SUCCESS:
                     // TODO: getBinding().progressBar.setVisibility(View.GONE);
                     if (resource.data != null) {
+                        currentTeacherId = resource.data.getTeacherId();
+                        sessionManager.saveTeacherId(currentTeacherId); // ✅ lưu vào session
                         String fullName = resource.data.getFirstName()
                                 + " " + resource.data.getLastName();
                         getBinding().tvName.setText(fullName.trim());

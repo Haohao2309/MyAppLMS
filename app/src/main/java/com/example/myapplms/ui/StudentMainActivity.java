@@ -9,6 +9,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.myapplms.LMSApplication;
@@ -17,6 +18,7 @@ import com.example.myapplms.data.repository.AuthRepository;
 import com.example.myapplms.ui.auth.AuthViewModel;
 import com.example.myapplms.ui.auth.AuthViewModelFactory;
 import com.example.myapplms.ui.auth.LoginActivity;
+import com.example.myapplms.ui.explore.ExploreListCourseFragment;
 import com.example.myapplms.ui.notification.NotificationsFragment;
 import com.example.myapplms.ui.profile.ProfileFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -50,7 +52,8 @@ public class StudentMainActivity extends AppCompatActivity {
                 // selectedFragment = new HomeFragment(); // TODO: Tạo Fragment sau
                 Toast.makeText(this, "Chưa làm Home", Toast.LENGTH_SHORT).show();
             } else if (itemId == R.id.nav_explore) {
-                // selectedFragment = new ExploreFragment(); // TODO: Tạo Fragment sau
+                replaceFragment(new ExploreListCourseFragment());
+                return true;
             } else if (itemId == R.id.nav_community) {
                 // selectedFragment = new CommunityFragment(); // TODO: Tạo Fragment sau
             } else if (itemId == R.id.nav_notifications) {
@@ -99,7 +102,13 @@ public class StudentMainActivity extends AppCompatActivity {
                 .setNegativeButton("Hủy", null)
                 .show();
     }
-
+    private void replaceFragment(Fragment fragment) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        // Thiết lập hiệu ứng chuyển cảnh mượt mà (tùy chọn)
+        transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+        transaction.replace(R.id.fragment_container, fragment);
+        transaction.commit();
+    }
     private void logout() {
         LMSApplication app = (LMSApplication) getApplication();
         app.getSessionManager().clearSession();
