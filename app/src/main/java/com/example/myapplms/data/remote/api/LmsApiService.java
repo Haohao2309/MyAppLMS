@@ -11,6 +11,7 @@ import com.example.myapplms.data.remote.dto.response.PaymentCheckoutResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentWebhookResponse;
 import com.example.myapplms.data.remote.dto.response.CourseResponse;
 import com.example.myapplms.data.remote.dto.response.TeacherResponse;
+import com.example.myapplms.data.remote.dto.response.course_content.CourseContentResponse;
 import com.example.myapplms.model.Course;
 
 import java.util.List;
@@ -54,5 +55,10 @@ public interface LmsApiService {
     @GET("v1/courses/teacher/{id}")
     Call<List<CourseResponse>> getCoursesByTeacherId(@Path("id") Integer id);
 
+    @GET("v1/courses/{id}")
+    Call<CourseResponse> getCourseById(@Path("id") int id);
+
+    @GET("v1/courses/{id}/content")
+    Call<CourseContentResponse> getCourseContent(@Path("id") int id);
 }
 
