@@ -18,9 +18,9 @@
             android:id="@+id/btnBack"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/ic_book"
-            android:tint="@color/white"
+            android:background="@drawable/bg_icon_container"
+            android:backgroundTint="@color/white2"
+            android:src="@drawable/ic_back"
             android:contentDescription="Back"/>
 
         <LinearLayout
@@ -60,7 +60,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="16dp"
+            android:fillViewport="true">
 
             <!-- Course Thumbnail -->
             <androidx.cardview.widget.CardView
@@ -100,12 +101,12 @@
                         android:layout_height="160dp"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:background="@drawable/ic_book">
+                        android:background="@drawable/bg_placeholder">
 
                         <ImageView
                             android:layout_width="40dp"
                             android:layout_height="40dp"
-                            android:src="@drawable/ic_book"
+                            android:src="@drawable/ic_upload"
                             app:tint="#6C63FF"
                             android:contentDescription="@null"/>
 
@@ -130,6 +131,7 @@
                         android:id="@+id/etImageUrl"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:background="@drawable/bg_input_field"
                         android:hint="Hoặc nhập Image URL"
                         android:inputType="textUri"
                         android:layout_marginTop="12dp"/>
@@ -169,10 +171,12 @@
                     <EditText
                         android:id="@+id/etTitle"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginBottom="12dp"
+                        android:background="@drawable/bg_input_selector"
+                        android:padding="8dp"
                         android:hint="e.g., Complete Web Development Bootcamp"
-                        android:inputType="textCapSentences"
-                        android:layout_marginBottom="12dp"/>
+                        android:inputType="textCapSentences" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -185,6 +189,8 @@
                         android:id="@+id/etSubtitle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:background="@drawable/bg_input_selector"
+                        android:padding="8dp"
                         android:hint="Brief course description"
                         android:inputType="textCapSentences"
                         android:layout_marginBottom="12dp"/>
@@ -200,10 +206,29 @@
                         android:id="@+id/etDescription"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:background="@drawable/bg_input_selector"
+                        android:padding="8dp"
                         android:hint="What will students learn in this course?"
                         android:inputType="textMultiLine"
                         android:minLines="4"
-                        android:gravity="top"/>
+                        android:gravity="top"
+                        android:layout_marginBottom="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Price ($) *"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <EditText
+                        android:id="@+id/etPrice"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:padding="8dp"
+                        android:background="@drawable/bg_input_selector"
+                        android:hint="49.99"
+                        android:inputType="numberDecimal"/>
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -307,96 +332,7 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Pricing -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Pricing"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="12dp"/>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_marginEnd="8dp"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Price ($) *"
-                                android:textSize="14sp"
-                                android:layout_marginBottom="4dp"/>
-
-                            <EditText
-                                android:id="@+id/etPrice"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:hint="49.99"
-                                android:inputType="numberDecimal"/>
-
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Original Price ($)"
-                                android:textSize="14sp"
-                                android:layout_marginBottom="4dp"/>
-
-                            <EditText
-                                android:id="@+id/etOriginalPrice"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:hint="99.99"
-                                android:inputType="numberDecimal"/>
-
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Duration"
-                        android:textSize="14sp"
-                        android:layout_marginTop="12dp"
-                        android:layout_marginBottom="4dp"/>
-
-                    <EditText
-                        android:id="@+id/etDuration"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="e.g., 42h 15m"
-                        android:inputType="text"/>
-
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
 
             <ProgressBar
                 android:id="@+id/progressBar"
@@ -424,17 +360,19 @@
             android:layout_height="56dp"
             android:layout_weight="1"
             android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_button_logout"
+            app:backgroundTint="@null"
             android:text="Cancel"
-            android:backgroundTint="#F5F5F5"
             android:textColor="#666666"/>
 
         <Button
             android:id="@+id/btnSubmit"
             android:layout_width="0dp"
             android:layout_height="56dp"
-            android:layout_weight="2"
+            android:layout_weight="1"
+            android:background="@drawable/bg_button_logout"
+            android:backgroundTint="@color/primary_light"
             android:text="Create Course"
-            android:backgroundTint="#6C63FF"
             android:textColor="@color/white"/>
 
     </LinearLayout>

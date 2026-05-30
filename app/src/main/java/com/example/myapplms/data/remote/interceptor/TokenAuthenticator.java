@@ -2,6 +2,7 @@ package com.example.myapplms.data.remote.interceptor;
 
 import com.example.myapplms.data.remote.api.LmsApiService;
 import com.example.myapplms.data.remote.dto.request.RefreshTokenRequest;
+import com.example.myapplms.data.remote.dto.response.ApiResponse;
 import com.example.myapplms.data.remote.dto.response.AuthResponse;
 import com.example.myapplms.utils.SessionManager;
 
@@ -32,16 +33,19 @@ public class TokenAuthenticator implements Authenticator {
         if (refreshToken == null) return null;
 
         // Gọi đồng bộ để lấy token mới
-        Call<AuthResponse> call = apiService.refreshToken(new RefreshTokenRequest(refreshToken));
-        retrofit2.Response<AuthResponse> refreshResponse = call.execute();
+        Call<ApiResponse<AuthResponse>> call = apiService.refreshToken(new RefreshTokenRequest(refreshToken));
+        retrofit2.Response<ApiResponse<AuthResponse>> refreshResponse = call.execute();
 
         if (refreshResponse.isSuccessful() && refreshResponse.body() != null) {
-            AuthResponse body = refreshResponse.body();
-            sessionManager.saveSession(body.accessToken, body.refreshToken, body.role, body.userId, body.email, body.teacherId, body.studentId);
+            ApiResponse<AuthResponse> apiResponse = refreshResponse.body();
 
-            return response.request().newBuilder()
-                    .header("Authorization", "Bearer " + body.accessToken)
-                    .build();
+            if(apiResponse.isSuccess()&&apiResponse.getData()!=null){
+                AuthResponse body = apiResponse.getData();
+                sessionManager.saveSession(body.accessToken, body.refreshToken, body.role, body.userId, body.email, body.teacherId, body.studentId);
+                return response.request().newBuilder()
+                        .header("Authorization", "Bearer " + body.accessToken)
+                        .build();
+            }
         }
 
         // Refresh thất bại → buộc đăng xuất

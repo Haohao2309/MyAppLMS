@@ -18,7 +18,7 @@
         <activity
             android:name=".ui.teacher.CourseFormActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".ui.TeacherMainActivity"
             android:exported="false" />

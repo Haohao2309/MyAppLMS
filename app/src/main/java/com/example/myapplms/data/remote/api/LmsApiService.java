@@ -4,8 +4,12 @@ package com.example.myapplms.data.remote.api;
 import com.example.myapplms.data.remote.dto.request.CourseRequest;
 import com.example.myapplms.data.remote.dto.request.LoginRequest;
 import com.example.myapplms.data.remote.dto.request.RefreshTokenRequest;
+import com.example.myapplms.data.remote.dto.request.RegisterRequest;
+import com.example.myapplms.data.remote.dto.request.StudentRequest;
+import com.example.myapplms.data.remote.dto.response.ApiResponse;
 import com.example.myapplms.data.remote.dto.response.AuthResponse;
 import com.example.myapplms.data.remote.dto.response.CourseResponse;
+import com.example.myapplms.data.remote.dto.response.StudentResponse;
 import com.example.myapplms.data.remote.dto.response.TeacherResponse;
 import com.example.myapplms.model.Course;
 
@@ -23,10 +27,12 @@ import retrofit2.http.Query;
 public interface LmsApiService {
 
     @POST("auth/login")
-    Call<AuthResponse> login(@Body LoginRequest request);
+    Call<ApiResponse<AuthResponse>> login(@Body LoginRequest request);
+    @POST("auth/register")
+    Call<ApiResponse<AuthResponse>> register(@Body RegisterRequest request);
 
     @POST("auth/refresh")
-    Call<AuthResponse> refreshToken(@Body RefreshTokenRequest request);
+    Call<ApiResponse<AuthResponse>> refreshToken(@Body RefreshTokenRequest request);
 
     @POST("auth/logout")
     Call<Void> logout(@Body RefreshTokenRequest request);
@@ -34,6 +40,15 @@ public interface LmsApiService {
     Call<List<TeacherResponse>> getTeachers();
     @GET("teachers/{id}")
     Call<TeacherResponse> getTeacherbyId(@Path("id") Integer id); // Bắt buộc phải có @Path("id")
+
+    @GET("students/{id}")
+    Call<StudentResponse> getStudentById(@Path("id") Integer userId);
+
+    /** PUT cập nhật thông tin sinh viên theo studentId */
+    @PUT("students/{id}")
+    Call<StudentResponse> updateStudent(@Path("id") Integer studentId,
+                                        @Body StudentRequest request);
+
     @GET("v1/courses")
     Call<List<CourseResponse>> getCourses();
     @GET("v1/courses/teacher/{id}")

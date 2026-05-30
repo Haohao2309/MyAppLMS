@@ -13,6 +13,8 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.myapplms.LMSApplication;
 import com.example.myapplms.data.repository.AuthRepository;
+import com.example.myapplms.model.Student;
+import com.example.myapplms.data.repository.StudentRepository;
 import com.example.myapplms.data.repository.TeacherRepository;
 import com.example.myapplms.databinding.FragmentProfileBinding;
 import com.example.myapplms.ui.auth.AuthViewModel;
@@ -23,11 +25,23 @@ import com.example.myapplms.ui.teacher.TeacherViewModel;
 import com.example.myapplms.ui.teacher.TeacherViewModelFactory;
 import com.example.myapplms.utils.SessionManager;
 
+/**
+ * Bước 5 — ProfileFragment cải thiện:
+ *   • Đọc role từ SessionManager
+ *   • STUDENT  → gọi StudentViewModel
+ *   • TEACHER  → gọi TeacherViewModel (giữ nguyên logic cũ)
+ *   • Cả hai đều dùng cùng layout fragment_profile.xml
+ */
 public class ProfileFragment extends BaseFragment<FragmentProfileBinding> {
 
     private static final String TAG = "ProfileFragment";
 
+    // Hằng số role — phải khớp với giá trị lưu trong SessionManager
+    private static final String ROLE_STUDENT = "STUDENT";
+    private static final String ROLE_TEACHER = "TEACHER";
+
     private TeacherViewModel teacherViewModel;
+    private StudentViewModel studentViewModel;
     private AuthViewModel authViewModel;
     private SessionManager sessionManager;
 
@@ -43,7 +57,7 @@ public class ProfileFragment extends BaseFragment<FragmentProfileBinding> {
     }
 
     // -------------------------------------------------------------------------
-    // onCreate — khởi tạo ViewModel & SessionManager
+    // onCreate — khởi tạo ViewModel theo role
     // -------------------------------------------------------------------------
 
     @Override
@@ -53,129 +67,212 @@ public class ProfileFragment extends BaseFragment<FragmentProfileBinding> {
         LMSApplication app = (LMSApplication) requireActivity().getApplication();
         sessionManager = new SessionManager(requireContext());
 
-        // TeacherViewModel
+        String role = sessionManager.getRole(); // Lấy role từ session
+
+        // --- TeacherViewModel (khởi tạo luôn để tránh null-check ở dưới) ---
         TeacherRepository teacherRepository =
                 new TeacherRepository(app.getRetrofitClient().getApiService());
-        TeacherViewModelFactory teacherFactory = new TeacherViewModelFactory(teacherRepository);
-        teacherViewModel = new ViewModelProvider(this, teacherFactory).get(TeacherViewModel.class);
+        teacherViewModel = new ViewModelProvider(
+                this, new TeacherViewModelFactory(teacherRepository))
+                .get(TeacherViewModel.class);
 
-        // AuthViewModel — dùng để gọi logout
+        // --- StudentViewModel (chỉ khởi tạo khi cần) ---
+        if (ROLE_STUDENT.equalsIgnoreCase(role)) {
+            StudentRepository studentRepository =
+                    new StudentRepository(app.getRetrofitClient().getApiService());
+            studentViewModel = new ViewModelProvider(
+                    this, new StudentViewModel.Factory(studentRepository))
+                    .get(StudentViewModel.class);
+        }
+
+        // --- AuthViewModel (dùng chung cho cả hai role) ---
         AuthRepository authRepository = new AuthRepository(
                 app.getRetrofitClient().getApiService(), sessionManager);
-        AuthViewModelFactory authFactory = new AuthViewModelFactory(authRepository);
-        authViewModel = new ViewModelProvider(this, authFactory).get(AuthViewModel.class);
+        authViewModel = new ViewModelProvider(
+                this, new AuthViewModelFactory(authRepository))
+                .get(AuthViewModel.class);
     }
 
     // -------------------------------------------------------------------------
-    // onViewCreated — đăng ký observers & load dữ liệu
+    // onViewCreated
     // -------------------------------------------------------------------------
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        observeTeacher();
+
         observeLogout();
-        loadTeacherProfile();
+        loadProfileByRole();
     }
 
     // -------------------------------------------------------------------------
-    // setupViews
+    // setupViews / setupListeners
     // -------------------------------------------------------------------------
 
     @Override
-    protected void setupViews() {
-        // Observer đã chuyển sang onViewCreated() để đảm bảo lifecycle đúng
-    }
-
-    // -------------------------------------------------------------------------
-    // setupListeners
-    // -------------------------------------------------------------------------
+    protected void setupViews() { /* Observers đã đăng ký trong onViewCreated */ }
 
     @Override
     protected void setupListeners() {
 
-        getBinding().switchNotifications.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                showToast("Push Notifications Enabled");
-            } else {
-                showToast("Push Notifications Disabled");
-            }
-        });
+        getBinding().switchNotifications.setOnCheckedChangeListener((btn, isChecked) ->
+                showToast(isChecked ? "Push Notifications Enabled" : "Push Notifications Disabled"));
 
         getBinding().btnLanguage.setOnClickListener(v ->
                 showToast("Open Language Selection"));
 
-        // Nút đăng xuất — gọi authViewModel.logout() thay vì xóa session thủ công
         getBinding().btnLogout.setOnClickListener(v -> {
-            getBinding().btnLogout.setEnabled(false); // tránh bấm nhiều lần
+            getBinding().btnLogout.setEnabled(false);
             authViewModel.logout();
         });
     }
 
     // -------------------------------------------------------------------------
-    // Observers
+    // Điều hướng load theo role
     // -------------------------------------------------------------------------
 
-    private void observeTeacher() {
-        teacherViewModel.teacher.observe(getViewLifecycleOwner(), resource -> {
+    private void loadProfileByRole() {
+        String userIdStr = sessionManager.getUserId();
+        String role      = sessionManager.getRole();
+
+        Log.d(TAG, "userId=" + userIdStr + "  role=" + role);
+
+        if (userIdStr == null || userIdStr.isEmpty()) {
+            showToast("Phiên đăng nhập không hợp lệ, vui lòng đăng nhập lại.");
+            navigateToLogin();
+            return;
+        }
+
+        try {
+            Integer userId = Integer.parseInt(userIdStr);
+
+            if (ROLE_STUDENT.equalsIgnoreCase(role)) {
+                observeStudentProfile();
+                studentViewModel.getStudentByUserId(userId);
+            } else {
+                // Mặc định TEACHER (giữ nguyên logic cũ)
+                observeTeacherProfile();
+                teacherViewModel.getTeacherbyId(userId);
+            }
+
+        } catch (NumberFormatException e) {
+            Log.e(TAG, "userId không phải số: " + userIdStr, e);
+            showToast("ID không hợp lệ!");
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Observer — Student
+    // -------------------------------------------------------------------------
+
+    private void observeStudentProfile() {
+        studentViewModel.student.observe(getViewLifecycleOwner(), resource -> {
             if (resource == null) return;
 
-            Log.d(TAG, "Teacher | Status: " + resource.status
-                    + " | Data: " + resource.data
-                    + " | Message: " + resource.message);
+            Log.d(TAG, "Student | Status=" + resource.status
+                    + " | Data=" + resource.data
+                    + " | Msg=" + resource.message);
 
             switch (resource.status) {
                 case LOADING:
-                    Log.d(TAG, "Đang tải thông tin giáo viên...");
-                    // TODO: getBinding().progressBar.setVisibility(View.VISIBLE);
+                    showLoading(true);
                     break;
 
                 case SUCCESS:
-                    // TODO: getBinding().progressBar.setVisibility(View.GONE);
+                    showLoading(false);
                     if (resource.data != null) {
-//                        currentTeacherId = resource.data.getTeacherId();
-//                        sessionManager.saveTeacherId(currentTeacherId); // ✅ lưu vào session
-                        String fullName = resource.data.getFirstName()
-                                + " " + resource.data.getLastName();
-                        getBinding().tvName.setText(fullName.trim());
-                        getBinding().tvBio.setText(resource.data.getBio());
-                        getBinding().tvRole.setText(resource.data.getDegree());
-                        Log.d(TAG, "Hiển thị thành công: " + fullName);
+                        bindStudentData(resource.data); // resource.data là Student (domain model)
                     } else {
                         Log.w(TAG, "SUCCESS nhưng data null");
                     }
                     break;
 
                 case ERROR:
-                    // TODO: getBinding().progressBar.setVisibility(View.GONE);
-                    Log.e(TAG, "Lỗi tải profile: " + resource.message);
+                    showLoading(false);
+                    Log.e(TAG, "Lỗi tải student profile: " + resource.message);
                     showToast("Lỗi: " + resource.message);
                     break;
             }
         });
     }
 
-    /** Quan sát kết quả đăng xuất và điều hướng về LoginActivity. */
+    /**
+     * Đổ dữ liệu Student (domain model) lên UI.
+     * Dùng getter thay vì truy cập field trực tiếp — nhất quán với TeacherViewModel.
+     */
+    private void bindStudentData(Student data) {
+        // getFullName() đã xử lý null và trim bên trong Student
+        getBinding().tvName.setText(data.getFullName());
+        getBinding().tvBio.setText(trim(data.getBio()));
+
+        // tvRole → trường học (ngữ cảnh sinh viên)
+        getBinding().tvRole.setText(trim(data.getSchool()));
+
+        Log.d(TAG, "Hiển thị student: " + data.getFullName() + " | " + data.getSchool());
+    }
+
+    // -------------------------------------------------------------------------
+    // Observer — Teacher (giữ nguyên logic cũ)
+    // -------------------------------------------------------------------------
+
+    private void observeTeacherProfile() {
+        teacherViewModel.teacher.observe(getViewLifecycleOwner(), resource -> {
+            if (resource == null) return;
+
+            Log.d(TAG, "Teacher | Status=" + resource.status
+                    + " | Data=" + resource.data
+                    + " | Msg=" + resource.message);
+
+            switch (resource.status) {
+                case LOADING:
+                    showLoading(true);
+                    break;
+
+                case SUCCESS:
+                    showLoading(false);
+                    if (resource.data != null) {
+                        String fullName = trim(resource.data.getFirstName())
+                                + " " + trim(resource.data.getLastName());
+                        getBinding().tvName.setText(fullName.trim());
+                        getBinding().tvBio.setText(trim(resource.data.getBio()));
+                        getBinding().tvRole.setText(trim(resource.data.getDegree()));
+                        Log.d(TAG, "Hiển thị teacher: " + fullName);
+                    } else {
+                        Log.w(TAG, "SUCCESS nhưng data null");
+                    }
+                    break;
+
+                case ERROR:
+                    showLoading(false);
+                    Log.e(TAG, "Lỗi tải teacher profile: " + resource.message);
+                    showToast("Lỗi: " + resource.message);
+                    break;
+            }
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // Observer — Logout (dùng chung)
+    // -------------------------------------------------------------------------
+
     private void observeLogout() {
         authViewModel.logoutResult.observe(getViewLifecycleOwner(), resource -> {
             if (resource == null) return;
 
-            Log.d(TAG, "Logout | Status: " + resource.status);
+            Log.d(TAG, "Logout | Status=" + resource.status);
 
             switch (resource.status) {
                 case LOADING:
-                    // Nút đã bị disable ở trên, không cần làm thêm
                     break;
 
                 case SUCCESS:
-                    Log.d(TAG, "Đăng xuất thành công, chuyển về Login");
-                    sessionManager.clearSession(); // đảm bảo xóa session local
+                    Log.d(TAG, "Đăng xuất thành công");
+                    sessionManager.clearSession();
                     navigateToLogin();
                     break;
 
                 case ERROR:
                     Log.e(TAG, "Đăng xuất lỗi: " + resource.message);
-                    // Dù API lỗi vẫn xóa session local và về Login
                     showToast("Đăng xuất thất bại, đang đăng xuất khỏi thiết bị...");
                     sessionManager.clearSession();
                     navigateToLogin();
@@ -185,34 +282,24 @@ public class ProfileFragment extends BaseFragment<FragmentProfileBinding> {
     }
 
     // -------------------------------------------------------------------------
-    // Private helpers
+    // Helpers
     // -------------------------------------------------------------------------
 
-    /** Lấy userId từ session rồi gọi API. */
-    private void loadTeacherProfile() {
-        String userIdStr = sessionManager.getUserId();
-        Log.d(TAG, "userId từ session: " + userIdStr);
+    /**
+     * Bật / tắt ProgressBar (nếu có trong layout).
+     * Nếu layout chưa có progressBar thì bỏ comment khi thêm vào.
+     */
+    private void showLoading(boolean show) {
+        // TODO: getBinding().progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
 
-        if (userIdStr == null || userIdStr.isEmpty()) {
-            Log.w(TAG, "Không tìm thấy userId trong session");
-            showToast("Phiên đăng nhập không hợp lệ, vui lòng đăng nhập lại.");
-            navigateToLogin();
-            return;
-        }
-
-        try {
-            Integer userId = Integer.parseInt(userIdStr);
-            teacherViewModel.getTeacherbyId(userId);
-        } catch (NumberFormatException e) {
-            Log.e(TAG, "userId không phải số: " + userIdStr, e);
-            showToast("ID không hợp lệ!");
-        }
+    private static String trim(@Nullable String s) {
+        return s != null ? s.trim() : "";
     }
 
     /** Chuyển về LoginActivity và xóa back stack. */
     private void navigateToLogin() {
         Intent intent = new Intent(requireContext(), LoginActivity.class);
-        // Xóa toàn bộ back stack, người dùng không thể bấm back về lại
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         requireActivity().finish();
