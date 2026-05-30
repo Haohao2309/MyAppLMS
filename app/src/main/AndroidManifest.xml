@@ -39,8 +39,17 @@
             </intent-filter>
         </activity> <!-- ── Student ──────────────────────────────────────── -->
         <activity
+            android:name=".ui.community.CommunityActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.community.PostDetailActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ui.StudentMainActivity"
             android:exported="false" /> <!-- ── Teacher ──────────────────────────────────────── -->
+        <!-- ── Admin ────────────────────────────────────────── -->
         <activity
             android:name=".ui.AdminMainActivity"
             android:exported="false" />
