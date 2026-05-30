@@ -26,12 +26,16 @@ public class CourseDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_course_detail);
 
-        int courseId = getIntent().getIntExtra("COURSE_ID", 2); // Test hardcode id = 2
+        int courseId = getIntent().getIntExtra("COURSE_ID", -1);
 
         initViews();
         setupViewModel();
-        setupViewPager();
+
+        // ĐƯA DÒNG OBSERVE NÀY LÊN TRƯỚC
         observeHeaderData(courseId);
+
+        // SAU ĐÓ MỚI SET UP VIEW PAGER
+        setupViewPager();
     }
 
     private void initViews() {

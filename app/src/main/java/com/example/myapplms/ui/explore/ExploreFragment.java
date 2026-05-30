@@ -1,6 +1,7 @@
 // ui/explore/ExploreFragment.java
 package com.example.myapplms.ui.explore;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +21,7 @@ import com.example.myapplms.data.repository.TeacherRepository;
 import com.example.myapplms.databinding.FragmentExploreListCourseBinding;
 import com.example.myapplms.model.Course;
 import com.example.myapplms.ui.base.BaseFragment;
+import com.example.myapplms.ui.student.course_detail.CourseDetailActivity;
 import com.example.myapplms.ui.teacher.TeacherViewModel;
 import com.example.myapplms.ui.teacher.TeacherViewModelFactory;
 import com.example.myapplms.utils.SessionManager;
@@ -46,8 +48,17 @@ public class ExploreFragment extends BaseFragment<FragmentExploreListCourseBindi
 
     @Override
     protected void setupViews() {
-        courseList = new ArrayList<>();
-        adapter = new CourseAdapter(courseList);
+        // Cập nhật lại dòng khởi tạo adapter để nhận sự kiện click
+        adapter = new CourseAdapter(courseList, course -> {
+            // Khi click vào 1 khóa học -> Tạo Intent chuyển sang CourseDetailActivity
+            Intent intent = new Intent(requireContext(), CourseDetailActivity.class);
+
+            // Gửi COURSE_ID sang bên kia (để ViewModel của trang chi tiết gọi API)
+            intent.putExtra("COURSE_ID", course.id);
+
+            startActivity(intent);
+        });
+
         getBinding().rvCourses.setLayoutManager(new LinearLayoutManager(getContext()));
         getBinding().rvCourses.setAdapter(adapter);
     }

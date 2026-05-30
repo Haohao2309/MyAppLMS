@@ -5,11 +5,13 @@ import com.example.myapplms.data.remote.dto.request.LoginRequest;
 import com.example.myapplms.data.remote.dto.request.PaymentCheckoutRequest;
 import com.example.myapplms.data.remote.dto.request.PaymentWebhookRequest;
 import com.example.myapplms.data.remote.dto.request.RefreshTokenRequest;
+import com.example.myapplms.data.remote.dto.request.VoteRequest;
 import com.example.myapplms.data.remote.dto.response.AuthResponse;
 import com.example.myapplms.data.remote.dto.response.NotificationResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentCheckoutResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentWebhookResponse;
 import com.example.myapplms.data.remote.dto.response.CourseResponse;
+import com.example.myapplms.data.remote.dto.response.ReviewResponse;
 import com.example.myapplms.data.remote.dto.response.TeacherResponse;
 import com.example.myapplms.data.remote.dto.response.course_content.CourseContentResponse;
 import com.example.myapplms.model.Course;
@@ -21,6 +23,7 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 public interface LmsApiService {
@@ -45,10 +48,10 @@ public interface LmsApiService {
     @POST("payments/webhook")
     Call<PaymentWebhookResponse> paymentWebhook(@Body PaymentWebhookRequest request);
 
-    @GET("/api/notifications/my-notifications")
+    @GET("notifications/my-notifications")
     Call<List<NotificationResponse>> getMyNotifications();
 
-    @PATCH("/api/notifications/{id}/read")
+    @PATCH("notifications/{id}/read")
     Call<Void> markAsRead(@Path("id") String id);
     @GET("v1/courses")
     Call<List<CourseResponse>> getCourses();
@@ -60,5 +63,13 @@ public interface LmsApiService {
 
     @GET("v1/courses/{id}/content")
     Call<CourseContentResponse> getCourseContent(@Path("id") int id);
+
+    // Lấy danh sách review
+    @GET("courses/{courseId}/reviews")
+    Call<List<ReviewResponse>> getCourseReviews(@Path("courseId") int courseId);
+
+    // Vote review (Để sẵn cho tính năng vote sau này)
+    @PUT("v1/courses/{courseId}/reviews/{reviewId}/vote")
+    Call<ReviewResponse> voteReview(@Path("courseId") int courseId, @Path("reviewId") String reviewId, @Body VoteRequest request);
 }
 

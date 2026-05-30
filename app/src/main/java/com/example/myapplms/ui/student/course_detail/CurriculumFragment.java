@@ -6,6 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -51,14 +53,19 @@ public class CurriculumFragment extends Fragment {
                     break;
                 case SUCCESS:
                     progressBar.setVisibility(View.GONE);
-                    if (resource.data != null) {
+                    if (resource.data != null && resource.data.modules != null && !resource.data.modules.isEmpty()) {
                         tvStats.setText(resource.data.modules.size() + " sections • " + resource.data.metadata.totalLessons + " lessons");
                         ModuleAdapter adapter = new ModuleAdapter(resource.data.modules);
                         rvModules.setAdapter(adapter);
+                    } else {
+                        // THÊM DÒNG NÀY: Nếu API gọi thành công nhưng Modules bị rỗng
+                        Toast.makeText(getContext(), "Khóa học này chưa có video bài giảng!", Toast.LENGTH_LONG).show();
                     }
                     break;
                 case ERROR:
                     progressBar.setVisibility(View.GONE);
+                    // THÊM DÒNG NÀY: Để xem chính xác API báo lỗi gì (404, 500, hay lỗi parse JSON)
+                    Toast.makeText(getContext(), "Lỗi: " + resource.message, Toast.LENGTH_LONG).show();
                     break;
             }
         });

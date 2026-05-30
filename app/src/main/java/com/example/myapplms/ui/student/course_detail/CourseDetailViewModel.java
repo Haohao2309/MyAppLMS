@@ -4,10 +4,14 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.myapplms.data.remote.dto.response.PaymentCheckoutResponse;
+import com.example.myapplms.data.remote.dto.response.ReviewResponse;
 import com.example.myapplms.data.repository.CourseDetailRepository;
 import com.example.myapplms.model.Course;
 import com.example.myapplms.model.course_content.CourseContent;
 import com.example.myapplms.utils.Resource;
+
+import java.util.List;
 
 public class CourseDetailViewModel extends ViewModel {
 
@@ -46,5 +50,14 @@ public class CourseDetailViewModel extends ViewModel {
     public void refreshData(int courseId) {
         courseDetailLiveData = repository.getCourseDetail(courseId);
         courseContentLiveData = repository.getCourseContent(courseId);
+    }
+
+    // Bổ sung hàm lấy Reviews
+    public LiveData<Resource<List<ReviewResponse>>> getCourseReviews(int courseId) {
+        return repository.getCourseReviews(courseId);
+    }
+
+    public LiveData<Resource<PaymentCheckoutResponse>> checkoutCourse(int courseId) {
+        return repository.checkoutCourse(courseId);
     }
 }
