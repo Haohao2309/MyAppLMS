@@ -16,11 +16,12 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".ui.teacher.CourseFormActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
             android:name=".ui.student.course_detail.CourseDetailActivity"
-            android:exported="false">
-
-        </activity>
-
+            android:exported="false" />
         <activity
             android:name=".ui.TeacherMainActivity"
             android:exported="false" />
@@ -36,12 +37,22 @@
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity> <!-- ── Student ──────────────────────────────────────── -->
         <activity
+            android:name=".ui.community.CommunityActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.community.PostDetailActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ui.StudentMainActivity"
             android:exported="false" /> <!-- ── Teacher ──────────────────────────────────────── -->
+        <!-- ── Admin ────────────────────────────────────────── -->
         <activity
             android:name=".ui.AdminMainActivity"
             android:exported="false" />

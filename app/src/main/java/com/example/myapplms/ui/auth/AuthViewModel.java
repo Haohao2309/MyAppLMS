@@ -32,6 +32,16 @@ public class AuthViewModel extends ViewModel {
 
 
 
+    public void register(String fullName, String email, String password, String role) {
+        _registerResult.setValue(Resource.loading());
+
+        executor.execute(() -> {
+            Resource<AuthResponse> result =
+                    authRepository.register(fullName, email, password, role);
+            _registerResult.postValue(result);
+        });
+    }
+
     public void login(String username, String password) {
         _loginResult.setValue(Resource.loading());
         executor.execute(() -> {

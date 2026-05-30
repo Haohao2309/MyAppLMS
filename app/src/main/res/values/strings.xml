@@ -42,6 +42,20 @@
     <string name="enroll">Enroll</string>
     <string name="enroll_free">Enroll Free</string>
     <string name="free">FREE</string>
+
+    <!-- Community -->
+    <string name="community_title">Cộng đồng LearnHub</string>
+    <string name="search_topics">Tìm kiếm chủ đề…</string>
+    <string name="back">Back</string>
+    <string name="add_post">Add Post</string>
+    <string name="all_vietnamese">Tất cả</string>
+    <string name="courses_vietnamese">Khóa học</string>
+    <string name="programming_vietnamese">Lập trình</string>
+    <string name="hot">Hot</string>
+    <string name="views">lượt xem</string>
+    <string name="comments_count_format">%1$d phản hồi</string>
+    <string name="views_count_format">%1$d lượt xem</string>
+    <string name="likes_count_format">%1$d likes</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

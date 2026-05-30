@@ -23,5 +23,10 @@ public class AuthResponse {
 
     @SerializedName("role")
     public String role; // "STUDENT" | "TEACHER" | "ADMIN"
+
+    @SerializedName("teacherId")
+    public Integer teacherId;  // null nếu không phải TEACHER
+    @SerializedName("studentId")
+    public Integer studentId;
 }
 

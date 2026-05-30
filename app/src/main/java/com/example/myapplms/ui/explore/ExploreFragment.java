@@ -36,8 +36,6 @@ public class ExploreFragment extends BaseFragment<FragmentExploreListCourseBindi
     private ExploreViewModel viewModel;
     private CourseAdapter adapter;
     private List<Course> courseList;
-    private SessionManager sessionManager;
-    private Integer teacherId;
 
     @NonNull
     @Override
@@ -67,9 +65,8 @@ public class ExploreFragment extends BaseFragment<FragmentExploreListCourseBindi
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // ✅ Khởi tạo sau khi Fragment đã attach
-        sessionManager = new SessionManager(requireContext());
-        teacherId = sessionManager.getTeacherId();
+        SessionManager sessionManager = new SessionManager(requireContext());
+        Integer teacherId = sessionManager.getTeacherId();
 
         LMSApplication app = (LMSApplication) requireActivity().getApplication();
         CourseRepository repository = new CourseRepository(app.getRetrofitClient().getApiService());
