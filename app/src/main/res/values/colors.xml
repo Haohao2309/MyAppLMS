@@ -91,4 +91,9 @@
     <color name="message_icon">#FF0369A1</color>      <!-- xanh dương đậm -->
 
     <color name="blue_500">#23A9E2</color>
+
+    <color name="course_brand_purple">#5E35B1</color>
+    <color name="course_text_title">#212121</color>
+    <color name="course_text_body">#424242</color>
+    <color name="course_text_muted">#757575</color>
 </resources>

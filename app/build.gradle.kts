@@ -70,4 +70,5 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata:2.7.0")
     annotationProcessor(libs.room.compiler)
 
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 }

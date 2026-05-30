@@ -20,7 +20,7 @@
     <string name="nav_home">Home</string>
     <string name="nav_explore">Explore</string>
     <string name="nav_community">Community</string>
-    <string name="nav_notifications">Alerts</string>
+    <string name="nav_notifications">Notifications</string>
     <string name="nav_profile">Profile</string>
 
     <!-- Dashboard & Explore -->
@@ -56,4 +56,6 @@
     <string name="comments_count_format">%1$d phản hồi</string>
     <string name="views_count_format">%1$d lượt xem</string>
     <string name="likes_count_format">%1$d likes</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

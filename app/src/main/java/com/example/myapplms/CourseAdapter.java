@@ -8,16 +8,24 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.myapplms.model.Course; // Đảm bảo import đúng package chứa model Course
+import com.example.myapplms.model.Course;
 
 import java.util.List;
 
 public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.ViewHolder> {
 
     private List<Course> courseList;
+    private final OnCourseClickListener listener; // 1. THÊM BIẾN LẮNG NGHE SỰ KIỆN
 
-    public CourseAdapter(List<Course> courseList) {
+    // 2. TẠO INTERFACE ĐỂ CHUYỂN SỰ KIỆN RA NGOÀI FRAGMENT
+    public interface OnCourseClickListener {
+        void onCourseClick(Course course);
+    }
+
+    // 3. CẬP NHẬT CONSTRUCTOR ĐỂ NHẬN LISTENER
+    public CourseAdapter(List<Course> courseList, OnCourseClickListener listener) {
         this.courseList = courseList;
+        this.listener = listener;
     }
 
     @NonNull
@@ -32,23 +40,24 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.ViewHolder
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Course course = courseList.get(position);
 
-        // Đã sửa lại các thuộc tính cho khớp với file Course.java
-        // Lưu ý: Nếu trong Course.java bạn để public các biến, hãy dùng course.title
-        // Nếu bạn dùng private và tạo getter, hãy dùng course.getTitle()
-
         holder.tvCourseName.setText(course.title != null ? course.title : "Chưa có tên");
         holder.tvInstructor.setText(course.instructor);
         holder.tvRating.setText(course.rating);
         holder.tvStudents.setText(course.students);
         holder.tvLessons.setText(course.lessons);
         holder.tvDuration.setText(course.duration);
-        holder.tvPrice.setText(course.priceText); // Đổi từ price sang priceText
+        holder.tvPrice.setText(course.priceText);
         holder.tvCategory.setText(course.category);
         holder.tvLevel.setText(course.level);
 
-        // Tạm thời gán ảnh local bằng imageRes.
-        // Lời khuyên: Sau này nếu API trả về link ảnh thực (imageUrl), bạn nên tích hợp thư viện Glide hoặc Picasso ở đoạn này.
         holder.ivThumbnail.setImageResource(course.imageRes);
+
+        // 4. BẮT SỰ KIỆN KHI NGƯỜI DÙNG BẤM VÀO ITEM KHÓA HỌC
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onCourseClick(course);
+            }
+        });
     }
 
     @Override
@@ -56,7 +65,7 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.ViewHolder
         if (courseList != null) {
             return courseList.size();
         }
-        return 0; // Tránh lỗi NullPointerException khi list chưa có dữ liệu
+        return 0;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -65,8 +74,6 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.ViewHolder
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-
-            // Các ID này hoàn toàn khớp với file item_course.xml của bạn
             ivThumbnail = itemView.findViewById(R.id.ivThumbnail);
             tvCourseName = itemView.findViewById(R.id.tvCourseName);
             tvInstructor = itemView.findViewById(R.id.tvInstructor);

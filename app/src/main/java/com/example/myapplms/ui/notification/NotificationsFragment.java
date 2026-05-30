@@ -14,7 +14,7 @@ import com.example.myapplms.LMSApplication;
 import com.example.myapplms.R;
 import com.example.myapplms.data.local.LmsDatabase;
 import com.example.myapplms.data.local.dao.NotificationDao;
-import com.example.myapplms.data.remote.api.NotificationApiService;
+import com.example.myapplms.data.remote.api.LmsApiService;
 import com.example.myapplms.data.repository.NotificationRepository;
 import com.example.myapplms.databinding.FragmentNotificationsBinding;
 import com.example.myapplms.ui.base.BaseFragment;
@@ -46,7 +46,7 @@ public class NotificationsFragment extends BaseFragment<FragmentNotificationsBin
         LMSApplication app = (LMSApplication) requireActivity().getApplication();
 
         // Lấy ApiService từ Retrofit
-        NotificationApiService apiService = app.getRetrofitClient().create(NotificationApiService.class);
+        LmsApiService apiService = app.getRetrofitClient().create(LmsApiService.class);
 
         // Lấy DAO từ Room Database
         NotificationDao notificationDao = LmsDatabase

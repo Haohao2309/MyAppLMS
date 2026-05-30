@@ -8,6 +8,7 @@ import java.util.Locale;
 public class Course {
     public int id;
     public String title;
+    public String description;
     public String instructor;
     public String rating;
     public String students;
@@ -18,11 +19,12 @@ public class Course {
     public String level;
     public int imageRes; // Tạm dùng int vì dùng ảnh local, sau này đổi thành String cho URL
 
-    public Course(int id, String title, String instructor, String rating, String students,
+    public Course(int id, String title, String description, String instructor, String rating, String students,
                   String lessons, String duration, String priceText, String category,
                   String level, int imageRes) {
         this.id = id;
         this.title = title;
+        this.description = description;
         this.instructor = instructor;
         this.rating = rating;
         this.students = students;
@@ -45,6 +47,7 @@ public class Course {
         return new Course(
                 res.courseId != null ? res.courseId : 0,
                 res.title,
+                res.description,
                 instructorName,
                 "4.5 (1k+)",     // Fake data vì DB chưa có
                 "10k students",  // Fake data
