@@ -36,6 +36,7 @@
     <color name="black">#000000</color>
     <color name="transparent">#00000000</color>
     <color name="divider">#E5E7EB</color>
+    <color name="white2">#2CF2ECEC</color>
 
     <!-- Input border -->
     <color name="input_border">#E4E7ED</color>

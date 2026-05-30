@@ -14,6 +14,6 @@ public interface NotificationApiService {
     @GET("/api/notifications/my-notifications")
     Call<List<NotificationResponse>> getMyNotifications();
 
-    @PATCH("api/notifications/{id}/read")
+    @PATCH("/api/notifications/{id}/read")
     Call<Void> markAsRead(@Path("id") String id);
 }
