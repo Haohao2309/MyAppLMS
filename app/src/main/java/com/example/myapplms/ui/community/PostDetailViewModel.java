@@ -5,9 +5,9 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.myapplms.data.remote.dto.request.CreateCommentRequest;
-import com.example.myapplms.data.remote.dto.response.CommentResponse;
-import com.example.myapplms.data.remote.dto.response.CommunityActionResponse;
-import com.example.myapplms.data.remote.dto.response.PostDetailResponse;
+import com.example.myapplms.data.remote.dto.response.community_response.CommentResponse;
+import com.example.myapplms.data.remote.dto.response.community_response.CommunityActionResponse;
+import com.example.myapplms.data.remote.dto.response.community_response.PostDetailResponse;
 import com.example.myapplms.data.repository.CommunityRepository;
 
 import retrofit2.Call;
@@ -75,9 +75,13 @@ public class PostDetailViewModel extends ViewModel {
         });
     }
 
-    public void addComment(String postId, String content) {
+    public void addComment(String postId, String content, String parentCommentId) {
         _isLoading.setValue(true);
-        repository.addComment(postId, new CreateCommentRequest(content)).enqueue(new Callback<CommentResponse>() {
+        CreateCommentRequest request = (parentCommentId == null) ? 
+                new CreateCommentRequest(content) : 
+                new CreateCommentRequest(content, parentCommentId);
+                
+        repository.addComment(postId, request).enqueue(new Callback<CommentResponse>() {
             @Override
             public void onResponse(Call<CommentResponse> call, Response<CommentResponse> response) {
                 _isLoading.setValue(false);

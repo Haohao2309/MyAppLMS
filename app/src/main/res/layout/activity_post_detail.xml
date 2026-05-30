@@ -115,50 +115,54 @@
                     android:text="342 lượt xem"
                     android:textColor="@color/text_secondary"
                     android:textSize="13sp" />
+
+                <!-- Hot Badge -->
+                <LinearLayout
+                    android:id="@+id/layoutHotBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:background="@drawable/bg_chip_unselected"
+                    android:backgroundTint="#FFF7ED"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:src="@drawable/ic_star_filled"
+                        app:tint="@color/accent" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="Hot"
+                        android:textColor="@color/accent"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
             </LinearLayout>
 
             <!-- Tags -->
-            <LinearLayout
+            <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:orientation="horizontal">
+                android:scrollbars="none">
 
-                <TextView
+                <LinearLayout
+                    android:id="@+id/layoutDetailTagsContainer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_chip_unselected"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="4dp"
-                    android:text="#React"
-                    android:textColor="@color/primary"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/bg_chip_unselected"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="4dp"
-                    android:text="#JavaScript"
-                    android:textColor="@color/primary"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/bg_chip_unselected"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="4dp"
-                    android:text="#Beginner"
-                    android:textColor="@color/primary"
-                    android:textSize="12sp" />
-            </LinearLayout>
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
 
             <!-- Main Post Content Card -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardPostDetail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
@@ -233,6 +237,34 @@
                                     android:textColor="#4CAF50"
                                     android:textSize="11sp"
                                     android:visibility="gone" />
+
+                                <LinearLayout
+                                    android:id="@+id/layoutPinnedBadgeDetail"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="8dp"
+                                    android:gravity="center_vertical"
+                                    android:orientation="horizontal"
+                                    android:visibility="gone"
+                                    tools:visibility="visible">
+
+                                    <ImageView
+                                        android:layout_width="14dp"
+                                        android:layout_height="14dp"
+                                        android:src="@drawable/ic_edit"
+                                        android:rotation="45"
+                                        app:tint="#F59E0B"
+                                        android:contentDescription="@null" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginStart="4dp"
+                                        android:text="Ghim"
+                                        android:textColor="#F59E0B"
+                                        android:textSize="11sp"
+                                        android:textStyle="bold" />
+                                </LinearLayout>
                             </LinearLayout>
 
                             <TextView
@@ -309,40 +341,75 @@
         android:layout_height="wrap_content"
         android:background="@color/white"
         android:elevation="8dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:paddingHorizontal="16dp"
         android:paddingVertical="12dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <EditText
-            android:id="@+id/etComment"
-            android:layout_width="0dp"
+        <!-- Reply indicator header -->
+        <LinearLayout
+            android:id="@+id/layoutReplyIndicator"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/bg_input_field"
-            android:hint="Viết phản hồi của bạn..."
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="10dp"
-            android:textSize="14sp"
-            android:importantForAutofill="no" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone">
 
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/btnSendComment"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="12dp"
-            app:cardBackgroundColor="@color/primary_light"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="0dp">
+            <TextView
+                android:id="@+id/tvReplyingTo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Đang trả lời..."
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                android:textStyle="italic" />
 
             <ImageView
+                android:id="@+id/btnCancelReply"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_send"
-                android:contentDescription="Send" />
-        </com.google.android.material.card.MaterialCardView>
+                android:src="@drawable/ic_close"
+                app:tint="@color/text_hint"
+                android:contentDescription="Cancel reply" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/etComment"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/bg_input_field"
+                android:hint="Viết phản hồi của bạn..."
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="10dp"
+                android:textSize="14sp"
+                android:importantForAutofill="no" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/btnSendComment"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="12dp"
+                app:cardBackgroundColor="@color/primary_light"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="0dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_send"
+                    android:contentDescription="Send" />
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

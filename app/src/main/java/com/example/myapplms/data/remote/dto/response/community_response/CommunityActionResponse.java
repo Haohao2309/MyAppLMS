@@ -1,4 +1,4 @@
-package com.example.myapplms.data.remote.dto.response;
+package com.example.myapplms.data.remote.dto.response.community_response;
 
 public class CommunityActionResponse {
     public boolean success;

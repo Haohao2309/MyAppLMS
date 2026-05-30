@@ -186,9 +186,14 @@ public class LoginActivity extends AppCompatActivity {
     private void navigateByRole(String role) {
         Intent intent;
         switch (role) {
-            case "TEACHER": intent = new Intent(this, TeacherMainActivity.class); break;
-            case "ADMIN":   intent = new Intent(this, AdminMainActivity.class);   break;
-            default:        intent = new Intent(this, CommunityActivity.class); break;
+            case "ADMIN":   
+                intent = new Intent(this, AdminMainActivity.class);   
+                break;
+            case "TEACHER": 
+            case "STUDENT":
+            default:        
+                intent = new Intent(this, CommunityActivity.class); 
+                break;
         }
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
