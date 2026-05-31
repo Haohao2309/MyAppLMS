@@ -6,7 +6,7 @@ import android.os.Looper;
 import com.example.myapplms.data.local.dao.NotificationDao;
 import com.example.myapplms.data.local.entity.NotificationEntity;
 import com.example.myapplms.data.mapper.NotificationMapper;
-import com.example.myapplms.data.remote.api.NotificationApiService;
+import com.example.myapplms.data.remote.api.LmsApiService;
 import com.example.myapplms.data.remote.dto.response.NotificationResponse;
 import com.example.myapplms.model.Notification;
 
@@ -42,7 +42,7 @@ import retrofit2.Response;
  */
 public class NotificationRepository {
 
-    private final NotificationApiService apiService;
+    private final LmsApiService apiService;
     private final NotificationDao notificationDao;
 
     // Single-thread executor cho các tác vụ DB tuần tự
@@ -54,7 +54,7 @@ public class NotificationRepository {
      * Constructor nhận cả ApiService và DAO.
      * LMSApplication hoặc Factory sẽ cung cấp cả hai dependency này.
      */
-    public NotificationRepository(NotificationApiService apiService, NotificationDao notificationDao) {
+    public NotificationRepository(LmsApiService apiService, NotificationDao notificationDao) {
         this.apiService = apiService;
         this.notificationDao = notificationDao;
     }

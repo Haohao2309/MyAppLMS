@@ -20,6 +20,9 @@
             android:exported="false"
             android:windowSoftInputMode="adjustPan" />
         <activity
+            android:name=".ui.student.course_detail.CourseDetailActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.TeacherMainActivity"
             android:exported="false" />
         <activity

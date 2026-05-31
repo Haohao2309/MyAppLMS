@@ -91,12 +91,9 @@
     <color name="message_icon">#FF0369A1</color>      <!-- xanh dương đậm -->
 
     <color name="blue_500">#23A9E2</color>
-    <!-- Home UI Colors -->
-    <color name="home_header_start">#6366F1</color>
-    <color name="home_header_end">#A855F7</color>
-    <color name="streak_orange_start">#F97316</color>
-    <color name="streak_orange_end">#EA580C</color>
-    <color name="progress_purple">#8B5CF6</color>
-    <color name="chart_bar_light">#DBEAFE</color>
-    <color name="chart_bar_dark">#3B82F6</color>
+
+    <color name="course_brand_purple">#5E35B1</color>
+    <color name="course_text_title">#212121</color>
+    <color name="course_text_body">#424242</color>
+    <color name="course_text_muted">#757575</color>
 </resources>
