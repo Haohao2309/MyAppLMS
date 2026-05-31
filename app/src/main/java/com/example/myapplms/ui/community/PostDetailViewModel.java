@@ -121,6 +121,28 @@ public class PostDetailViewModel extends ViewModel {
         });
     }
 
+    public void updateComment(String postId, String commentId, String content) {
+        _isLoading.setValue(true);
+        CreateCommentRequest request = new CreateCommentRequest(content);
+        repository.updateComment(postId, commentId, request).enqueue(new Callback<CommentResponse>() {
+            @Override
+            public void onResponse(Call<CommentResponse> call, Response<CommentResponse> response) {
+                _isLoading.setValue(false);
+                if (response.isSuccessful()) {
+                    loadDetail(postId);
+                } else {
+                    _errorMessage.setValue("Lỗi cập nhật bình luận: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CommentResponse> call, Throwable t) {
+                _isLoading.setValue(false);
+                _errorMessage.setValue("Lỗi kết nối: " + t.getMessage());
+            }
+        });
+    }
+
     public void deletePost(String postId) {
         _isLoading.setValue(true);
         repository.deletePost(postId).enqueue(new Callback<CommunityActionResponse>() {

@@ -91,6 +91,14 @@ public interface LmsApiService {
             @Path("postId") String postId,
             @Path("commentId") String commentId
     );
+
+    @PUT("community/posts/{postId}/comments/{commentId}")
+    Call<CommentResponse> updateComment(
+            @Path("postId") String postId,
+            @Path("commentId") String commentId,
+            @Body CreateCommentRequest request
+    );
+
     @PUT("community/posts/{id}")
     Call<PostResponse> updatePost(
             @Path("id") String postId,
