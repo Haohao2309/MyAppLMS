@@ -18,14 +18,19 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
 
     private final List<CommentResponse> commentList;
     private final OnCommentClickListener listener;
+    private final String currentUserId;
+    private final String userRole;
 
     public interface OnCommentClickListener {
-        void onLongClick(CommentResponse comment);
         void onReplyClick(CommentResponse comment);
+        void onEditComment(CommentResponse comment, int position);
+        void onDeleteComment(CommentResponse comment, int position);
     }
 
-    public CommentAdapter(List<CommentResponse> commentList, OnCommentClickListener listener) {
+    public CommentAdapter(List<CommentResponse> commentList, String currentUserId, String userRole, OnCommentClickListener listener) {
         this.commentList = commentList;
+        this.currentUserId = currentUserId;
+        this.userRole = userRole;
         this.listener = listener;
     }
 
@@ -70,12 +75,40 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
         }
         holder.rootLayout.setLayoutParams(params);
 
-        holder.itemView.setOnLongClickListener(v -> {
-            listener.onLongClick(comment);
-            return true;
-        });
+        // More options visibility logic
+        if (currentUserId != null && currentUserId.equals(comment.userId)) {
+            holder.btnMore.setVisibility(View.VISIBLE);
+        } else if ("ADMIN".equalsIgnoreCase(userRole)) {
+            holder.btnMore.setVisibility(View.VISIBLE);
+        } else {
+            holder.btnMore.setVisibility(View.GONE);
+        }
+
+        holder.btnMore.setOnClickListener(v -> showMoreOptions(holder, comment, position));
 
         holder.tvReply.setOnClickListener(v -> listener.onReplyClick(comment));
+    }
+
+    private void showMoreOptions(ViewHolder holder, CommentResponse comment, int position) {
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(holder.itemView.getContext());
+        java.util.List<String> options = new java.util.ArrayList<>();
+        
+        if (currentUserId != null && currentUserId.equals(comment.userId)) {
+            options.add("Sửa bình luận");
+            options.add("Xóa bình luận");
+        } else if ("ADMIN".equalsIgnoreCase(userRole)) {
+            options.add("Xóa bình luận");
+        }
+
+        builder.setItems(options.toArray(new String[0]), (dialog, which) -> {
+            String selected = options.get(which);
+            if ("Sửa bình luận".equals(selected)) {
+                listener.onEditComment(comment, position);
+            } else if ("Xóa bình luận".equals(selected)) {
+                listener.onDeleteComment(comment, position);
+            }
+        });
+        builder.show();
     }
 
     @Override
@@ -85,7 +118,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvAuthor, tvContent, tvTime, tvReply;
-        View rootLayout;
+        View rootLayout, btnMore;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -94,6 +127,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
             tvTime = itemView.findViewById(R.id.tvCommentTime);
             tvReply = itemView.findViewById(R.id.tvReply);
             rootLayout = itemView.findViewById(R.id.rootCommentLayout);
+            btnMore = itemView.findViewById(R.id.btnMoreComment);
         }
     }
 }

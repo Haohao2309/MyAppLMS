@@ -141,7 +141,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
         // 6. Gán sự kiện Click xử lý tập trung
         holder.itemView.setOnClickListener(v -> {
-            int pos = holder.getAdapterPosition();
+            int pos = holder.getBindingAdapterPosition();
             if (pos != RecyclerView.NO_POSITION) {
                 listener.onPostClick(postList.get(pos));
             }
@@ -150,7 +150,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         // Giả định bạn đã chuyển btnLike và btnMore vào khai báo trong lớp ViewHolder
         if (holder.btnLike != null) {
             holder.btnLike.setOnClickListener(v -> {
-                int pos = holder.getAdapterPosition();
+                int pos = holder.getBindingAdapterPosition();
                 if (pos != RecyclerView.NO_POSITION) {
                     listener.onLikeClick(postList.get(pos));
                 }
@@ -159,7 +159,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
         if (holder.btnMore != null) {
             holder.btnMore.setOnClickListener(v -> {
-                int pos = holder.getAdapterPosition();
+                int pos = holder.getBindingAdapterPosition();
                 if (pos != RecyclerView.NO_POSITION) {
                     listener.onDeleteClick(postList.get(pos));
                 }
