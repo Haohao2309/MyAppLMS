@@ -43,10 +43,12 @@ import retrofit2.http.Query;
 
 public interface LmsApiService {
 
+    // Trong file LmsApiService.java sửa lại như thế này:
     @POST("auth/login")
-    Call<ApiResponse<AuthResponse>> login(@Body LoginRequest request);
+    Call<AuthResponse> login(@Body LoginRequest request);
+
     @POST("auth/register")
-    Call<ApiResponse<AuthResponse>> register(@Body RegisterRequest request);
+    Call<AuthResponse> register(@Body RegisterRequest request);;
 
     @POST("auth/refresh")
     Call<ApiResponse<AuthResponse>> refreshToken(@Body RefreshTokenRequest request);

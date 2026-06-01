@@ -20,6 +20,7 @@ import com.example.myapplms.ui.auth.AuthViewModelFactory;
 import com.example.myapplms.ui.auth.LoginActivity;
 import com.example.myapplms.ui.community.CommunityFragment;
 import com.example.myapplms.ui.explore.ExploreListCourseFragment;
+
 import com.example.myapplms.ui.home.HomeFragment;
 import com.example.myapplms.ui.notification.NotificationsFragment;
 import com.example.myapplms.ui.profile.ProfileFragment;
@@ -47,29 +48,26 @@ public class StudentMainActivity extends AppCompatActivity {
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
-            Fragment selectedFragment = null;
             int itemId = item.getItemId();
 
             if (itemId == R.id.nav_home) {
-                selectedFragment = new HomeFragment();
+                replaceFragment(new HomeFragment());
+                return true;
             } else if (itemId == R.id.nav_explore) {
                 replaceFragment(new ExploreListCourseFragment());
                 return true;
             } else if (itemId == R.id.nav_community) {
-                selectedFragment = new CommunityFragment();
+                replaceFragment(new CommunityFragment());
+                return true;
             } else if (itemId == R.id.nav_notifications) {
-                selectedFragment = new NotificationsFragment(); // Kéo Fragment Thông báo của bạn vào đây!
+                replaceFragment(new NotificationsFragment());
+                return true;
             } else if (itemId == R.id.nav_profile) {
-                 selectedFragment = new ProfileFragment(); // TODO: Tạo Fragment sau
+                replaceFragment(new ProfileFragment());
+                return true;
             }
 
-            // Thực hiện thay thế Fragment vào cái khung
-            if (selectedFragment != null) {
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, selectedFragment)
-                        .commit();
-            }
-            return true;
+            return false;
         });
 
         // 3. Mặc định mở tab Home khi vừa vào app
