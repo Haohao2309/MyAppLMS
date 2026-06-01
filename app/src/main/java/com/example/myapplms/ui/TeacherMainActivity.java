@@ -12,7 +12,7 @@ import com.example.myapplms.ui.explore.ExploreListCourseFragment;
 import com.example.myapplms.ui.home.HomeFragment;
 import com.example.myapplms.ui.notification.NotificationsFragment;
 import com.example.myapplms.ui.profile.ProfileFragment;
-import com.example.myapplms.ui.teacher.TeacherHomeFragment;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class TeacherMainActivity extends AppCompatActivity {
@@ -46,7 +46,7 @@ public class TeacherMainActivity extends AppCompatActivity {
             return false;
         });
 
-        // Mặc định vào Home (Overview)
+        // Mặc định vào Home
         if (savedInstanceState == null) {
             bottomNav.setSelectedItemId(R.id.nav_home);
         }
