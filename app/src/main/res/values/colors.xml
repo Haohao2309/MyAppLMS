@@ -96,4 +96,19 @@
     <color name="course_text_title">#212121</color>
     <color name="course_text_body">#424242</color>
     <color name="course_text_muted">#757575</color>
+
+    <!-- Home UI Colors -->
+    <color name="home_header_blue">#4F46E5</color>
+    <color name="home_streak_orange">#FF9800</color>
+    <color name="home_stats_icon_bg">#F0F2FF</color>
+    <color name="home_stats_icon_bg_green">#ECFDF5</color>
+    <color name="home_stats_icon_bg_amber">#FFFBEB</color>
+    <color name="home_progress_blue">#4F46E5</color>
+    <color name="home_play_btn_bg">#EEF2FF</color>
+    <color name="home_chart_bar_default">#C7D2FE</color>
+    <color name="home_chart_bar_active">#4F46E5</color>
+    <color name="home_quick_action_bg_blue">#EFF6FF</color>
+    <color name="home_quick_action_bg_yellow">#FFFBEB</color>
+    <color name="home_quick_action_bg_green">#F0FDF4</color>
+    <color name="home_quick_action_bg_purple">#FAF5FF</color>
 </resources>
