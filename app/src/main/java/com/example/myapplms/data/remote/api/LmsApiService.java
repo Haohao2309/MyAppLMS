@@ -6,6 +6,7 @@ import com.example.myapplms.data.remote.dto.request.LoginRequest;
 import com.example.myapplms.data.remote.dto.request.RefreshTokenRequest;
 import com.example.myapplms.data.remote.dto.request.RegisterRequest;
 import com.example.myapplms.data.remote.dto.request.StudentRequest;
+import com.example.myapplms.data.remote.dto.request.TeacherRequest;
 import com.example.myapplms.data.remote.dto.response.ApiResponse;
 import com.example.myapplms.data.remote.dto.response.AuthResponse;
 import com.example.myapplms.data.remote.dto.response.CourseResponse;
@@ -40,6 +41,9 @@ public interface LmsApiService {
     Call<List<TeacherResponse>> getTeachers();
     @GET("teachers/{id}")
     Call<TeacherResponse> getTeacherbyId(@Path("id") Integer id); // Bắt buộc phải có @Path("id")
+
+    @PUT("teachers/{id}")
+    Call<TeacherResponse> updateTeacher(@Path("id") Integer id, @Body TeacherRequest request);
 
     @GET("students/{id}")
     Call<StudentResponse> getStudentById(@Path("id") Integer userId);
