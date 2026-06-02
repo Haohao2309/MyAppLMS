@@ -20,6 +20,9 @@
             android:exported="false"
             android:windowSoftInputMode="adjustPan" />
         <activity
+            android:name=".ui.student.course_detail.CourseDetailActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.TeacherMainActivity"
             android:exported="false" />
         <activity
@@ -39,8 +42,12 @@
             </intent-filter>
         </activity> <!-- ── Student ──────────────────────────────────────── -->
         <activity
+            android:name=".ui.community.PostDetailActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.StudentMainActivity"
-            android:exported="false" /> <!-- ── Teacher ──────────────────────────────────────── -->
+            android:exported="false" /> <!-- ── Student ──────────────────────────────────────── -->
+        <!-- ── Admin ────────────────────────────────────────── -->
         <activity
             android:name=".ui.AdminMainActivity"
             android:exported="false" />

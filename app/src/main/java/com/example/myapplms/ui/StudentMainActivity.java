@@ -18,7 +18,10 @@ import com.example.myapplms.data.repository.AuthRepository;
 import com.example.myapplms.ui.auth.AuthViewModel;
 import com.example.myapplms.ui.auth.AuthViewModelFactory;
 import com.example.myapplms.ui.auth.LoginActivity;
+import com.example.myapplms.ui.community.CommunityFragment;
 import com.example.myapplms.ui.explore.ExploreListCourseFragment;
+
+import com.example.myapplms.ui.home.HomeFragment;
 import com.example.myapplms.ui.notification.NotificationsFragment;
 import com.example.myapplms.ui.profile.ProfileFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -45,35 +48,31 @@ public class StudentMainActivity extends AppCompatActivity {
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
-            Fragment selectedFragment = null;
             int itemId = item.getItemId();
 
             if (itemId == R.id.nav_home) {
-                // selectedFragment = new HomeFragment(); // TODO: Tạo Fragment sau
-                Toast.makeText(this, "Chưa làm Home", Toast.LENGTH_SHORT).show();
+                replaceFragment(new HomeFragment());
+                return true;
             } else if (itemId == R.id.nav_explore) {
                 replaceFragment(new ExploreListCourseFragment());
                 return true;
             } else if (itemId == R.id.nav_community) {
-                // selectedFragment = new CommunityFragment(); // TODO: Tạo Fragment sau
+                replaceFragment(new CommunityFragment());
+                return true;
             } else if (itemId == R.id.nav_notifications) {
-                selectedFragment = new NotificationsFragment(); // Kéo Fragment Thông báo của bạn vào đây!
+                replaceFragment(new NotificationsFragment());
+                return true;
             } else if (itemId == R.id.nav_profile) {
-                 selectedFragment = new ProfileFragment(); // TODO: Tạo Fragment sau
+                replaceFragment(new ProfileFragment());
+                return true;
             }
 
-            // Thực hiện thay thế Fragment vào cái khung
-            if (selectedFragment != null) {
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, selectedFragment)
-                        .commit();
-            }
-            return true;
+            return false;
         });
 
-        // 3. Mặc định mở tab Notifications khi vừa vào app để bạn test cho nhanh
+        // 3. Mặc định mở tab Home khi vừa vào app
         if (savedInstanceState == null) {
-            bottomNavigationView.setSelectedItemId(R.id.nav_notifications);
+            bottomNavigationView.setSelectedItemId(R.id.nav_home);
         }
     }
 

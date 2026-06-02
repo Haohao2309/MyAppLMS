@@ -29,4 +29,3 @@ public class AuthResponse {
     @SerializedName("studentId")
     public Integer studentId;
 }
-
