@@ -13,22 +13,19 @@ public class AuthResponse {
     public String tokenType;
 
     @SerializedName("userId")
-    public int userId;
+    public String userId;
 
     @SerializedName("email")
     public String email;
 
-    // ✅ Đổi tên biến thành "active" cho đồng bộ tuyệt đối với JSON
-    @SerializedName("active")
-    public boolean active;
+    @SerializedName("isActive")
+    public boolean isActive;
 
     @SerializedName("role")
-    public String role;
+    public String role; // "STUDENT" | "TEACHER" | "ADMIN"
 
-    // ✅ Bổ sung SerializedName để bảo vệ an toàn cho data khi build release
     @SerializedName("teacherId")
-    public Integer teacherId;
-
+    public Integer teacherId;  // null nếu không phải TEACHER
     @SerializedName("studentId")
     public Integer studentId;
 }
