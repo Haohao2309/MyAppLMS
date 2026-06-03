@@ -24,6 +24,7 @@ public class CourseDetailRepository {
     private final LmsApiService apiService;
 
     public CourseDetailRepository(LmsApiService apiService) {
+
         this.apiService = apiService;
     }
 

@@ -12,6 +12,7 @@ import com.example.myapplms.data.remote.dto.request.RegisterRequest;
 import com.example.myapplms.data.remote.dto.request.StudentRequest;
 import com.example.myapplms.data.remote.dto.response.ApiResponse;
 import com.example.myapplms.data.remote.dto.response.AuthResponse;
+import com.example.myapplms.data.remote.dto.response.CategoryResponse;
 import com.example.myapplms.data.remote.dto.response.NotificationResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentCheckoutResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentWebhookResponse;
@@ -167,7 +168,9 @@ public interface LmsApiService {
     Call<String> deleteCourse(@Path("id") Integer id,
                               @Query("deletedBy") String deletedBy,
                               @Query("reason") String reason);
-
+    // data/remote/LmsApiService.java
+    @GET("v1/categories")
+    Call<List<CategoryResponse>> getCategories();
 }
 
 

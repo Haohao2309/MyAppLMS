@@ -20,7 +20,7 @@ import com.example.myapplms.ui.auth.AuthViewModelFactory;
 import com.example.myapplms.ui.auth.LoginActivity;
 import com.example.myapplms.ui.community.CommunityFragment;
 import com.example.myapplms.ui.explore.ExploreListCourseFragment;
-import com.example.myapplms.ui.home.HomeFragment;
+//import com.example.myapplms.ui.home.HomeFragment;
 import com.example.myapplms.ui.notification.NotificationsFragment;
 import com.example.myapplms.ui.profile.ProfileFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -51,7 +51,7 @@ public class StudentMainActivity extends AppCompatActivity {
             int itemId = item.getItemId();
 
             if (itemId == R.id.nav_home) {
-                selectedFragment = new HomeFragment();
+//                selectedFragment = new HomeFragment();
             } else if (itemId == R.id.nav_explore) {
                 replaceFragment(new ExploreListCourseFragment());
                 return true;
