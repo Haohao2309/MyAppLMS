@@ -13,6 +13,7 @@ public class SessionManager {
     private static final String KEY_EMAIL = "email";
     private static final String KEY_TEACHER_ID = "teacher_id";
     private static final String KEY_STUDENT_ID = "student_id";
+    private static final String KEY_IMAGE_URL   = "image_url";
 
     private final SharedPreferences prefs;
 
@@ -32,6 +33,14 @@ public class SessionManager {
                 .putInt(KEY_TEACHER_ID,   teacherId != null ? teacherId : -1)
                 .putInt(KEY_STUDENT_ID,   studentId != null ? studentId : -1)
                 .apply();
+    }
+
+    public void saveImageUrl(String imageUrl) {
+        prefs.edit().putString(KEY_IMAGE_URL, imageUrl).apply();
+    }
+
+    public String getImageUrl() {
+        return prefs.getString(KEY_IMAGE_URL, null);
     }
 
     public Integer getTeacherId() {

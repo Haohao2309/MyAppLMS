@@ -16,6 +16,7 @@ import com.example.myapplms.data.remote.dto.response.AuthResponse;
 import com.example.myapplms.data.remote.dto.response.NotificationResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentCheckoutResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentWebhookResponse;
+import com.example.myapplms.data.remote.dto.response.UserResponse;
 import com.example.myapplms.data.remote.dto.response.community_response.CommentResponse;
 import com.example.myapplms.data.remote.dto.response.community_response.CommunityActionResponse;
 import com.example.myapplms.data.remote.dto.response.community_response.CommunityStatsResponse;
@@ -32,13 +33,16 @@ import com.example.myapplms.model.Course;
 
 import java.util.List;
 
+import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.Multipart;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -172,6 +176,10 @@ public interface LmsApiService {
                               @Query("deletedBy") String deletedBy,
                               @Query("reason") String reason);
 
+    // Upload ảnh — multipart
+    @Multipart
+    @POST("upload/avatar")
+    Call<UserResponse> uploadAvatar(@Part MultipartBody.Part file);
 }
 
 

@@ -1,56 +1,66 @@
 package com.example.myapplms.ui.profile;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.myapplms.LMSApplication;
+import com.example.myapplms.R;
 import com.example.myapplms.data.remote.dto.request.StudentRequest;
 import com.example.myapplms.data.remote.dto.request.TeacherRequest;
+import com.example.myapplms.data.repository.AvatarRepository;
 import com.example.myapplms.data.repository.StudentRepository;
 import com.example.myapplms.data.repository.TeacherRepository;
 import com.example.myapplms.databinding.FragmentEditProfileBinding;
 import com.example.myapplms.ui.base.BaseFragment;
 import com.example.myapplms.ui.teacher.TeacherViewModel;
+import com.example.myapplms.utils.ImageUtils;
+import com.example.myapplms.utils.SessionManager;
 
-/**
- * EditProfileFragment — mở từ ProfileFragment qua FragmentManager.
- *
- * Nhận data qua Bundle args (buildArgs).
- * Khi save thành công → setFragmentResult → popBackStack về ProfileFragment.
- */
+import java.io.File;
+
 public class EditProfileFragment extends BaseFragment<FragmentEditProfileBinding> {
 
-    // ── Bundle keys ───────────────────────────────────────────────────────────
-    public static final String ARG_ROLE       = "arg_role";
-    public static final String ARG_PROFILE_ID = "arg_profile_id";
-    public static final String ARG_FIRST_NAME = "arg_first_name";
-    public static final String ARG_LAST_NAME  = "arg_last_name";
-    public static final String ARG_PHONE      = "arg_phone";
-    public static final String ARG_LOCATION   = "arg_location";
-    public static final String ARG_BIO        = "arg_bio";
-    public static final String ARG_OCCUPATION = "arg_occupation";
+    // ── Bundle keys ───────────────────────────────────────────
+    public static final String ARG_ROLE        = "arg_role";
+    public static final String ARG_PROFILE_ID  = "arg_profile_id";
+    public static final String ARG_FIRST_NAME  = "arg_first_name";
+    public static final String ARG_LAST_NAME   = "arg_last_name";
+    public static final String ARG_PHONE       = "arg_phone";
+    public static final String ARG_LOCATION    = "arg_location";
+    public static final String ARG_BIO         = "arg_bio";
+    public static final String ARG_OCCUPATION  = "arg_occupation";
+    public static final String ARG_IMAGE_URL   = "arg_image_url";  // ← thêm mới
 
     private static final String ROLE_STUDENT = "STUDENT";
     private static final String ROLE_TEACHER = "TEACHER";
 
     private StudentViewModel studentViewModel;
     private TeacherViewModel teacherViewModel;
+    private AvatarViewModel  avatarViewModel;
 
+    private SessionManager sessionManager;
     private String role;
     private int    profileId;
 
-    // ── Factory method ────────────────────────────────────────────────────────
-
+    // ── Factory method ────────────────────────────────────────
     public static Bundle buildArgs(String role, int profileId,
                                    String firstName, String lastName,
                                    String phone, String location,
-                                   String bio, String occupation) {
+                                   String bio, String occupation,
+                                   String imageUrl) {
         Bundle b = new Bundle();
         b.putString(ARG_ROLE,       role);
         b.putInt   (ARG_PROFILE_ID, profileId);
@@ -60,11 +70,24 @@ public class EditProfileFragment extends BaseFragment<FragmentEditProfileBinding
         b.putString(ARG_LOCATION,   location);
         b.putString(ARG_BIO,        bio);
         b.putString(ARG_OCCUPATION, occupation);
+        b.putString(ARG_IMAGE_URL,  imageUrl);   // ← thêm mới
         return b;
     }
 
-    // ── Inflate ───────────────────────────────────────────────────────────────
+    // ── Launcher chọn ảnh từ gallery ─────────────────────────
+    private final ActivityResultLauncher<Intent> pickImageLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+                        if (result.getResultCode() == Activity.RESULT_OK
+                                && result.getData() != null) {
+                            Uri imageUri = result.getData().getData();
+                            if (imageUri != null) {
+                                handleImageSelected(imageUri);
+                            }
+                        }
+                    });
 
+    // ── Inflate ───────────────────────────────────────────────
     @NonNull
     @Override
     protected FragmentEditProfileBinding inflateBinding(@NonNull LayoutInflater inflater,
@@ -72,8 +95,7 @@ public class EditProfileFragment extends BaseFragment<FragmentEditProfileBinding
         return FragmentEditProfileBinding.inflate(inflater, container, false);
     }
 
-    // ── onCreate ─────────────────────────────────────────────────────────────
-
+    // ── onCreate ─────────────────────────────────────────────
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,7 +107,9 @@ public class EditProfileFragment extends BaseFragment<FragmentEditProfileBinding
         }
 
         LMSApplication app = (LMSApplication) requireActivity().getApplication();
+        sessionManager = new SessionManager(requireContext());
 
+        // Profile ViewModel theo role
         if (ROLE_STUDENT.equalsIgnoreCase(role)) {
             StudentRepository repo =
                     new StudentRepository(app.getRetrofitClient().getApiService());
@@ -97,37 +121,62 @@ public class EditProfileFragment extends BaseFragment<FragmentEditProfileBinding
             teacherViewModel = new ViewModelProvider(this,
                     new TeacherViewModel.Factory(repo)).get(TeacherViewModel.class);
         }
+
+        // AvatarViewModel — dùng chung cho cả 2 role
+        AvatarRepository avatarRepo = new AvatarRepository(
+                app.getRetrofitClient().getApiService(), sessionManager);
+        avatarViewModel = new ViewModelProvider(this,
+                new AvatarViewModel.Factory(avatarRepo)).get(AvatarViewModel.class);
     }
 
-    // ── onViewCreated ─────────────────────────────────────────────────────────
-
+    // ── onViewCreated ─────────────────────────────────────────
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         fillFormFromArgs();
         setupOccupationLabel();
         observeUpdateResult();
+        observeUploadResult();
     }
 
     @Override
     protected void setupViews() {}
 
-    // ── setupListeners ────────────────────────────────────────────────────────
-
+    // ── setupListeners ────────────────────────────────────────
     @Override
     protected void setupListeners() {
-        // Back → popBackStack (tương đương finish() của Activity)
         getBinding().btnBack.setOnClickListener(v ->
                 requireActivity().getSupportFragmentManager().popBackStack());
 
         getBinding().btnSave.setOnClickListener(v -> attemptSave());
 
-        getBinding().btnChoosePhoto.setOnClickListener(v ->
-                showToast("Tính năng upload ảnh đang phát triển"));
+        // Chọn ảnh từ gallery
+        getBinding().btnChoosePhoto.setOnClickListener(v -> openGallery());
     }
 
-    // ── Fill form ─────────────────────────────────────────────────────────────
+    // ── Mở gallery ────────────────────────────────────────────
+    private void openGallery() {
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType("image/*");
+        pickImageLauncher.launch(intent);
+    }
 
+    // ── Xử lý ảnh được chọn ──────────────────────────────────
+    private void handleImageSelected(Uri imageUri) {
+        // Hiển thị preview ngay lập tức (trước khi upload xong)
+        loadAvatarFromUri(imageUri);
+
+        // Chuyển Uri → File rồi upload
+        File imageFile = ImageUtils.uriToFile(requireContext(), imageUri);
+        if (imageFile != null) {
+            setAvatarLoading(true);
+            avatarViewModel.uploadAvatar(imageFile);
+        } else {
+            showToast("Không thể đọc file ảnh");
+        }
+    }
+
+    // ── Fill form ─────────────────────────────────────────────
     private void fillFormFromArgs() {
         Bundle args = getArguments();
         if (args == null) return;
@@ -138,6 +187,37 @@ public class EditProfileFragment extends BaseFragment<FragmentEditProfileBinding
         getBinding().etLocation.setText(safe(args.getString(ARG_LOCATION)));
         getBinding().etBio.setText(safe(args.getString(ARG_BIO)));
         getBinding().etOccupation.setText(safe(args.getString(ARG_OCCUPATION)));
+
+        // Hiển thị avatar hiện tại
+        String imageUrl = args.getString(ARG_IMAGE_URL);
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            // Thử lấy từ session nếu args không có
+            imageUrl = sessionManager.getImageUrl();
+        }
+        loadAvatarFromUrl(imageUrl);
+    }
+
+    // ── Hiển thị avatar từ URL (Glide) ────────────────────────
+    private void loadAvatarFromUrl(String imageUrl) {
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            Glide.with(this)
+                    .load(imageUrl)
+                    .transform(new CircleCrop())
+                    .placeholder(R.drawable.ic_profile)
+                    .error(R.drawable.ic_profile)
+                    .into(getBinding().ivAvatar);
+        } else {
+            getBinding().ivAvatar.setImageResource(R.drawable.ic_profile);
+        }
+    }
+
+    // ── Hiển thị avatar từ Uri (preview local) ────────────────
+    private void loadAvatarFromUri(Uri uri) {
+        Glide.with(this)
+                .load(uri)
+                .transform(new CircleCrop())
+                .placeholder(R.drawable.ic_profile)
+                .into(getBinding().ivAvatar);
     }
 
     private void setupOccupationLabel() {
@@ -150,8 +230,7 @@ public class EditProfileFragment extends BaseFragment<FragmentEditProfileBinding
         }
     }
 
-    // ── Validate & save ───────────────────────────────────────────────────────
-
+    // ── Validate và save thông tin ────────────────────────────
     private void attemptSave() {
         String firstName  = getBinding().etFirstName.getText().toString().trim();
         String lastName   = getBinding().etLastName.getText().toString().trim();
@@ -176,21 +255,45 @@ public class EditProfileFragment extends BaseFragment<FragmentEditProfileBinding
             StudentRequest request = StudentRequest.builder()
                     .firstName(firstName)
                     .lastName(lastName)
-                    .phone(phone)
-                    .location(location)
-                    .bio(bio)
-                    .school(occupation)
+                    .phone(phone.isEmpty() ? null : phone)
+                    .location(location.isEmpty() ? null : location)
+                    .bio(bio.isEmpty() ? null : bio)
+                    .school(occupation.isEmpty() ? null : occupation)
                     .build();
             studentViewModel.updateStudent(profileId, request);
         } else {
             TeacherRequest request = new TeacherRequest(
-                    firstName, lastName, null, location, phone, bio, occupation);
+                    firstName, lastName, null,
+                    location.isEmpty() ? null : location,
+                    phone.isEmpty() ? null : phone,
+                    bio.isEmpty() ? null : bio,
+                    occupation.isEmpty() ? null : occupation);
             teacherViewModel.updateTeacher(profileId, request);
         }
     }
 
-    // ── Observe update result ─────────────────────────────────────────────────
+    // ── Observe kết quả upload avatar ────────────────────────
+    private void observeUploadResult() {
+        avatarViewModel.uploadResult.observe(getViewLifecycleOwner(), result -> {
+            if (result == null) return;
+            switch (result.status) {
+                case LOADING:
+                    setAvatarLoading(true);
+                    break;
+                case SUCCESS:
+                    setAvatarLoading(false);
+                    showToast("Cập nhật ảnh đại diện thành công!");
+                    // imageUrl đã được lưu vào SessionManager trong Repository
+                    break;
+                case ERROR:
+                    setAvatarLoading(false);
+                    showToast("Upload ảnh thất bại: " + result.message);
+                    break;
+            }
+        });
+    }
 
+    // ── Observe kết quả update profile ───────────────────────
     private void observeUpdateResult() {
         if (ROLE_STUDENT.equalsIgnoreCase(role) && studentViewModel != null) {
             studentViewModel.updateResult.observe(getViewLifecycleOwner(), result -> {
@@ -209,22 +312,15 @@ public class EditProfileFragment extends BaseFragment<FragmentEditProfileBinding
         switch (status.toString()) {
             case "LOADING":
                 break;
-
             case "SUCCESS":
                 setLoadingState(false);
                 showToast("Cập nhật thành công!");
-
-                // Gửi kết quả về ProfileFragment qua FragmentResultListener
-                // (thay NavController.getSavedStateHandle)
                 Bundle result = new Bundle();
                 result.putBoolean(ProfileFragment.RESULT_BUNDLE_KEY, true);
                 getParentFragmentManager().setFragmentResult(
                         ProfileFragment.RESULT_KEY_UPDATED, result);
-
-                // Quay về ProfileFragment
                 requireActivity().getSupportFragmentManager().popBackStack();
                 break;
-
             case "ERROR":
                 setLoadingState(false);
                 showToast(message != null ? message : "Cập nhật thất bại");
@@ -232,14 +328,20 @@ public class EditProfileFragment extends BaseFragment<FragmentEditProfileBinding
         }
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
-
+    // ── Helpers ───────────────────────────────────────────────
     private void setLoadingState(boolean loading) {
         getBinding().progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         getBinding().btnSave.setEnabled(!loading);
     }
 
-    private static String safe(String s) {
-        return s != null ? s : "";
+    private void setAvatarLoading(boolean loading) {
+        getBinding().btnChoosePhoto.setEnabled(!loading);
+        if (loading) {
+            getBinding().btnChoosePhoto.setText("Đang upload...");
+        } else {
+            getBinding().btnChoosePhoto.setText("Choose New Photo");
+        }
     }
+
+    private static String safe(String s) { return s != null ? s : ""; }
 }
