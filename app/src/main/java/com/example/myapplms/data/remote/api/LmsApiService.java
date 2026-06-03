@@ -13,6 +13,7 @@ import com.example.myapplms.data.remote.dto.request.StudentRequest;
 import com.example.myapplms.data.remote.dto.request.TeacherRequest;
 import com.example.myapplms.data.remote.dto.response.ApiResponse;
 import com.example.myapplms.data.remote.dto.response.AuthResponse;
+import com.example.myapplms.data.remote.dto.response.CategoryResponse;
 import com.example.myapplms.data.remote.dto.response.NotificationResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentCheckoutResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentWebhookResponse;
@@ -44,10 +45,12 @@ import retrofit2.http.Query;
 
 public interface LmsApiService {
 
+    // Trong file LmsApiService.java sửa lại như thế này:
     @POST("auth/login")
-    Call<ApiResponse<AuthResponse>> login(@Body LoginRequest request);
+    Call<AuthResponse> login(@Body LoginRequest request);
+
     @POST("auth/register")
-    Call<ApiResponse<AuthResponse>> register(@Body RegisterRequest request);
+    Call<AuthResponse> register(@Body RegisterRequest request);;
 
     @POST("auth/refresh")
     Call<ApiResponse<AuthResponse>> refreshToken(@Body RefreshTokenRequest request);
@@ -171,7 +174,9 @@ public interface LmsApiService {
     Call<String> deleteCourse(@Path("id") Integer id,
                               @Query("deletedBy") String deletedBy,
                               @Query("reason") String reason);
-
+    // data/remote/LmsApiService.java
+    @GET("v1/categories")
+    Call<List<CategoryResponse>> getCategories();
 }
 
 
