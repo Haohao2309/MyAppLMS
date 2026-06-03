@@ -47,10 +47,9 @@ public interface LmsApiService {
 
     // Trong file LmsApiService.java sửa lại như thế này:
     @POST("auth/login")
-    Call<AuthResponse> login(@Body LoginRequest request);
-
+    Call<ApiResponse<AuthResponse>> login(@Body LoginRequest request);
     @POST("auth/register")
-    Call<AuthResponse> register(@Body RegisterRequest request);;
+    Call<ApiResponse<AuthResponse>> register(@Body RegisterRequest request);
 
     @POST("auth/refresh")
     Call<ApiResponse<AuthResponse>> refreshToken(@Body RefreshTokenRequest request);
