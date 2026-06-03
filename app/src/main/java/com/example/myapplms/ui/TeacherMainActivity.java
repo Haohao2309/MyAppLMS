@@ -7,11 +7,10 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.myapplms.R;
-import com.example.myapplms.ui.community.CommunityFragment;
 import com.example.myapplms.ui.explore.ExploreListCourseFragment;
-//import com.example.myapplms.ui.home.HomeFragment;
 import com.example.myapplms.ui.notification.NotificationsFragment;
 import com.example.myapplms.ui.profile.ProfileFragment;
+
 import com.example.myapplms.ui.teacher.TeacherHomeFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -28,13 +27,10 @@ public class TeacherMainActivity extends AppCompatActivity {
             int id = item.getItemId();
 
             if (id == R.id.nav_home) {
-                replaceFragment(new TeacherHomeFragment());
+               replaceFragment(new TeacherHomeFragment());
                 return true;
             } else if (id == R.id.nav_explore) {
                 replaceFragment(new ExploreListCourseFragment());
-                return true;
-            } else if (id == R.id.nav_community) {
-                replaceFragment(new CommunityFragment());
                 return true;
             } else if (id == R.id.nav_notifications) {
                 replaceFragment(new NotificationsFragment());
@@ -46,7 +42,7 @@ public class TeacherMainActivity extends AppCompatActivity {
             return false;
         });
 
-        // Mặc định vào Home (Overview)
+        // Mặc định vào Home
         if (savedInstanceState == null) {
             bottomNav.setSelectedItemId(R.id.nav_home);
         }
