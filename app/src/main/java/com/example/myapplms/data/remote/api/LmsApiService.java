@@ -10,6 +10,7 @@ import com.example.myapplms.data.remote.dto.request.RefreshTokenRequest;
 import com.example.myapplms.data.remote.dto.request.VoteRequest;
 import com.example.myapplms.data.remote.dto.request.RegisterRequest;
 import com.example.myapplms.data.remote.dto.request.StudentRequest;
+import com.example.myapplms.data.remote.dto.request.TeacherRequest;
 import com.example.myapplms.data.remote.dto.response.ApiResponse;
 import com.example.myapplms.data.remote.dto.response.AuthResponse;
 import com.example.myapplms.data.remote.dto.response.NotificationResponse;
@@ -119,6 +120,9 @@ public interface LmsApiService {
     Call<List<TeacherResponse>> getTeachers();
     @GET("teachers/{id}")
     Call<TeacherResponse> getTeacherbyId(@Path("id") Integer id); // Bắt buộc phải có @Path("id")
+
+    @PUT("teachers/{id}")
+    Call<TeacherResponse> updateTeacher(@Path("id") Integer id, @Body TeacherRequest request);
 
     // Payment
     @POST("payments/checkout")

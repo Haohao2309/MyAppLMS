@@ -7,9 +7,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.myapplms.R;
-import com.example.myapplms.ui.community.CommunityFragment;
 import com.example.myapplms.ui.explore.ExploreListCourseFragment;
-//import com.example.myapplms.ui.home.HomeFragment;
 import com.example.myapplms.ui.notification.NotificationsFragment;
 import com.example.myapplms.ui.profile.ProfileFragment;
 
@@ -32,9 +30,6 @@ public class TeacherMainActivity extends AppCompatActivity {
                 return true;
             } else if (id == R.id.nav_explore) {
                 replaceFragment(new ExploreListCourseFragment());
-                return true;
-            } else if (id == R.id.nav_community) {
-                replaceFragment(new CommunityFragment());
                 return true;
             } else if (id == R.id.nav_notifications) {
                 replaceFragment(new NotificationsFragment());
