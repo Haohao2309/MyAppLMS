@@ -1,0 +1,248 @@
+package com.example.myapplms.ui.teacher;
+
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
+
+import com.example.myapplms.LMSApplication;
+import com.example.myapplms.data.repository.CourseRepository;
+import com.example.myapplms.databinding.ActivityCourseFormBinding;
+import com.example.myapplms.ui.explore.TeacherCourseViewModel;
+import com.example.myapplms.ui.explore.TeacherCourseViewModelFactory;
+import com.example.myapplms.utils.SessionManager;
+
+public class CourseFormActivity extends AppCompatActivity {
+
+    public static final String EXTRA_COURSE_ID          = "extra_course_id";
+    public static final String EXTRA_COURSE_TITLE       = "extra_course_title";
+    public static final String EXTRA_COURSE_DESCRIPTION = "extra_course_description";
+    public static final String EXTRA_COURSE_PRICE       = "extra_course_price";
+    public static final String EXTRA_COURSE_IMAGE_URL   = "extra_course_image_url";
+
+    private ActivityCourseFormBinding binding;
+    private TeacherCourseViewModel viewModel;
+
+    // -1 = chế độ tạo mới, > 0 = chế độ sửa
+    private int courseId  = -1;
+    private int teacherId = -1;
+    private int categoryId = 1;
+    private String selectedLevel = "Beginner";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        binding = ActivityCourseFormBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        // Lấy teacherId từ session
+        teacherId = getTeacherId();
+
+        // Lấy courseId từ Intent — -1 nghĩa là tạo mới
+        courseId = getIntent().getIntExtra(EXTRA_COURSE_ID, -1);
+
+        setupViewModel();
+        setupSpinners();
+        setupLevelButtons();
+        setupFormMode();
+        setupListeners();
+        observeResults();
+    }
+
+    private int getTeacherId() {
+        SessionManager session = new SessionManager(this);
+        Integer id = session.getTeacherId();
+        return id != null ? id : -1;
+    }
+
+    private void setupViewModel() {
+        LMSApplication app = (LMSApplication) getApplication();
+        CourseRepository repository = new CourseRepository(app.getRetrofitClient().getApiService());
+        viewModel = new ViewModelProvider(this, new TeacherCourseViewModelFactory(repository))
+                .get(TeacherCourseViewModel.class);
+    }
+
+    private void setupSpinners() {
+        // Category
+        String[] categories = {"Development", "Design", "Data Science", "Marketing", "Business"};
+        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, categories);
+        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        binding.spinnerCategory.setAdapter(categoryAdapter);
+
+        // Language
+        String[] languages = {"English", "Vietnamese", "French", "Spanish"};
+        ArrayAdapter<String> languageAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, languages);
+        languageAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        binding.spinnerLanguage.setAdapter(languageAdapter);
+    }
+
+    private void setupLevelButtons() {
+        // Mặc định Beginner được chọn
+        selectLevel("Beginner");
+
+        binding.btnBeginner.setOnClickListener(v -> selectLevel("Beginner"));
+        binding.btnIntermediate.setOnClickListener(v -> selectLevel("Intermediate"));
+        binding.btnAdvanced.setOnClickListener(v -> selectLevel("Advanced"));
+    }
+
+    private void selectLevel(String level) {
+        selectedLevel = level;
+
+        // Reset tất cả về unselected
+        binding.btnBeginner.setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(0xFFF0EFFF));
+        binding.btnBeginner.setTextColor(0xFF6C63FF);
+        binding.btnIntermediate.setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(0xFFF0EFFF));
+        binding.btnIntermediate.setTextColor(0xFF6C63FF);
+        binding.btnAdvanced.setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(0xFFF0EFFF));
+        binding.btnAdvanced.setTextColor(0xFF6C63FF);
+
+        // Highlight level được chọn
+        switch (level) {
+            case "Beginner":
+                binding.btnBeginner.setBackgroundTintList(
+                        android.content.res.ColorStateList.valueOf(0xFF6C63FF));
+                binding.btnBeginner.setTextColor(0xFFFFFFFF);
+                break;
+            case "Intermediate":
+                binding.btnIntermediate.setBackgroundTintList(
+                        android.content.res.ColorStateList.valueOf(0xFF6C63FF));
+                binding.btnIntermediate.setTextColor(0xFFFFFFFF);
+                break;
+            case "Advanced":
+                binding.btnAdvanced.setBackgroundTintList(
+                        android.content.res.ColorStateList.valueOf(0xFF6C63FF));
+                binding.btnAdvanced.setTextColor(0xFFFFFFFF);
+                break;
+        }
+    }
+
+    private void setupFormMode() {
+        if (isEditMode()) {
+            // ── Chế độ SỬA ───────────────────────────────────
+            binding.tvFormTitle.setText("Edit Course");
+            binding.tvFormSubtitle.setText("Update course details");
+            binding.btnSubmit.setText("Save Changes");
+
+            // Điền dữ liệu cũ vào form từ Intent
+            String title = getIntent().getStringExtra(EXTRA_COURSE_TITLE);
+            String description = getIntent().getStringExtra(EXTRA_COURSE_DESCRIPTION);
+            String imageUrl = getIntent().getStringExtra(EXTRA_COURSE_IMAGE_URL);
+            String priceText = getIntent().getStringExtra(EXTRA_COURSE_PRICE);
+
+            if (title != null) binding.etTitle.setText(title);
+            if (description != null) binding.etDescription.setText(description);
+            if (imageUrl != null) binding.etImageUrl.setText(imageUrl);
+            if (priceText != null && !priceText.equals("FREE")) {
+                binding.etPrice.setText(priceText.replace("$", "").trim());
+            }
+        } else {
+            // ── Chế độ TẠO MỚI ───────────────────────────────
+            binding.tvFormTitle.setText("Create New Course");
+            binding.tvFormSubtitle.setText("Fill in the course details");
+            binding.btnSubmit.setText("Create Course");
+        }
+    }
+
+    private boolean isEditMode() {
+        return false;
+    }
+
+    private void setupListeners() {
+        binding.btnBack.setOnClickListener(v -> finish());
+        binding.btnCancel.setOnClickListener(v -> finish());
+        binding.btnSubmit.setOnClickListener(v -> attemptSubmit());
+    }
+
+    private void attemptSubmit() {
+        String title       = binding.etTitle.getText().toString().trim();
+        String description = binding.etDescription.getText().toString().trim();
+        String imageUrl    = binding.etImageUrl.getText().toString().trim();
+        String priceStr    = binding.etPrice.getText().toString().trim();
+
+        // Validate
+        if (title.isEmpty()) {
+            binding.etTitle.setError("Tiêu đề không được để trống");
+            binding.etTitle.requestFocus();
+            return;
+        }
+        if (description.isEmpty()) {
+            binding.etDescription.setError("Mô tả không được để trống");
+            binding.etDescription.requestFocus();
+            return;
+        }
+        if (teacherId == -1) {
+            Toast.makeText(this, "Không tìm thấy thông tin giảng viên", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        double price = 0.0;
+        if (!priceStr.isEmpty()) {
+            try {
+                price = Double.parseDouble(priceStr);
+            } catch (NumberFormatException e) {
+                binding.etPrice.setError("Giá không hợp lệ");
+                return;
+            }
+        }
+
+        binding.progressBar.setVisibility(View.VISIBLE);
+        binding.btnSubmit.setEnabled(false);
+
+        if (isEditMode()) {
+            viewModel.updateCourse(courseId, teacherId, categoryId,
+                    title, description, imageUrl, price);
+        } else {
+            System.out.println("teacher ID: "+teacherId);
+            viewModel.createCourse(teacherId, categoryId,
+                    title, description, imageUrl, price);
+        }
+    }
+
+    private void observeResults() {
+        viewModel.createResult.observe(this, result -> {
+            if (result == null) return;
+            switch (result.status) {
+                case LOADING:
+                    break;
+                case SUCCESS:
+                    binding.progressBar.setVisibility(View.GONE);
+                    Toast.makeText(this, "Tạo khóa học thành công!", Toast.LENGTH_SHORT).show();
+                    setResult(RESULT_OK);
+                    finish();
+                    break;
+                case ERROR:
+                    binding.progressBar.setVisibility(View.GONE);
+                    binding.btnSubmit.setEnabled(true);
+                    Toast.makeText(this, result.message, Toast.LENGTH_LONG).show();
+                    break;
+            }
+        });
+
+        viewModel.updateResult.observe(this, result -> {
+            if (result == null) return;
+            switch (result.status) {
+                case LOADING:
+                    break;
+                case SUCCESS:
+                    binding.progressBar.setVisibility(View.GONE);
+                    Toast.makeText(this, "Cập nhật thành công!", Toast.LENGTH_SHORT).show();
+                    setResult(RESULT_OK);
+                    finish();
+                    break;
+                case ERROR:
+                    binding.progressBar.setVisibility(View.GONE);
+                    binding.btnSubmit.setEnabled(true);
+                    Toast.makeText(this, result.message, Toast.LENGTH_LONG).show();
+                    break;
+            }
+        });
+    }
+}

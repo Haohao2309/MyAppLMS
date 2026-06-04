@@ -4,20 +4,26 @@
     <color name="primary">#6366F1</color>
     <color name="primary_dark">#4F46E5</color>
     <color name="primary_light">#818CF8</color>
-
+    <color name="purple_primary">#6C3EF4</color>
+    <color name="red">#E53935</color>
     <!-- Accent Colors -->
     <color name="accent">#F59E0B</color>
     <color name="accent_dark">#D97706</color>
 
     <!-- Background Colors -->
+    <color name="background_light">#F0F2FF</color>
     <color name="background">#F9FAFB</color>
     <color name="surface">#FFFFFF</color>
     <color name="surface_variant">#F3F4F6</color>
+    <color name="background_tab_light">#E8EAFF</color>
+
 
     <!-- Text Colors -->
     <color name="text_primary">#111827</color>
     <color name="text_secondary">#6B7280</color>
     <color name="text_hint">#9CA3AF</color>
+    <color name="text_grey">#9098A3</color>
+    <color name="text_dark">#1A1A2E</color>
 
     <!-- Status Colors -->
     <color name="success">#10B981</color>
@@ -30,6 +36,11 @@
     <color name="black">#000000</color>
     <color name="transparent">#00000000</color>
     <color name="divider">#E5E7EB</color>
+    <color name="white2">#2CF2ECEC</color>
+
+    <!-- Input border -->
+    <color name="input_border">#E4E7ED</color>
+    <color name="tab_bg">#F0F2FF</color>
 
     <!-- ============================================== -->
     <!-- 2. BẢNG MÀU BỔ SUNG TỪ FIGMA (Cho UI mới)      -->
@@ -49,20 +60,55 @@
     <!-- Bảng màu Tím (Tailwind Indigo) -->
     <color name="indigo_100">#E0E7FF</color>
     <color name="indigo_600">#4F46E5</color>
+    <color name="indigo_200">#FFC7D2FE</color>
+    <color name="indigo_700">#FF4338CA</color>
 
 
-    <!-- ============================================== -->
-    <!-- 3. MÀU NGỮ NGHĨA CHO THÔNG BÁO (Notifications) -->
-    <!-- ============================================== -->
-    <!-- Achievement (Vàng/Amber) -->
-    <color name="achievement_bg">#FEF3C7</color>
-    <color name="achievement_icon">#D97706</color>
+    <!-- ===== MÀU NỀN CHIP ===== -->
+    <!-- Chip khi CHƯA chọn: nền xám nhạt, chữ xám -->
+    <color name="chip_bg_default">#FFF3F4F6</color>
+    <color name="chip_text_default">#FF4B5563</color>
+    <!-- Chip khi ĐÃ chọn: nền tím, chữ trắng -->
+    <color name="chip_bg_selected">#FF4F46E5</color>
+    <color name="chip_text_selected">#FFFFFFFF</color>
 
-    <!-- Grade (Tím/Purple) -->
-    <color name="grade_bg">#EDE9FE</color>
-    <color name="grade_icon">#7C3AED</color>
+    <!-- ===== MÀU CARD THÔNG BÁO ===== -->
+    <!-- Card ĐÃ ĐỌC: nền trắng thuần -->
+    <color name="notification_read_background">#FFFFFFFF</color>
+    <!-- Card CHƯA ĐỌC: nền tím cực nhạt để nổi bật -->
+    <color name="notification_unread_background">#FFEEF2FF</color>
+    <!-- Viền card đã đọc: xám nhạt -->
+    <color name="notification_read_stroke">#FFE5E7EB</color>
+    <!-- Viền card chưa đọc: tím nhạt để tạo điểm nhấn -->
+    <color name="notification_unread_stroke">#FFC7D2FE</color>
 
-    <!-- Message (Xanh lá/Emerald) -->
-    <color name="message_bg">#D1FAE5</color>
-    <color name="message_icon">#059669</color>
+    <!-- ===== MÀU ICON TỪNG LOẠI THÔNG BÁO ===== -->
+    <color name="achievement_bg">#FFFEF9C3</color>  <!-- vàng nhạt -->
+    <color name="achievement_icon">#FFB45309</color> <!-- vàng đậm -->
+    <color name="grade_bg">#FFDCFCE7</color>         <!-- xanh lá nhạt -->
+    <color name="grade_icon">#FF15803D</color>        <!-- xanh lá đậm -->
+    <color name="message_bg">#FFE0F2FE</color>        <!-- xanh dương nhạt -->
+    <color name="message_icon">#FF0369A1</color>      <!-- xanh dương đậm -->
+
+    <color name="blue_500">#23A9E2</color>
+
+    <color name="course_brand_purple">#5E35B1</color>
+    <color name="course_text_title">#212121</color>
+    <color name="course_text_body">#424242</color>
+    <color name="course_text_muted">#757575</color>
+
+    <!-- Home UI Colors -->
+    <color name="home_header_blue">#4F46E5</color>
+    <color name="home_streak_orange">#FF9800</color>
+    <color name="home_stats_icon_bg">#F0F2FF</color>
+    <color name="home_stats_icon_bg_green">#ECFDF5</color>
+    <color name="home_stats_icon_bg_amber">#FFFBEB</color>
+    <color name="home_progress_blue">#4F46E5</color>
+    <color name="home_play_btn_bg">#EEF2FF</color>
+    <color name="home_chart_bar_default">#C7D2FE</color>
+    <color name="home_chart_bar_active">#4F46E5</color>
+    <color name="home_quick_action_bg_blue">#EFF6FF</color>
+    <color name="home_quick_action_bg_yellow">#FFFBEB</color>
+    <color name="home_quick_action_bg_green">#F0FDF4</color>
+    <color name="home_quick_action_bg_purple">#FAF5FF</color>
 </resources>

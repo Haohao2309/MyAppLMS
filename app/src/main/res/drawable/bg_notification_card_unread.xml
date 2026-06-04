@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- Bo góc 12dp — đồng bộ với card đã đọc -->
+    <corners android:radius="12dp" />
+
+    <!-- Nền tím rất nhạt (indigo_50) — khác biệt rõ với nền trắng đã đọc -->
+    <solid android:color="@color/notification_unread_background" />
+
+    <!-- Viền tím nhạt (indigo_200) — tạo điểm nhấn, giống Notion/Linear -->
+    <stroke
+        android:width="1.5dp"
+        android:color="@color/notification_unread_stroke" />
+
+</shape>

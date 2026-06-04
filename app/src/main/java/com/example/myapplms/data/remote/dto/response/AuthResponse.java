@@ -15,10 +15,18 @@ public class AuthResponse {
     @SerializedName("userId")
     public String userId;
 
-    @SerializedName("fullName")
-    public String fullName;
+    @SerializedName("email")
+    public String email;
+
+    @SerializedName("isActive")
+    public boolean isActive;
 
     @SerializedName("role")
     public String role; // "STUDENT" | "TEACHER" | "ADMIN"
+
+    @SerializedName("teacherId")
+    public Integer teacherId;  // null nếu không phải TEACHER
+    @SerializedName("studentId")
+    public Integer studentId;
 }
 

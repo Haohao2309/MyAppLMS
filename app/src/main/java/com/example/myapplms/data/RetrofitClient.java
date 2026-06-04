@@ -14,6 +14,7 @@ public class RetrofitClient {
 
     private static RetrofitClient instance;
     private final LmsApiService apiService;
+    private final Retrofit retrofit;
 
     private RetrofitClient(SessionManager sessionManager) {
         // Logging
@@ -27,7 +28,7 @@ public class RetrofitClient {
                 .addInterceptor(logging)
                 .build();
 
-        Retrofit retrofit = new Retrofit.Builder()
+        this.retrofit = new Retrofit.Builder()
                 .baseUrl(Constants.BASE_URL)
                 .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -54,5 +55,8 @@ public class RetrofitClient {
 
     public LmsApiService getApiService() {
         return apiService;
+    }
+    public <T> T create(Class<T> serviceClass) {
+        return retrofit.create(serviceClass);
     }
 }

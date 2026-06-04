@@ -2,25 +2,56 @@ package com.example.myapplms.ui;
 
 import android.os.Bundle;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.example.myapplms.R;
+import com.example.myapplms.ui.explore.ExploreListCourseFragment;
+import com.example.myapplms.ui.notification.NotificationsFragment;
+import com.example.myapplms.ui.profile.ProfileFragment;
+
+import com.example.myapplms.ui.teacher.TeacherHomeFragment;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class TeacherMainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_teacher_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNavigation);
+
+        bottomNav.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.nav_home) {
+               replaceFragment(new TeacherHomeFragment());
+                return true;
+            } else if (id == R.id.nav_explore) {
+                replaceFragment(new ExploreListCourseFragment());
+                return true;
+            } else if (id == R.id.nav_notifications) {
+                replaceFragment(new NotificationsFragment());
+                return true;
+            } else if (id == R.id.nav_profile) {
+                replaceFragment(new ProfileFragment());
+                return true;
+            }
+            return false;
         });
+
+        // Mặc định vào Home
+        if (savedInstanceState == null) {
+            bottomNav.setSelectedItemId(R.id.nav_home);
+        }
+    }
+
+    private void replaceFragment(Fragment fragment) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+        transaction.replace(R.id.fragment_container, fragment);
+        transaction.commit();
     }
 }
