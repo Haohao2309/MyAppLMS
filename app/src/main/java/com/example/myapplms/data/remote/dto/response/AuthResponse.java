@@ -28,4 +28,9 @@ public class AuthResponse {
     public Integer teacherId;  // null nếu không phải TEACHER
     @SerializedName("studentId")
     public Integer studentId;
+
+    @SerializedName("imageUrl")
+    public String imageUrl;
+
+
 }
