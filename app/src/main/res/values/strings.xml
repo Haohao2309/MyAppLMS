@@ -58,4 +58,14 @@
     <string name="likes_count_format">%1$d likes</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
+    <string name="title_quiz">Bài kiểm tra trắc nghiệm</string>
+    <string name="title_assignment">Nộp bài tập</string>
+    <string name="action_submit">Nộp bài</string>
+    <string name="label_drive_link">Link Google Drive *</string>
+    <string name="desc_drive_link">Nhập link Google Drive bài làm (đã cấp quyền xem)</string>
+    <string name="hint_drive_link">https://drive.google.com/...</string>
+    <string name="label_student_notes">Ghi chú (tùy chọn)</string>
+    <string name="hint_student_notes">Mô tả ngắn gọn về bài làm, cách chạy chương trình...</string>
 </resources>

@@ -1,63 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/selectableItemBackground"
-    android:paddingHorizontal="16dp"
-    android:paddingVertical="12dp">
+    android:orientation="horizontal"
+    android:padding="@dimen/spacing_medium"
+    android:gravity="center_vertical"
+    android:background="?attr/selectableItemBackground">
 
     <ImageView
         android:id="@+id/iv_lesson_icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:background="@drawable/bg_circle_purple_light"
-        android:padding="12dp"
-        android:src="@drawable/ic_play"
-        app:tint="#5E35B1"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-    <TextView
-        android:id="@+id/tv_lesson_title"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="@dimen/spacing_medium"
+        android:src="@drawable/ic_play_circle" />
+
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="8dp"
-        android:text="Welcome to LearnHub"
-        android:textColor="#424242"
-        android:textSize="15sp"
-        android:textStyle="normal"
-        app:layout_constraintEnd_toStartOf="@id/tv_preview_badge"
-        app:layout_constraintStart_toEndOf="@id/iv_lesson_icon"
-        app:layout_constraintTop_toTopOf="@id/iv_lesson_icon" />
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/tv_lesson_duration"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:text="5:00"
-        android:textColor="#9E9E9E"
-        android:textSize="13sp"
-        app:layout_constraintStart_toStartOf="@id/tv_lesson_title"
-        app:layout_constraintTop_toBottomOf="@id/tv_lesson_title" />
+        <TextView
+            android:id="@+id/tv_lesson_title"
+            style="@style/TextBody1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tên bài học" />
+
+        <TextView
+            android:id="@+id/tv_lesson_duration"
+            style="@style/TextCaption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="10:00"
+            android:layout_marginTop="@dimen/spacing_tiny"/>
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tv_preview_badge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_tag_green"
-        android:paddingHorizontal="10dp"
-        android:paddingVertical="4dp"
-        android:text="Free"
-        android:textColor="#43A047"
+        android:layout_marginStart="@dimen/spacing_small"
+        android:background="@drawable/bg_preview_badge"
+        android:text="Học thử"
+        android:textColor="@color/primary"
         android:textSize="12sp"
         android:textStyle="bold"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:visibility="gone" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

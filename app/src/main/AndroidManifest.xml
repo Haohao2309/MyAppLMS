@@ -16,6 +16,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".ui.student.learning.LearningActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.teacher.CourseFormActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustPan" />
@@ -44,11 +47,9 @@
         <activity
             android:name=".ui.community.CommunityActivity"
             android:exported="false" />
-
         <activity
             android:name=".ui.community.PostDetailActivity"
             android:exported="false" />
-
         <activity
             android:name=".ui.StudentMainActivity"
             android:exported="false" /> <!-- ── Teacher ──────────────────────────────────────── -->

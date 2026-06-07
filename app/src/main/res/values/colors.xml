@@ -96,4 +96,6 @@
     <color name="course_text_title">#212121</color>
     <color name="course_text_body">#424242</color>
     <color name="course_text_muted">#757575</color>
+
+    <color name="success_green">#4CAF50</color>
 </resources>
