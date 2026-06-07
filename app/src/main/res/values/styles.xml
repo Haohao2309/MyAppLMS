@@ -102,4 +102,10 @@
         <item name="android:maxLength">1</item>
         <item name="android:textAlignment">center</item>
     </style>
+
+    <style name="TextDisplay">
+        <item name="android:textSize">@dimen/text_size_display</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textStyle">bold</item>
+    </style>
 </resources>

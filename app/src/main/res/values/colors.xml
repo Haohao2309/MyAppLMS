@@ -97,6 +97,8 @@
     <color name="course_text_body">#424242</color>
     <color name="course_text_muted">#757575</color>
 
+    <color name="success_green">#4CAF50</color>
+
     <!-- Home UI Colors -->
     <color name="home_header_blue">#4F46E5</color>
     <color name="home_streak_orange">#FF9800</color>

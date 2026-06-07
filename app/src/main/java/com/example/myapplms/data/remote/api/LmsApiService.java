@@ -7,6 +7,9 @@ import com.example.myapplms.data.remote.dto.request.LoginRequest;
 import com.example.myapplms.data.remote.dto.request.PaymentCheckoutRequest;
 import com.example.myapplms.data.remote.dto.request.PaymentWebhookRequest;
 import com.example.myapplms.data.remote.dto.request.RefreshTokenRequest;
+import com.example.myapplms.data.remote.dto.request.SubmitAssignmentRequest;
+import com.example.myapplms.data.remote.dto.request.SubmitQuizRequest;
+import com.example.myapplms.data.remote.dto.request.SyncVideoRequest;
 import com.example.myapplms.data.remote.dto.request.VoteRequest;
 import com.example.myapplms.data.remote.dto.request.RegisterRequest;
 import com.example.myapplms.data.remote.dto.request.StudentRequest;
@@ -17,6 +20,7 @@ import com.example.myapplms.data.remote.dto.response.CategoryResponse;
 import com.example.myapplms.data.remote.dto.response.NotificationResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentCheckoutResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentWebhookResponse;
+import com.example.myapplms.data.remote.dto.response.ProgressResponse;
 import com.example.myapplms.data.remote.dto.response.community_response.CommentResponse;
 import com.example.myapplms.data.remote.dto.response.community_response.CommunityActionResponse;
 import com.example.myapplms.data.remote.dto.response.community_response.CommunityStatsResponse;
@@ -176,6 +180,18 @@ public interface LmsApiService {
     // data/remote/LmsApiService.java
     @GET("v1/categories")
     Call<List<CategoryResponse>> getCategories();
+    // --- LEARNING WORKSPACE ---
+    @GET("v1/learn/courses/{courseId}/progress")
+    Call<ProgressResponse> getProgress(@Path("courseId") int courseId);
+
+    @PUT("v1/learn/courses/{courseId}/lessons/{lessonId}/sync")
+    Call<Void> syncVideoProgress(@Path("courseId") int courseId, @Path("lessonId") String lessonId, @Body SyncVideoRequest request);
+
+    @POST("v1/learn/courses/{courseId}/lessons/{lessonId}/submit-quiz")
+    Call<ProgressResponse> submitQuiz(@Path("courseId") int courseId, @Path("lessonId") String lessonId, @Body SubmitQuizRequest request);
+
+    @POST("v1/learn/courses/{courseId}/lessons/{lessonId}/submit-assignment")
+    Call<ProgressResponse> submitAssignment(@Path("courseId") int courseId, @Path("lessonId") String lessonId, @Body SubmitAssignmentRequest request);
 }
 
 
