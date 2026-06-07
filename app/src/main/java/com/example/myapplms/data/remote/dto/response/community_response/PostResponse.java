@@ -18,7 +18,7 @@ public class PostResponse {
     public String authorName;
     public String authorRole;
 
-    // 🌟 SỬA DÒNG NÀY: Đổi từ "isPinned" thành "pinned" để khớp 100% với Spring Boot mới của sếp
+    // 🌟 SỬA DÒNG NÀY: Đồng bộ thành "pinned" để khớp 100% với Spring Boot của sếp
     @SerializedName("pinned")
     public boolean pinned;
 

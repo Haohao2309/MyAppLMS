@@ -13,8 +13,10 @@ import com.example.myapplms.data.remote.dto.request.SyncVideoRequest;
 import com.example.myapplms.data.remote.dto.request.VoteRequest;
 import com.example.myapplms.data.remote.dto.request.RegisterRequest;
 import com.example.myapplms.data.remote.dto.request.StudentRequest;
+import com.example.myapplms.data.remote.dto.request.TeacherRequest;
 import com.example.myapplms.data.remote.dto.response.ApiResponse;
 import com.example.myapplms.data.remote.dto.response.AuthResponse;
+import com.example.myapplms.data.remote.dto.response.CategoryResponse;
 import com.example.myapplms.data.remote.dto.response.NotificationResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentCheckoutResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentWebhookResponse;
@@ -47,6 +49,7 @@ import retrofit2.http.Query;
 
 public interface LmsApiService {
 
+    // Trong file LmsApiService.java sửa lại như thế này:
     @POST("auth/login")
     Call<ApiResponse<AuthResponse>> login(@Body LoginRequest request);
     @POST("auth/register")
@@ -95,6 +98,14 @@ public interface LmsApiService {
             @Path("postId") String postId,
             @Path("commentId") String commentId
     );
+
+    @PUT("community/posts/{postId}/comments/{commentId}")
+    Call<CommentResponse> updateComment(
+            @Path("postId") String postId,
+            @Path("commentId") String commentId,
+            @Body CreateCommentRequest request
+    );
+
     @PUT("community/posts/{id}")
     Call<PostResponse> updatePost(
             @Path("id") String postId,
@@ -113,6 +124,9 @@ public interface LmsApiService {
     Call<List<TeacherResponse>> getTeachers();
     @GET("teachers/{id}")
     Call<TeacherResponse> getTeacherbyId(@Path("id") Integer id); // Bắt buộc phải có @Path("id")
+
+    @PUT("teachers/{id}")
+    Call<TeacherResponse> updateTeacher(@Path("id") Integer id, @Body TeacherRequest request);
 
     // Payment
     @POST("payments/checkout")
@@ -163,6 +177,9 @@ public interface LmsApiService {
     Call<String> deleteCourse(@Path("id") Integer id,
                               @Query("deletedBy") String deletedBy,
                               @Query("reason") String reason);
+    // data/remote/LmsApiService.java
+    @GET("v1/categories")
+    Call<List<CategoryResponse>> getCategories();
     // --- LEARNING WORKSPACE ---
     @GET("v1/learn/courses/{courseId}/progress")
     Call<ProgressResponse> getProgress(@Path("courseId") int courseId);

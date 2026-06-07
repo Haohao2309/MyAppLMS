@@ -22,6 +22,7 @@
     <string name="nav_community">Community</string>
     <string name="nav_notifications">Notifications</string>
     <string name="nav_profile">Profile</string>
+    <string name="nav_dashboard">Dashboard</string>
 
     <!-- Dashboard & Explore -->
     <string name="good_morning">Good Morning</string>

@@ -162,6 +162,7 @@ public class CommunityViewModel extends ViewModel {
         });
     }
 
+    // 🌟 DÁN ĐÈ HÀM NÀY VÀO CommunityViewModel.java CỦA FRAGMENT
     public void togglePin(String postId) {
         repository.togglePin(postId).enqueue(new Callback<PostResponse>() {
             @Override
@@ -177,12 +178,10 @@ public class CommunityViewModel extends ViewModel {
                             }
                         }
 
-                        //
                         updatedList.sort((p1, p2) -> {
                             if (p1.pinned != p2.pinned) {
                                 return Boolean.compare(p2.pinned, p1.pinned);
                             }
-                            // Nếu trạng thái ghim giống nhau, bài viết nào có ID lớn hơn (mới hơn) đứng trước
                             return p2.id.compareTo(p1.id);
                         });
 

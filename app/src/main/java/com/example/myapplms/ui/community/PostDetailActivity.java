@@ -95,18 +95,27 @@ public class PostDetailActivity extends AppCompatActivity {
 
     private void setupRecyclerView() {
         RecyclerView rvComments = findViewById(R.id.rvComments);
-        adapter = new CommentAdapter(commentList, new CommentAdapter.OnCommentClickListener() {
-            @Override
-            public void onLongClick(CommentResponse comment) {
-                showDeleteCommentDialog(comment.commentId);
-            }
+        SessionManager sessionManager = new SessionManager(this);
+        String currentUserId = sessionManager.getUserId();
+        String userRole = sessionManager.getRole();
 
+        adapter = new CommentAdapter(commentList, currentUserId, userRole, new CommentAdapter.OnCommentClickListener() {
             @Override
             public void onReplyClick(CommentResponse comment) {
                 selectedParentCommentId = comment.commentId;
                 findViewById(R.id.layoutReplyIndicator).setVisibility(View.VISIBLE);
                 ((TextView) findViewById(R.id.tvReplyingTo)).setText("Đang trả lời " + comment.authorName + "...");
                 etComment.requestFocus();
+            }
+
+            @Override
+            public void onEditComment(CommentResponse comment, int position) {
+                showEditCommentDialog(comment, position);
+            }
+
+            @Override
+            public void onDeleteComment(CommentResponse comment, int position) {
+                showDeleteCommentConfirmation(comment, position);
             }
         });
         rvComments.setLayoutManager(new LinearLayoutManager(this));
@@ -415,11 +424,69 @@ public class PostDetailActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void showDeleteCommentDialog(String commentId) {
+    private void showDeleteCommentConfirmation(CommentResponse comment, int position) {
         new AlertDialog.Builder(this)
                 .setTitle("Xóa bình luận")
-                .setMessage("Bạn có chắc chắn muốn xóa bình luận này?")
-                .setPositiveButton("Xóa", (dialog, which) -> viewModel.deleteComment(postId, commentId))
+                .setMessage("Bạn có chắc chắn muốn xóa bình luận này không?")
+                .setPositiveButton("Xóa", (dialog, which) -> {
+                    LMSApplication app = (LMSApplication) getApplication();
+                    CommunityRepository repository = new CommunityRepository(app.getRetrofitClient().getApiService());
+                    repository.deleteComment(postId, comment.commentId).enqueue(new retrofit2.Callback<com.example.myapplms.data.remote.dto.response.community_response.CommunityActionResponse>() {
+                        @Override
+                        public void onResponse(retrofit2.Call<com.example.myapplms.data.remote.dto.response.community_response.CommunityActionResponse> call, retrofit2.Response<com.example.myapplms.data.remote.dto.response.community_response.CommunityActionResponse> response) {
+                            if (response.isSuccessful()) {
+                                if (position >= 0 && position < commentList.size()) {
+                                    commentList.remove(position);
+                                    adapter.notifyItemRemoved(position);
+                                    Toast.makeText(PostDetailActivity.this, "Đã xóa bình luận", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(retrofit2.Call<com.example.myapplms.data.remote.dto.response.community_response.CommunityActionResponse> call, Throwable t) {
+                            Toast.makeText(PostDetailActivity.this, "Lỗi kết nối", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                })
+                .setNegativeButton("Hủy", null)
+                .show();
+    }
+
+    private void showEditCommentDialog(CommentResponse comment, int position) {
+        EditText etEditComment = new EditText(this);
+        etEditComment.setText(comment.content);
+        etEditComment.setPadding(64, 32, 64, 32);
+
+        new AlertDialog.Builder(this)
+                .setTitle("Sửa bình luận")
+                .setView(etEditComment)
+                .setPositiveButton("Lưu thay đổi", (dialog, which) -> {
+                    String newContent = etEditComment.getText().toString().trim();
+                    if (newContent.isEmpty()) return;
+
+                    LMSApplication app = (LMSApplication) getApplication();
+                    CommunityRepository repository = new CommunityRepository(app.getRetrofitClient().getApiService());
+                    com.example.myapplms.data.remote.dto.request.CreateCommentRequest request = new com.example.myapplms.data.remote.dto.request.CreateCommentRequest(newContent);
+
+                    repository.updateComment(postId, comment.commentId, request).enqueue(new retrofit2.Callback<CommentResponse>() {
+                        @Override
+                        public void onResponse(retrofit2.Call<CommentResponse> call, retrofit2.Response<CommentResponse> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                if (position >= 0 && position < commentList.size()) {
+                                    commentList.set(position, response.body());
+                                    adapter.notifyItemChanged(position);
+                                    Toast.makeText(PostDetailActivity.this, "Đã cập nhật bình luận", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(retrofit2.Call<CommentResponse> call, Throwable t) {
+                            Toast.makeText(PostDetailActivity.this, "Lỗi kết nối", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                })
                 .setNegativeButton("Hủy", null)
                 .show();
     }

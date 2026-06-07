@@ -48,6 +48,10 @@ public class CommunityRepository {
         return apiService.deleteComment(postId, commentId);
     }
 
+    public Call<CommentResponse> updateComment(String postId, String commentId, CreateCommentRequest request) {
+        return apiService.updateComment(postId, commentId, request);
+    }
+
     public Call<PostResponse> updatePost(String postId, CreatePostRequest request) {
         return apiService.updatePost(postId, request);
     }
