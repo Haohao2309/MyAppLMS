@@ -4,6 +4,7 @@ import com.example.myapplms.data.mapper.TeacherMapper;
 import com.example.myapplms.data.remote.api.LmsApiService;
 import com.example.myapplms.data.remote.dto.request.TeacherRequest;
 import com.example.myapplms.data.remote.dto.response.TeacherResponse;
+import com.example.myapplms.data.remote.dto.response.TeacherStatsResponse;
 import com.example.myapplms.model.Teacher;
 import com.example.myapplms.utils.Resource;
 
@@ -55,6 +56,17 @@ public class TeacherRepository {
                 return Resource.success(TeacherMapper.toModel(response.body()));
             }
             return Resource.error("Lỗi " + response.code() + ": Cập nhật thất bại", null);
+        } catch (IOException e) {
+            return Resource.error("Không có kết nối mạng", null);
+        }
+    }
+    public Resource<TeacherStatsResponse> getDashboardStats(Integer teacherId) {
+        try {
+            Response<TeacherStatsResponse> response = lmsApi.getTeacherDashboardStats(teacherId).execute();
+            if (response.isSuccessful() && response.body() != null) {
+                return Resource.success(response.body());
+            }
+            return Resource.error("Lỗi: " + response.code(), null);
         } catch (IOException e) {
             return Resource.error("Không có kết nối mạng", null);
         }

@@ -17,6 +17,7 @@ import com.example.myapplms.data.remote.dto.response.CategoryResponse;
 import com.example.myapplms.data.remote.dto.response.NotificationResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentCheckoutResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentWebhookResponse;
+import com.example.myapplms.data.remote.dto.response.TeacherStatsResponse;
 import com.example.myapplms.data.remote.dto.response.community_response.CommentResponse;
 import com.example.myapplms.data.remote.dto.response.community_response.CommunityActionResponse;
 import com.example.myapplms.data.remote.dto.response.community_response.CommunityStatsResponse;
@@ -176,6 +177,9 @@ public interface LmsApiService {
     // data/remote/LmsApiService.java
     @GET("v1/categories")
     Call<List<CategoryResponse>> getCategories();
+    // API Lấy dữ liệu Dashboard cho Giáo viên
+    @GET("teachers/{id}/dashboard")
+    Call<TeacherStatsResponse> getTeacherDashboardStats(@Path("id") Integer teacherId);
 }
 
 

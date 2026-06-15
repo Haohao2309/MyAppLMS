@@ -10,7 +10,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- ── Header Banner ─────────────────────────────── -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="160dp"
@@ -54,7 +53,6 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- ── Stats Cards ───────────────────────────────── -->
         <GridLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -62,7 +60,6 @@
             android:layout_margin="16dp"
             android:useDefaultMargins="true">
 
-            <!-- Total Students -->
             <androidx.cardview.widget.CardView
                 android:layout_width="0dp"
                 app:cardBackgroundColor="@color/background_tab_light"
@@ -113,7 +110,6 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Revenue -->
             <androidx.cardview.widget.CardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -164,7 +160,6 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Avg Rating -->
             <androidx.cardview.widget.CardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -216,7 +211,6 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Total Courses -->
             <androidx.cardview.widget.CardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -262,7 +256,6 @@
 
         </GridLayout>
 
-        <!-- ── Tab: Overview / My Courses / Students ─────── -->
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -301,7 +294,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-
                         android:gravity="center"
                         android:paddingHorizontal="20dp"
                         android:text="My Courses"
@@ -314,7 +306,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-
                         android:gravity="center"
                         android:paddingHorizontal="20dp"
                         android:text="Students"
@@ -326,7 +317,6 @@
             </FrameLayout>
         </HorizontalScrollView>
 
-        <!-- ── Tab Content Container ─────────────────────── -->
         <FrameLayout
             android:id="@+id/tabContent"
             android:layout_width="match_parent"
@@ -334,17 +324,14 @@
             android:backgroundTint="@color/background"
             android:layout_marginTop="16dp">
 
-            <!-- Overview content (mặc định hiện) -->
             <LinearLayout
                 android:id="@+id/layoutOverview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingHorizontal="16dp"
-
                 android:visibility="visible">
 
-                <!-- Revenue Overview chart placeholder -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -380,14 +367,12 @@
 
                         </LinearLayout>
 
-                        <!-- Chart placeholder -->
                         <View
                             android:layout_width="match_parent"
                             android:layout_height="150dp"
                             android:layout_marginTop="12dp"
                             android:background="#F0EFFF"/>
 
-                        <!-- X-axis labels -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -414,7 +399,6 @@
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
-                <!-- Recent Reviews -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -438,7 +422,6 @@
 
                 </LinearLayout>
 
-                <!-- Review item 1 -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -493,7 +476,6 @@
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
-                <!-- Review item 2 -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -550,14 +532,12 @@
 
             </LinearLayout>
 
-            <!-- My Courses content (ẩn mặc định) -->
             <FrameLayout
                 android:id="@+id/layoutMyCourses"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"/>
 
-            <!-- Students content (ẩn mặc định) -->
             <LinearLayout
                 android:id="@+id/layoutStudents"
                 android:layout_width="match_parent"
