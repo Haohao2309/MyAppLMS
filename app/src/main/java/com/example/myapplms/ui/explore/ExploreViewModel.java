@@ -21,7 +21,10 @@ public class ExploreViewModel extends ViewModel {
     public ExploreViewModel(CourseRepository courseRepository) {
         this.courseRepository = courseRepository;
     }
-
+    // Thêm LiveData cho Category
+    private final MutableLiveData<Resource<List<String>>> _categories = new MutableLiveData<>();
+    public final LiveData<Resource<List<String>>> categories = _categories;
+    
 
     public void loadCourses() {
         // Observe LiveData từ Repository rồi forward vào _courses

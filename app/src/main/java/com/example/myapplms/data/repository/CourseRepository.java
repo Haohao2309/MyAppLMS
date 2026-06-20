@@ -5,10 +5,12 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.example.myapplms.data.remote.api.LmsApiService;
 import com.example.myapplms.data.remote.dto.request.CourseRequest;
+import com.example.myapplms.data.remote.dto.response.CategoryResponse;
 import com.example.myapplms.data.remote.dto.response.CourseResponse;
 import com.example.myapplms.model.Course;
 import com.example.myapplms.utils.Resource;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,7 +54,19 @@ public class CourseRepository {
 
         return result;
     }
+    public Resource<List<CategoryResponse>> getCategories() {
+        try {
+            Response<List<CategoryResponse>> response = apiService.getCategories().execute();
 
+            if (response.isSuccessful() && response.body() != null) {
+                return Resource.success(response.body());
+            }
+            return Resource.error("Lỗi: " + response.code(), null);
+
+        } catch (IOException e) {
+            return Resource.error("Không có kết nối mạng", null);
+        }
+    }
     public LiveData<Resource<List<Course>>> getCoursesByTeacherId(Integer teacherId) {
         MutableLiveData<Resource<List<Course>>> result = new MutableLiveData<>();
         // Báo LOADING ngay lập tức

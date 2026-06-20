@@ -5,7 +5,7 @@
     <color name="primary_dark">#4F46E5</color>
     <color name="primary_light">#818CF8</color>
     <color name="purple_primary">#6C3EF4</color>
-
+    <color name="red">#E53935</color>
     <!-- Accent Colors -->
     <color name="accent">#F59E0B</color>
     <color name="accent_dark">#D97706</color>
@@ -96,6 +96,8 @@
     <color name="course_text_title">#212121</color>
     <color name="course_text_body">#424242</color>
     <color name="course_text_muted">#757575</color>
+
+    <color name="success_green">#4CAF50</color>
 
     <!-- Home UI Colors -->
     <color name="home_header_blue">#4F46E5</color>

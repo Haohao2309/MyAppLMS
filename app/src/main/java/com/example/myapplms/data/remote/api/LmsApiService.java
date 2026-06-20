@@ -7,17 +7,22 @@ import com.example.myapplms.data.remote.dto.request.LoginRequest;
 import com.example.myapplms.data.remote.dto.request.PaymentCheckoutRequest;
 import com.example.myapplms.data.remote.dto.request.PaymentWebhookRequest;
 import com.example.myapplms.data.remote.dto.request.RefreshTokenRequest;
+import com.example.myapplms.data.remote.dto.request.SubmitAssignmentRequest;
+import com.example.myapplms.data.remote.dto.request.SubmitQuizRequest;
+import com.example.myapplms.data.remote.dto.request.SyncVideoRequest;
 import com.example.myapplms.data.remote.dto.request.VoteRequest;
 import com.example.myapplms.data.remote.dto.request.RegisterRequest;
 import com.example.myapplms.data.remote.dto.request.StudentRequest;
 import com.example.myapplms.data.remote.dto.request.TeacherRequest;
 import com.example.myapplms.data.remote.dto.response.ApiResponse;
 import com.example.myapplms.data.remote.dto.response.AuthResponse;
+import com.example.myapplms.data.remote.dto.response.CategoryResponse;
 import com.example.myapplms.data.remote.dto.response.NotificationResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentCheckoutResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentWebhookResponse;
 import com.example.myapplms.data.remote.dto.response.TeacherStatsResponse;
 import com.example.myapplms.data.remote.dto.response.UserResponse;
+import com.example.myapplms.data.remote.dto.response.ProgressResponse;
 import com.example.myapplms.data.remote.dto.response.community_response.CommentResponse;
 import com.example.myapplms.data.remote.dto.response.community_response.CommunityActionResponse;
 import com.example.myapplms.data.remote.dto.response.community_response.CommunityStatsResponse;
@@ -49,6 +54,7 @@ import retrofit2.http.Query;
 
 public interface LmsApiService {
 
+    // Trong file LmsApiService.java sửa lại như thế này:
     @POST("auth/login")
     Call<ApiResponse<AuthResponse>> login(@Body LoginRequest request);
     @POST("auth/register")
@@ -176,6 +182,15 @@ public interface LmsApiService {
     Call<String> deleteCourse(@Path("id") Integer id,
                               @Query("deletedBy") String deletedBy,
                               @Query("reason") String reason);
+    // data/remote/LmsApiService.java
+    @GET("v1/categories")
+    Call<List<CategoryResponse>> getCategories();
+    // --- LEARNING WORKSPACE ---
+    @GET("v1/learn/courses/{courseId}/progress")
+    Call<ProgressResponse> getProgress(@Path("courseId") int courseId);
+
+    @PUT("v1/learn/courses/{courseId}/lessons/{lessonId}/sync")
+    Call<Void> syncVideoProgress(@Path("courseId") int courseId, @Path("lessonId") String lessonId, @Body SyncVideoRequest request);
 
     // Upload ảnh — multipart
     @Multipart
@@ -191,6 +206,11 @@ public interface LmsApiService {
     Call<TeacherStatsResponse> getTeacherDashboardStats(@Path("id") Integer teacherId);
 
 
+    @POST("v1/learn/courses/{courseId}/lessons/{lessonId}/submit-quiz")
+    Call<ProgressResponse> submitQuiz(@Path("courseId") int courseId, @Path("lessonId") String lessonId, @Body SubmitQuizRequest request);
+
+    @POST("v1/learn/courses/{courseId}/lessons/{lessonId}/submit-assignment")
+    Call<ProgressResponse> submitAssignment(@Path("courseId") int courseId, @Path("lessonId") String lessonId, @Body SubmitAssignmentRequest request);
 }
 
 
