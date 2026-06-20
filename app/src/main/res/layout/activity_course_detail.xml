@@ -28,7 +28,8 @@
                     android:layout_height="220dp"
                     android:scaleType="centerCrop"
                     android:src="@drawable/ic_launcher_background"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:layout_editor_absoluteX="0dp" />
 
                 <LinearLayout
                     android:id="@+id/layout_tags"

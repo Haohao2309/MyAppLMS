@@ -551,11 +551,32 @@
             </LinearLayout>
 
             <!-- My Courses content (ẩn mặc định) -->
-            <FrameLayout
+            <!-- My Courses content (ẩn mặc định) -->
+            <LinearLayout
                 android:id="@+id/layoutMyCourses"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone"/>
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:visibility="gone">
+
+                <!-- Nút Create New Course -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCreateCourseHome"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="16dp"
+                    android:text="+ Create New Course"
+                    android:textColor="#6C63FF"
+                    android:textSize="16sp"
+                    app:backgroundTint="#F0EFFF"
+                    app:cornerRadius="12dp"
+                    app:strokeColor="#6C63FF"
+                    app:strokeWidth="1dp"/>
+
+                <!-- RecyclerView sẽ được add bằng code vào đây -->
+
+            </LinearLayout>
 
             <!-- Students content (ẩn mặc định) -->
             <LinearLayout
