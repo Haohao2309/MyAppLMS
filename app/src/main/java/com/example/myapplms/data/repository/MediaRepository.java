@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.myapplms.data.remote.api.LmsApiService;
+import com.example.myapplms.data.remote.dto.response.CourseResponse;
 import com.example.myapplms.data.remote.dto.response.UserResponse;
 import com.example.myapplms.utils.Resource;
 import com.example.myapplms.utils.SessionManager;
@@ -17,12 +18,12 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class AvatarRepository {
+public class MediaRepository {
 
     private final LmsApiService apiService;
     private final SessionManager sessionManager;
 
-    public AvatarRepository(LmsApiService apiService, SessionManager sessionManager) {
+    public MediaRepository(LmsApiService apiService, SessionManager sessionManager) {
         this.apiService     = apiService;
         this.sessionManager = sessionManager;
     }
@@ -59,4 +60,37 @@ public class AvatarRepository {
 
         return result;
     }
+
+    // ── Upload ảnh khóa học lên Cloudinary qua server ───────────────
+    public LiveData<Resource<String>> uploadCourseImage(File imageFile) {
+        MutableLiveData<Resource<String>> result = new MutableLiveData<>();
+        result.postValue(Resource.loading());
+
+        RequestBody requestBody = RequestBody.create(
+                MediaType.parse("image/*"), imageFile);
+        MultipartBody.Part part = MultipartBody.Part.createFormData(
+                "file", imageFile.getName(), requestBody);
+
+        apiService.uploadCourseImage(part).enqueue(new Callback<CourseResponse>() {
+            // Thay đoạn onResponse của uploadCourseImage:
+            @Override
+            public void onResponse(Call<CourseResponse> call, Response<CourseResponse> response) {
+                if (response.isSuccessful() && response.body() != null
+                        && response.body().imageUrl != null      // ← thêm check này
+                        && !response.body().imageUrl.isEmpty()) {
+                    result.postValue(Resource.success(response.body().imageUrl));
+                } else {
+                    result.postValue(Resource.error("Upload thất bại: " + response.code(), null));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CourseResponse> call, Throwable t) {
+                result.postValue(Resource.error("Không có kết nối mạng", null));
+            }
+        });
+
+        return result;
+    }
+
 }

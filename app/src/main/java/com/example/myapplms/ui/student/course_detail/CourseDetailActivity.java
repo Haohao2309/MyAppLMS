@@ -1,11 +1,15 @@
 package com.example.myapplms.ui.student.course_detail;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
+
+import com.bumptech.glide.Glide;
 import com.example.myapplms.R;
 import com.example.myapplms.data.RetrofitClient;
 import com.example.myapplms.data.remote.api.LmsApiService;
@@ -20,6 +24,7 @@ public class CourseDetailActivity extends AppCompatActivity {
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
     private TextView tvCourseTitle, tvCategory;
+    private ImageView ivCourse;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +48,7 @@ public class CourseDetailActivity extends AppCompatActivity {
         viewPager = findViewById(R.id.view_pager);
         tvCourseTitle = findViewById(R.id.tv_course_title);
         tvCategory = findViewById(R.id.tv_category);
+        ivCourse = findViewById(R.id.img_course_cover);
     }
 
     private void setupViewModel() {
@@ -72,14 +78,19 @@ public class CourseDetailActivity extends AppCompatActivity {
     }
 
     private void observeHeaderData(int courseId) {
-        // Gọi API và lắng nghe data cho phần Header
         viewModel.getCourseDetail(courseId).observe(this, resource -> {
             switch (resource.status) {
                 case SUCCESS:
                     if (resource.data != null) {
                         tvCourseTitle.setText(resource.data.title);
                         tvCategory.setText(resource.data.category);
-                        // Bind thêm các text khác...
+                        System.out.println("Day la anh "+resource.data.imageUrl);
+                        // ── Thêm dòng này ──────────────────────────
+                        Glide.with(this)
+                                .load(resource.data.imageUrl)  // ← kiểm tra field tên có đúng không
+                                .placeholder(R.drawable.ic_launcher_background)
+                                .centerCrop()
+                                .into(ivCourse);
                     }
                     break;
                 case ERROR:
@@ -88,7 +99,6 @@ public class CourseDetailActivity extends AppCompatActivity {
             }
         });
 
-        // Gọi API lấy Content (Fragment Curriculum sẽ tự hứng kết quả này)
         viewModel.getCourseContent(courseId);
     }
 }

@@ -6,19 +6,19 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.myapplms.data.repository.AvatarRepository;
+import com.example.myapplms.data.repository.MediaRepository;
 import com.example.myapplms.utils.Resource;
 
 import java.io.File;
 
 public class AvatarViewModel extends ViewModel {
 
-    private final AvatarRepository repository;
+    private final MediaRepository repository;
 
     private final MutableLiveData<Resource<String>> _uploadResult = new MutableLiveData<>();
     public final LiveData<Resource<String>> uploadResult = _uploadResult;
 
-    public AvatarViewModel(AvatarRepository repository) {
+    public AvatarViewModel(MediaRepository repository) {
         this.repository = repository;
     }
 
@@ -28,9 +28,9 @@ public class AvatarViewModel extends ViewModel {
     }
 
     public static class Factory implements ViewModelProvider.Factory {
-        private final AvatarRepository repository;
+        private final MediaRepository repository;
 
-        public Factory(AvatarRepository repository) {
+        public Factory(MediaRepository repository) {
             this.repository = repository;
         }
 

@@ -61,17 +61,18 @@ public class ProfileFragment extends BaseFragment<FragmentProfileBinding> {
         sessionManager = new SessionManager(requireContext());
         String role = sessionManager.getRole();
 
-        TeacherRepository teacherRepo =
-                new TeacherRepository(app.getRetrofitClient().getApiService());
-        teacherViewModel = new ViewModelProvider(this,
-                new TeacherViewModel.Factory(teacherRepo)).get(TeacherViewModel.class);
-
         if (ROLE_STUDENT.equalsIgnoreCase(role)) {
             StudentRepository studentRepo =
                     new StudentRepository(app.getRetrofitClient().getApiService());
             studentViewModel = new ViewModelProvider(this,
                     new StudentViewModel.Factory(studentRepo)).get(StudentViewModel.class);
+        } else{
+            TeacherRepository teacherRepo =
+                    new TeacherRepository(app.getRetrofitClient().getApiService());
+            teacherViewModel = new ViewModelProvider(this,
+                    new TeacherViewModel.Factory(teacherRepo)).get(TeacherViewModel.class);
         }
+
 
         AuthRepository authRepo = new AuthRepository(
                 app.getRetrofitClient().getApiService(), sessionManager);
@@ -115,7 +116,6 @@ public class ProfileFragment extends BaseFragment<FragmentProfileBinding> {
         if (imageUrl != null && !imageUrl.isEmpty()) {
             Glide.with(this)
                     .load(imageUrl)
-                    .transform(new CircleCrop())
                     .placeholder(R.drawable.ic_profile)
                     .error(R.drawable.ic_profile)
                     .into(getBinding().ivAvatar);

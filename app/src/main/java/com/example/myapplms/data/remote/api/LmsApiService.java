@@ -16,6 +16,7 @@ import com.example.myapplms.data.remote.dto.response.AuthResponse;
 import com.example.myapplms.data.remote.dto.response.NotificationResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentCheckoutResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentWebhookResponse;
+import com.example.myapplms.data.remote.dto.response.TeacherStatsResponse;
 import com.example.myapplms.data.remote.dto.response.UserResponse;
 import com.example.myapplms.data.remote.dto.response.community_response.CommentResponse;
 import com.example.myapplms.data.remote.dto.response.community_response.CommunityActionResponse;
@@ -180,6 +181,16 @@ public interface LmsApiService {
     @Multipart
     @POST("upload/avatar")
     Call<UserResponse> uploadAvatar(@Part MultipartBody.Part file);
+
+    @Multipart
+    @POST("upload/course-thumbnail")   // chỉnh lại đúng endpoint của bạn
+    Call<CourseResponse> uploadCourseImage(@Part MultipartBody.Part file);
+
+    // API Lấy dữ liệu Dashboard cho Giáo viên
+    @GET("teachers/{id}/dashboard")
+    Call<TeacherStatsResponse> getTeacherDashboardStats(@Path("id") Integer teacherId);
+
+
 }
 
 

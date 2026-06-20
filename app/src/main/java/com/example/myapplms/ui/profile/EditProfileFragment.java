@@ -20,7 +20,7 @@ import com.example.myapplms.LMSApplication;
 import com.example.myapplms.R;
 import com.example.myapplms.data.remote.dto.request.StudentRequest;
 import com.example.myapplms.data.remote.dto.request.TeacherRequest;
-import com.example.myapplms.data.repository.AvatarRepository;
+import com.example.myapplms.data.repository.MediaRepository;
 import com.example.myapplms.data.repository.StudentRepository;
 import com.example.myapplms.data.repository.TeacherRepository;
 import com.example.myapplms.databinding.FragmentEditProfileBinding;
@@ -123,7 +123,7 @@ public class EditProfileFragment extends BaseFragment<FragmentEditProfileBinding
         }
 
         // AvatarViewModel — dùng chung cho cả 2 role
-        AvatarRepository avatarRepo = new AvatarRepository(
+        MediaRepository avatarRepo = new MediaRepository(
                 app.getRetrofitClient().getApiService(), sessionManager);
         avatarViewModel = new ViewModelProvider(this,
                 new AvatarViewModel.Factory(avatarRepo)).get(AvatarViewModel.class);

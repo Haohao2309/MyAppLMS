@@ -8,6 +8,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.myapplms.model.Course;
 
 import java.util.List;
@@ -50,7 +51,11 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.ViewHolder
         holder.tvCategory.setText(course.category);
         holder.tvLevel.setText(course.level);
 
-        holder.ivThumbnail.setImageResource(course.imageRes);
+        Glide.with(holder.itemView.getContext())
+                .load(course.imageUrl)
+                .placeholder(R.drawable.ic_launcher_background)
+                .centerCrop()
+                .into(holder.ivThumbnail);
 
         // 4. BẮT SỰ KIỆN KHI NGƯỜI DÙNG BẤM VÀO ITEM KHÓA HỌC
         holder.itemView.setOnClickListener(v -> {
