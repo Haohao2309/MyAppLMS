@@ -36,90 +36,87 @@ public class OverviewFragment extends Fragment {
         tvInstructor  = view.findViewById(R.id.tv_instructor);
         tvCategory    = view.findViewById(R.id.tv_category);
         tvPrice       = view.findViewById(R.id.tv_price);
-        // 1. ÁNH XẠ NÚT MUA KHÓA HỌC
         Button btnBuyCourse = view.findViewById(R.id.btn_buy_course);
-
-        // 2. GẮN SỰ KIỆN CLICK VÀO NÚT
         btnBuyCourse.setOnClickListener(v -> handleCheckout());
+
         // Lấy Shared ViewModel từ Activity
         sharedViewModel = new ViewModelProvider(requireActivity()).get(CourseDetailViewModel.class);
 
-        // Lắng nghe dữ liệu PostgreSQL từ Shared ViewModel
-        // Không cần bọc trong if (courseId != -1) ở đây nữa vì LiveData trong ViewModel đã được Activity kích hoạt chạy rồi
-        sharedViewModel.getCourseDetail(1).observe(getViewLifecycleOwner(), resource -> {
-            if (resource == null) return;
+        // Lấy ID thực tế từ Intent của Activity thay vì hardcode 1
+        int courseId = requireActivity().getIntent().getIntExtra("COURSE_ID", -1);
 
-            switch (resource.status) {
-                case SUCCESS:
-                    if (resource.data != null) {
-                        // 1. Hiển thị mô tả khóa học
-                        if (resource.data.description != null && !resource.data.description.isEmpty()) {
-                            tvDescription.setText(resource.data.description);
-                        } else {
-                            tvDescription.setText("Chưa có mô tả cho khóa học này.");
+
+
+        if (courseId != -1) {
+            sharedViewModel.getCourseDetail(courseId).observe(getViewLifecycleOwner(), resource -> {
+                if (resource == null) return;
+
+                switch (resource.status) {
+                    case SUCCESS:
+                        if (resource.data != null) {
+                            if (resource.data.description != null && !resource.data.description.isEmpty()) {
+                                tvDescription.setText(resource.data.description);
+                            } else {
+                                tvDescription.setText("Chưa có mô tả cho khóa học này.");
+                            }
+
+                            String instructorName = resource.data.instructor != null ? resource.data.instructor : "Đang cập nhật";
+                            tvInstructor.setText("Instructor: " + instructorName.replace("by ", ""));
+                            tvCategory.setText("Category: " + (resource.data.category != null ? resource.data.category : "General"));
+                            tvPrice.setText("Price: " + (resource.data.priceText != null ? resource.data.priceText : "FREE"));
                         }
+                        break;
 
-                        // 2. Hiển thị tên giảng viên
-                        String instructorName = resource.data.instructor != null ? resource.data.instructor : "Đang cập nhật";
-                        tvInstructor.setText("Instructor: " + instructorName.replace("by ", ""));
+                    case ERROR:
+                        tvDescription.setText("Lỗi tải dữ liệu: " + resource.message);
+                        Toast.makeText(getContext(), "Lỗi tải chi tiết: " + resource.message, Toast.LENGTH_SHORT).show();
+                        break;
 
-                        // 3. Hiển thị danh mục
-                        tvCategory.setText("Category: " + (resource.data.category != null ? resource.data.category : "General"));
-
-                        // 4. Hiển thị giá tiền
-                        tvPrice.setText("Price: " + (resource.data.priceText != null ? resource.data.priceText : "FREE"));
-                    }
-                    break;
-
-                case ERROR:
-                    tvDescription.setText("Lỗi tải dữ liệu: " + resource.message);
-                    break;
-
-                case LOADING:
-                    // Giữ nguyên trạng thái hiển thị đang tải dữ liệu
-                    tvDescription.setText("Đang tải dữ liệu mô tả...");
-                    break;
-            }
-        });
+                    case LOADING:
+                        tvDescription.setText("Đang tải dữ liệu mô tả...");
+                        break;
+                }
+            });
+        }
     }
-    // Giả sử bạn có nút này trong layout fragment_overview.xml
-    // getBinding().btnBuyCourse.setOnClickListener(v -> handleCheckout());
 
     private void handleCheckout() {
         int courseId = requireActivity().getIntent().getIntExtra("COURSE_ID", -1);
-        if (courseId == -1) return;
+        if (courseId == -1) {
+            Toast.makeText(getContext(), "Không tìm thấy ID khóa học", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         sharedViewModel.checkoutCourse(courseId).observe(getViewLifecycleOwner(), resource -> {
             if (resource == null) return;
 
             switch (resource.status) {
                 case LOADING:
-                    // Hiện loading...
+                    Toast.makeText(getContext(), "Đang tạo hóa đơn...", Toast.LENGTH_SHORT).show();
                     break;
                 case SUCCESS:
                     PaymentCheckoutResponse data = resource.data;
                     if (data != null) {
                         if ("Paid".equalsIgnoreCase(data.paymentStatus)) {
                             Toast.makeText(getContext(), "Bạn đã mua khóa học này rồi!", Toast.LENGTH_SHORT).show();
+                        } else if (data.checkoutUrl != null && !data.checkoutUrl.isEmpty()) {
+                            android.content.Intent browserIntent = new android.content.Intent(
+                                    android.content.Intent.ACTION_VIEW,
+                                    android.net.Uri.parse(data.checkoutUrl)
+                            );
+                            startActivity(browserIntent);
                         } else {
-                            // SỬA Ở ĐÂY: Xóa (hoặc comment) dòng gọi Dialog cũ
-                            // showQrDialog(data.amount, courseId, data.paymentId);
-
-                            // THÊM MỚI: Mở trình duyệt với link thanh toán PayOS
-                            if (data.checkoutUrl != null && !data.checkoutUrl.isEmpty()) {
-                                android.content.Intent browserIntent = new android.content.Intent(
-                                        android.content.Intent.ACTION_VIEW,
-                                        android.net.Uri.parse(data.checkoutUrl)
-                                );
-                                startActivity(browserIntent);
-                            } else {
-                                Toast.makeText(getContext(), "Lỗi: Backend chưa trả về checkoutUrl", Toast.LENGTH_LONG).show();
-                            }
+                            Toast.makeText(getContext(), "Lỗi: Backend chưa trả về link thanh toán", Toast.LENGTH_LONG).show();
                         }
                     }
+                    break;
+                case ERROR:
+                    // Hiển thị lỗi từ Server để biết nguyên nhân thực sự
+                    Toast.makeText(getContext(), "Thanh toán thất bại: " + resource.message, Toast.LENGTH_LONG).show();
                     break;
             }
         });
     }
+
 
 }

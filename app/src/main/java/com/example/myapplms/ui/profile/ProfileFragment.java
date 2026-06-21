@@ -221,17 +221,25 @@ public class ProfileFragment extends BaseFragment<FragmentProfileBinding> {
 
         try {
             if (ROLE_STUDENT.equalsIgnoreCase(role)) {
-                int userId = sessionManager.getStudentId();
-                observeStudentProfile();
-                studentViewModel.getStudentByUserId(userId);
+                Integer userId = sessionManager.getStudentId();
+                if (userId != null) {
+                    observeStudentProfile();
+                    studentViewModel.getStudentByUserId(userId);
+                } else {
+                    showToast("Không tìm thấy Student ID");
+                }
             } else {
-                int userId = sessionManager.getTeacherId();
-                observeTeacherProfile();
-                teacherViewModel.getTeacherbyId(userId);
+                Integer userId = sessionManager.getTeacherId();
+                if (userId != null) {
+                    observeTeacherProfile();
+                    teacherViewModel.getTeacherbyId(userId);
+                } else {
+                    showToast("Không tìm thấy Teacher ID");
+                }
             }
 
-        } catch (NumberFormatException e) {
-            showToast("ID không hợp lệ!");
+        } catch (Exception e) {
+            showToast("Lỗi khi tải thông tin: " + e.getMessage());
         }
     }
 

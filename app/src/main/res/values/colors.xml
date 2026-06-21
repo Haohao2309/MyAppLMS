@@ -98,17 +98,28 @@
     <color name="course_text_muted">#757575</color>
 
     <!-- Home UI Colors -->
-    <color name="home_header_blue">#4F46E5</color>
+    <color name="home_blue_primary">#2563EB</color>
+    <color name="home_blue_search_bg">#4DFFFFFF</color>
+    <color name="home_header_gradient_start">#6366F1</color>
+    <color name="home_header_gradient_end">#4F46E5</color>
     <color name="home_streak_orange">#FF9800</color>
     <color name="home_stats_icon_bg">#F0F2FF</color>
     <color name="home_stats_icon_bg_green">#ECFDF5</color>
     <color name="home_stats_icon_bg_amber">#FFFBEB</color>
     <color name="home_progress_blue">#4F46E5</color>
     <color name="home_play_btn_bg">#EEF2FF</color>
-    <color name="home_chart_bar_default">#C7D2FE</color>
+    <color name="home_chart_bar_default">#E0E7FF</color>
     <color name="home_chart_bar_active">#4F46E5</color>
     <color name="home_quick_action_bg_blue">#EFF6FF</color>
     <color name="home_quick_action_bg_yellow">#FFFBEB</color>
     <color name="home_quick_action_bg_green">#F0FDF4</color>
     <color name="home_quick_action_bg_purple">#FAF5FF</color>
+    <color name="home_badge_bg_orange">#FFF7ED</color>
+    <color name="home_badge_bg_blue">#EFF6FF</color>
+    <color name="home_badge_bg_pink">#FFF1F2</color>
+    <color name="home_badge_border_green">#10B981</color>
+    <color name="home_card_shadow">#1A000000</color>
+    <color name="home_search_icon_bg">#4F46E5</color>
+    <color name="header_green">#1E9E65</color>
+    <color name="header_purple">#5E62F1</color>
 </resources>

@@ -7,6 +7,7 @@ import com.example.myapplms.data.remote.api.LmsApiService;
 import com.example.myapplms.data.remote.dto.request.CourseRequest;
 import com.example.myapplms.data.remote.dto.response.CategoryResponse;
 import com.example.myapplms.data.remote.dto.response.CourseResponse;
+import com.example.myapplms.data.remote.dto.response.DashboardResponse;
 import com.example.myapplms.model.Course;
 import com.example.myapplms.utils.Resource;
 
@@ -138,6 +139,29 @@ public class CourseRepository {
             @Override
             public void onFailure(Call<CourseResponse> call, Throwable t) {
                 result.postValue(Resource.error("Không có kết nối mạng", null));
+            }
+        });
+
+        return result;
+    }
+
+    public LiveData<Resource<DashboardResponse>> getStudentDashboard() {
+        MutableLiveData<Resource<DashboardResponse>> result = new MutableLiveData<>();
+        result.postValue(Resource.loading());
+
+        apiService.getStudentDashboard().enqueue(new Callback<DashboardResponse>() {
+            @Override
+            public void onResponse(Call<DashboardResponse> call, Response<DashboardResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    result.postValue(Resource.success(response.body()));
+                } else {
+                    result.postValue(Resource.error("Lỗi server: " + response.code(), null));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<DashboardResponse> call, Throwable t) {
+                result.postValue(Resource.error("Không có kết nối mạng: " + t.getMessage(), null));
             }
         });
 

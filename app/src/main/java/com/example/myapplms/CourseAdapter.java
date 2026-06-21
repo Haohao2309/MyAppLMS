@@ -166,6 +166,8 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.ViewHolder
 
         holder.ivThumbnail.setImageResource(course.imageRes);
 
+
+
         // 4. BẮT SỰ KIỆN KHI NGƯỜI DÙNG BẤM VÀO ITEM KHÓA HỌC
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
@@ -189,6 +191,7 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.ViewHolder
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             ivThumbnail = itemView.findViewById(R.id.ivThumbnail);
+
             tvCourseName = itemView.findViewById(R.id.tvCourseName);
             tvInstructor = itemView.findViewById(R.id.tvInstructor);
             tvRating = itemView.findViewById(R.id.tvRating);

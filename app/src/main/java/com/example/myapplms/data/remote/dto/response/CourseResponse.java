@@ -24,4 +24,22 @@ public class CourseResponse {
 
     @SerializedName("categoryName")
     public String categoryName;
+
+    @SerializedName("progressPercent")
+    public Integer progressPercent;
+
+    @SerializedName("lessonsCount")
+    public Integer lessonsCount;
+
+    @SerializedName("rating")
+    public Double rating;
+
+    @SerializedName("studentsCount")
+    public Integer studentsCount;
+
+    @SerializedName("duration")
+    public String duration;
+
+    @SerializedName("level")
+    public String level;
 }

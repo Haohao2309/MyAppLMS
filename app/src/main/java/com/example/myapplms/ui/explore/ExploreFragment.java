@@ -47,14 +47,17 @@ public class ExploreFragment extends BaseFragment<FragmentExploreListCourseBindi
     @Override
     protected void setupViews() {
         // Cập nhật lại dòng khởi tạo adapter để nhận sự kiện click
-        adapter = new CourseAdapter(courseList, course -> {
-            // Khi click vào 1 khóa học -> Tạo Intent chuyển sang CourseDetailActivity
-            Intent intent = new Intent(requireContext(), CourseDetailActivity.class);
+        adapter = new CourseAdapter(courseList, new CourseAdapter.OnCourseClickListener() {
+            @Override
+            public void onCourseClick(Course course) {
+                // Khi click vào 1 khóa học -> Tạo Intent chuyển sang CourseDetailActivity
+                Intent intent = new Intent(requireContext(), CourseDetailActivity.class);
+                // Gửi COURSE_ID sang bên kia (để ViewModel của trang chi tiết gọi API)
+                intent.putExtra("COURSE_ID", course.id);
+                startActivity(intent);
+            }
 
-            // Gửi COURSE_ID sang bên kia (để ViewModel của trang chi tiết gọi API)
-            intent.putExtra("COURSE_ID", course.id);
 
-            startActivity(intent);
         });
 
         getBinding().rvCourses.setLayoutManager(new LinearLayoutManager(getContext()));

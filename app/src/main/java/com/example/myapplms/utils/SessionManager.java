@@ -54,6 +54,7 @@ public class SessionManager {
         return getAccessToken() != null;
     }
 
+
     public void clearSession() {
         prefs.edit().clear().apply();
     }

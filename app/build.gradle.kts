@@ -1,18 +1,16 @@
 plugins {
-    id("com.android.application")
-    id("com.google.dagger.hilt.android") // Bắt buộc phải có dòng này
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.dagger.hilt.android)
 }
 
 android {
     namespace = "com.example.myapplms"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.example.myapplms"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
@@ -48,27 +46,19 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.gson)
 
-    // Thư viện Retrofit cốt lõi
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-// Thư viện giúp Retrofit tự động chuyển đổi JSON sang Object bằng Gson
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-// Thư viện Gson
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation(libs.okhttp.logging)
 
-    // 1. Thư viện OkHttp Logging Intercepto
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation(libs.hilt.android)
+    annotationProcessor(libs.hilt.compiler)
 
-// 2. Thư viện Dagger Hilt (Dành cho dự án viết bằng Java)
-    implementation("com.google.dagger:hilt-android:2.59.2")
-    annotationProcessor("com.google.dagger:hilt-android-compiler:2.59.2")
-
-    // Lifecycle ViewModel
-    implementation("androidx.lifecycle:lifecycle-viewmodel:2.7.0")
-    implementation("androidx.lifecycle:lifecycle-livedata:2.7.0")
+    implementation(libs.lifecycle.viewmodel)
+    implementation(libs.lifecycle.livedata)
     annotationProcessor(libs.room.compiler)
 
-    implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation(libs.glide)
+    implementation(libs.swiperefreshlayout)
 }

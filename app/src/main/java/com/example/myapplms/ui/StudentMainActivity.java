@@ -21,7 +21,7 @@ import com.example.myapplms.ui.auth.LoginActivity;
 import com.example.myapplms.ui.community.CommunityFragment;
 import com.example.myapplms.ui.explore.ExploreListCourseFragment;
 
-import com.example.myapplms.ui.home.HomeFragment;
+import com.example.myapplms.ui.student.home.HomeFragment;
 import com.example.myapplms.ui.notification.NotificationsFragment;
 import com.example.myapplms.ui.profile.ProfileFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -101,9 +101,33 @@ public class StudentMainActivity extends AppCompatActivity {
                 .setNegativeButton("Hủy", null)
                 .show();
     }
+    public void navigateToTab(int navId, Bundle args) {
+        bottomNavigationView.setSelectedItemId(navId);
+        // setSelectedItemId triggers the listener which calls replaceFragment.
+        // But the listener doesn't know about args.
+        // So we might need to manually call replaceFragment here if we want to pass args.
+        
+        Fragment fragment = null;
+        if (navId == R.id.nav_home) fragment = new HomeFragment();
+        else if (navId == R.id.nav_explore) fragment = new ExploreListCourseFragment();
+        else if (navId == R.id.nav_community) fragment = new CommunityFragment();
+        else if (navId == R.id.nav_notifications) fragment = new NotificationsFragment();
+        else if (navId == R.id.nav_profile) fragment = new ProfileFragment();
+        
+        if (fragment != null) {
+            replaceFragment(fragment, args);
+        }
+    }
+
     private void replaceFragment(Fragment fragment) {
+        replaceFragment(fragment, null);
+    }
+
+    private void replaceFragment(Fragment fragment, Bundle args) {
+        if (args != null) {
+            fragment.setArguments(args);
+        }
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        // Thiết lập hiệu ứng chuyển cảnh mượt mà (tùy chọn)
         transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
         transaction.replace(R.id.fragment_container, fragment);
         transaction.commit();

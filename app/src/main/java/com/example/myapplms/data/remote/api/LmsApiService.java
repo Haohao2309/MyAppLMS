@@ -14,6 +14,7 @@ import com.example.myapplms.data.remote.dto.request.TeacherRequest;
 import com.example.myapplms.data.remote.dto.response.ApiResponse;
 import com.example.myapplms.data.remote.dto.response.AuthResponse;
 import com.example.myapplms.data.remote.dto.response.CategoryResponse;
+import com.example.myapplms.data.remote.dto.response.DashboardResponse;
 import com.example.myapplms.data.remote.dto.response.NotificationResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentCheckoutResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentWebhookResponse;
@@ -24,6 +25,7 @@ import com.example.myapplms.data.remote.dto.response.community_response.PostDeta
 import com.example.myapplms.data.remote.dto.response.community_response.PostResponse;
 
 import java.util.List;
+import com.example.myapplms.data.remote.dto.response.BannerResponse;
 import com.example.myapplms.data.remote.dto.response.CourseResponse;
 import com.example.myapplms.data.remote.dto.response.ReviewResponse;
 import com.example.myapplms.data.remote.dto.response.StudentResponse;
@@ -176,6 +178,13 @@ public interface LmsApiService {
     // data/remote/LmsApiService.java
     @GET("v1/categories")
     Call<List<CategoryResponse>> getCategories();
+
+    @GET("v1/dashboard/student")  //
+    Call<DashboardResponse> getStudentDashboard();
+
+    @GET("v1/banners")
+    Call<ApiResponse<List<BannerResponse>>> getActiveBanners();
 }
+
 
 

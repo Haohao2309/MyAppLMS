@@ -27,6 +27,7 @@
                 android:src="@drawable/ic_launcher_background"
                 android:contentDescription="@null" />
 
+
             <TextView
                 android:id="@+id/tvDuration"
                 android:layout_width="wrap_content"

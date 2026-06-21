@@ -54,10 +54,15 @@ public class ExploreListCourseFragment extends BaseFragment<FragmentExploreListC
 
     @Override
     protected void setupViews() {
-        adapter = new CourseAdapter(courseList, course -> {
-            Intent intent = new Intent(requireContext(), CourseDetailActivity.class);
-            intent.putExtra("COURSE_ID", course.id);
-            startActivity(intent);
+        adapter = new CourseAdapter(courseList, new CourseAdapter.OnCourseClickListener() {
+            @Override
+            public void onCourseClick(Course course) {
+                Intent intent = new Intent(requireContext(), CourseDetailActivity.class);
+                intent.putExtra("COURSE_ID", course.id);
+                startActivity(intent);
+            }
+
+
         });
 
         getBinding().rvCourses.setLayoutManager(new LinearLayoutManager(getContext()));

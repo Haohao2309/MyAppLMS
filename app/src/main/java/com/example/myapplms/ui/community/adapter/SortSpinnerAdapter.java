@@ -10,13 +10,14 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import com.example.myapplms.R;
 
 public class SortSpinnerAdapter extends ArrayAdapter<String> {
 
     private final String[] options;
-    private final int[] icons = {R.drawable.ic_time, R.drawable.ic_trending, R.drawable.ic_heart};
+    private final int[] icons = {R.drawable.ic_time, R.drawable.ic_trending, R.drawable.ic_message};
     private int selectedPosition = 0;
 
     public SortSpinnerAdapter(@NonNull Context context, String[] options) {
@@ -60,12 +61,12 @@ public class SortSpinnerAdapter extends ArrayAdapter<String> {
 
         if (position == selectedPosition) {
             ivCheck.setVisibility(View.VISIBLE);
-            tvName.setTextColor(getContext().getResources().getColor(R.color.primary));
-            ivIcon.setColorFilter(getContext().getResources().getColor(R.color.primary));
+            tvName.setTextColor(ContextCompat.getColor(getContext(), R.color.primary));
+            ivIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.primary));
         } else {
             ivCheck.setVisibility(View.GONE);
-            tvName.setTextColor(getContext().getResources().getColor(R.color.text_primary));
-            ivIcon.setColorFilter(getContext().getResources().getColor(R.color.text_primary));
+            tvName.setTextColor(ContextCompat.getColor(getContext(), R.color.text_primary));
+            ivIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.text_primary));
         }
 
         return convertView;

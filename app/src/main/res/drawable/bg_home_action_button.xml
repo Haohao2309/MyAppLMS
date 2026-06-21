@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#206366F1"> <!-- Ripple color (primary with 12% alpha) -->
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="100dp" />
+            <solid android:color="#F0F2FF" /> <!-- Soft light indigo background -->
+        </shape>
+    </item>
+</ripple>
