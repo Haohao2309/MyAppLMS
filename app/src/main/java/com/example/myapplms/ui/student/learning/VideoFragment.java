@@ -89,6 +89,11 @@ public class VideoFragment extends Fragment {
             tvLessonTitle.setText(lessonTitle);
         }
 
+        // Ẩn tiêu đề nếu đang xoay ngang để Fullscreen tuyệt đối
+        if (getResources().getConfiguration().orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
+            if (tvLessonTitle != null) tvLessonTitle.setVisibility(View.GONE);
+        }
+
         getLifecycle().addObserver(youTubePlayerView);
         initializePlayer();
         setupSyncTimer();
@@ -153,6 +158,20 @@ public class VideoFragment extends Fragment {
         if(viewCenterClick != null) viewCenterClick.setOnClickListener(togglePlay);
         if(btnPlayPause != null) btnPlayPause.setOnClickListener(togglePlay);
 
+        ImageView btnFullscreen = getView() != null ? getView().findViewById(R.id.btn_fullscreen) : null;
+        if (btnFullscreen != null) {
+            btnFullscreen.setOnClickListener(v -> {
+                if (getActivity() != null) {
+                    int currentOrientation = getResources().getConfiguration().orientation;
+                    if (currentOrientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
+                        getActivity().setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                    } else {
+                        getActivity().setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                    }
+                }
+            });
+        }
+
         if(seekbarVideo != null) {
             seekbarVideo.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
@@ -189,6 +208,18 @@ public class VideoFragment extends Fragment {
             }
         };
         syncHandler.postDelayed(syncRunnable, 10000);
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull android.content.res.Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (tvLessonTitle != null) {
+            if (newConfig.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
+                tvLessonTitle.setVisibility(View.GONE);
+            } else {
+                tvLessonTitle.setVisibility(View.VISIBLE);
+            }
+        }
     }
 
     @Override
