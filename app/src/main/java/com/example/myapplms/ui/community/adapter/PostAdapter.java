@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplms.R;
 import com.example.myapplms.data.remote.dto.response.community_response.PostResponse;
-import com.example.myapplms.util.TimeUtils;
+import com.example.myapplms.utils.TimeUtils;
 
 import java.util.List;
 

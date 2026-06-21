@@ -49,6 +49,11 @@ public class CourseDetailActivity extends AppCompatActivity {
         tvCourseTitle = findViewById(R.id.tv_course_title);
         tvCategory = findViewById(R.id.tv_category);
         ivCourse = findViewById(R.id.img_course_cover);
+
+        android.widget.ImageButton btnBack = findViewById(R.id.btn_back);
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> finish());
+        }
     }
 
     private void setupViewModel() {

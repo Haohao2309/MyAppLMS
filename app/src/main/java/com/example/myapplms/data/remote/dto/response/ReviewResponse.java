@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 public class ReviewResponse {
-    @SerializedName("id")
+    @SerializedName(value = "_id", alternate = {"id"})
     public String id;
 
     @SerializedName("studentId")
@@ -30,6 +30,21 @@ public class ReviewResponse {
 
     @SerializedName("upvotes")
     public Integer upvotes;
+
+    @SerializedName("downvotes")
+    public Integer downvotes;
+
+    @SerializedName("votedUpBy")
+    public List<Integer> votedUpBy;
+
+    @SerializedName("votedDownBy")
+    public List<Integer> votedDownBy;
+
+    @SerializedName("isVerified")
+    public Boolean isVerified;
+
+    @SerializedName("courseId")
+    public Integer courseId;
 
     @SerializedName("createdAt")
     public String createdAt;

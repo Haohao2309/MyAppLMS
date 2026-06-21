@@ -1,23 +1,39 @@
 package com.example.myapplms.ui.student.learning;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.myapplms.LMSApplication;
 import com.example.myapplms.R;
+import com.example.myapplms.data.RetrofitClient;
+import com.example.myapplms.data.remote.api.LmsApiService;
+import com.example.myapplms.data.remote.dto.request.CreateDiscussionRequest;
+import com.example.myapplms.data.repository.CourseDetailRepository;
 import com.example.myapplms.data.repository.LearningRepository;
+import com.example.myapplms.ui.student.course_detail.CourseDetailViewModel;
+import com.example.myapplms.ui.student.course_detail.CourseDetailViewModelFactory;
 import com.example.myapplms.ui.student.course_detail.adapter.ModuleAdapter;
+import com.example.myapplms.ui.student.learning.adapter.DiscussionAdapter;
+import com.example.myapplms.utils.Resource;
+import com.example.myapplms.utils.SessionManager;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.gson.Gson;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import org.json.JSONObject;
 
 public class LearningActivity extends AppCompatActivity {
 
@@ -25,8 +41,10 @@ public class LearningActivity extends AppCompatActivity {
     private LearningViewModel viewModel;
     private int courseId;
 
-    // ĐÃ SỬA: Đưa menuAdapter lên đây làm thuộc tính của Class để gọi được ở mọi hàm
     private ModuleAdapter menuAdapter;
+    private String currentLessonId;
+    private ExtendedFloatingActionButton fabDiscussion;
+    private ImageView ivMenuToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,126 +53,99 @@ public class LearningActivity extends AppCompatActivity {
 
         courseId = getIntent().getIntExtra("COURSE_ID", -1);
         drawerLayout = findViewById(R.id.drawer_layout);
+        fabDiscussion = findViewById(R.id.fab_discussion);
+        ivMenuToggle = findViewById(R.id.iv_menu_toggle);
 
-        // Hứng dữ liệu từ Intent để tự động phát bài học khi vừa bấm vào từ bên ngoài
+        SessionManager sessionManager = new SessionManager(this);
+        LmsApiService apiService = RetrofitClient.getInstance(sessionManager).create(LmsApiService.class);
+
+        // 1. Khởi tạo LearningViewModel (Để quản lý điểm, tiến độ, Q&A)
+        LearningRepository learningRepo = new LearningRepository(apiService);
+        LearningViewModelFactory learningFactory = new LearningViewModelFactory(learningRepo);
+        viewModel = new ViewModelProvider(this, learningFactory).get(LearningViewModel.class);
+
+        // 2. Khởi tạo CourseDetailViewModel (Để tải danh sách Sidebar Menu giống hệt CurriculumFragment)
+        CourseDetailRepository detailRepo = new CourseDetailRepository(apiService);
+        CourseDetailViewModelFactory detailFactory = new CourseDetailViewModelFactory(detailRepo);
+        CourseDetailViewModel detailViewModel = new ViewModelProvider(this, detailFactory).get(CourseDetailViewModel.class);
+
+        // 3. Xử lý mở/đóng Sidebar Menu
+        if (ivMenuToggle != null && drawerLayout != null) {
+            ivMenuToggle.setOnClickListener(v -> {
+                if (drawerLayout.isDrawerOpen(GravityCompat.END)) {
+                    drawerLayout.closeDrawer(GravityCompat.END);
+                } else {
+                    drawerLayout.openDrawer(GravityCompat.END);
+                }
+            });
+        }
+
+        // 🟢 FIX LỖI MẤT MENU: Gọi API lấy Course Content và đổ vào Sidebar
+        RecyclerView rvMenu = findViewById(R.id.rv_curriculum_menu);
+        rvMenu.setLayoutManager(new LinearLayoutManager(this));
+
+        detailViewModel.getCourseContent(courseId).observe(this, resource -> {
+            if (resource.status == Resource.Status.SUCCESS && resource.data != null && resource.data.modules != null) {
+
+                // Đổ dữ liệu vào Adapter
+                menuAdapter = new ModuleAdapter(resource.data.modules, lesson -> {
+                    String contentStr = lesson.content != null ? new Gson().toJson(lesson.content) : "{}";
+                    openLessonFragment(lesson.lessonId, lesson.type, contentStr, lesson.title);
+                });
+                rvMenu.setAdapter(menuAdapter);
+
+                // Load tiến độ tích xanh NGAY SAU KHI Sidebar đã có danh sách
+                loadProgress();
+            }
+        });
+
+        // 4. Xử lý BottomSheet Thảo luận
+        fabDiscussion.setOnClickListener(v -> {
+            if (currentLessonId != null) {
+                showDiscussionBottomSheet();
+            } else {
+                Toast.makeText(this, "Vui lòng chọn một bài học trước", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // 5. Nạp bài học đầu tiên từ ngoài truyền vào
         String initialLessonId = getIntent().getStringExtra("LESSON_ID");
         String initialType = getIntent().getStringExtra("LESSON_TYPE");
-        String initialContentJson = getIntent().getStringExtra("CONTENT_JSON");
-
-        // Khởi tạo hệ thống mạng tích hợp Token bảo mật
-        com.example.myapplms.utils.SessionManager sessionManager = new com.example.myapplms.utils.SessionManager(this);
-        com.example.myapplms.data.remote.api.LmsApiService apiService =
-                com.example.myapplms.data.RetrofitClient.getInstance(sessionManager).create(com.example.myapplms.data.remote.api.LmsApiService.class);
-
-        LearningRepository repository = new LearningRepository(apiService);
-        viewModel = new ViewModelProvider(this, new LearningViewModelFactory(repository)).get(LearningViewModel.class);
-
-        // Bắt sự kiện bấm nút Menu góc phải trên Toolbar để mở ngăn kéo bài học
-        android.widget.ImageView ivMenuToggle = findViewById(R.id.iv_menu_toggle);
-        ivMenuToggle.setOnClickListener(v -> drawerLayout.openDrawer(androidx.core.view.GravityCompat.END));
-
-        // Tải danh sách cấu trúc bài học lên thanh Menu trượt
-        loadCurriculumMenu();
+        String initialContent = getIntent().getStringExtra("CONTENT_JSON");
+        String initialTitle = getIntent().getStringExtra("LESSON_TITLE");
 
         if (initialLessonId != null && initialType != null) {
-            openLessonFragment(initialLessonId, initialType, initialContentJson);
-        } else {
-            drawerLayout.openDrawer(androidx.core.view.GravityCompat.END);
+            openLessonFragment(initialLessonId, initialType, initialContent, initialTitle);
         }
     }
 
-    private void loadCurriculumMenu() {
-        LMSApplication app = (LMSApplication) getApplication();
-
-        app.getRetrofitClient().getApiService().getCourseContent(courseId).enqueue(new retrofit2.Callback<com.example.myapplms.data.remote.dto.response.course_content.CourseContentResponse>() {
-            @Override
-            public void onResponse(retrofit2.Call<com.example.myapplms.data.remote.dto.response.course_content.CourseContentResponse> call, retrofit2.Response<com.example.myapplms.data.remote.dto.response.course_content.CourseContentResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    RecyclerView rvCurriculum = findViewById(R.id.rv_curriculum_menu);
-                    rvCurriculum.setLayoutManager(new LinearLayoutManager(LearningActivity.this));
-
-                    // Chuyển đổi dữ liệu DTO sang định dạng cấu trúc Model giao diện
-                    String json = new com.google.gson.Gson().toJson(response.body().modules);
-                    java.lang.reflect.Type listType = new com.google.gson.reflect.TypeToken<java.util.List<com.example.myapplms.model.course_content.CourseModule>>(){}.getType();
-                    java.util.List<com.example.myapplms.model.course_content.CourseModule> mappedModules = new com.google.gson.Gson().fromJson(json, listType);
-
-                    // Gán trực tiếp vào thuộc tính toàn cục menuAdapter (Không thêm chữ ModuleAdapter ở đầu dòng)
-                    menuAdapter = new ModuleAdapter(mappedModules, lesson -> {
-
-                        com.example.myapplms.data.remote.dto.response.course_content.LessonResponse matchingLesson = null;
-                        for (com.example.myapplms.data.remote.dto.response.course_content.ModuleResponse moduleResp : response.body().modules) {
-                            for (com.example.myapplms.data.remote.dto.response.course_content.LessonResponse lessonResp : moduleResp.lessons) {
-                                if (lessonResp.lessonId != null && lessonResp.lessonId.equals(lesson.lessonId)) {
-                                    matchingLesson = lessonResp;
-                                    break;
-                                }
-                            }
-                            if (matchingLesson != null) break;
-                        }
-
-                        String contentJson = "";
-                        String lessonType = "video";
-
-                        if (matchingLesson != null) {
-                            lessonType = matchingLesson.type;
-                            if (matchingLesson.content != null) {
-                                contentJson = new com.google.gson.Gson().toJson(matchingLesson.content);
-                            }
-                        }
-
-                        openLessonFragment(lesson.lessonId, lessonType, contentJson);
-                    });
-
-                    rvCurriculum.setAdapter(menuAdapter);
-
-                    // Đồng bộ và tải thông tin tiến độ học tập thực tế
-                    loadProgress();
-                } else {
-                    Toast.makeText(LearningActivity.this, "Không thể tải danh sách bài học!", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(retrofit2.Call<com.example.myapplms.data.remote.dto.response.course_content.CourseContentResponse> call, Throwable t) {
-                Toast.makeText(LearningActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    // Hàm đồng bộ tiến độ, hiển thị % lên Toolbar và đánh tích xanh ✅ vào menu bài học
     public void loadProgress() {
-        viewModel.getProgress(courseId).observe(this, result -> {
-            if (result.status == com.example.myapplms.utils.Resource.Status.SUCCESS && result.data != null) {
-
-                // 1. Cập nhật phần trăm học tập lên phụ đề Toolbar
-                androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar_learning);
-                toolbar.setSubtitle("Đã học: " + result.data.overallProgress + "%");
-
-                // 2. Truyền danh sách mã bài học đã hoàn thành vào Menu trượt
+        viewModel.getProgress(courseId).observe(this, resource -> {
+            if (resource.status == Resource.Status.SUCCESS && resource.data != null) {
+                // Cập nhật dấu tích xanh cho danh sách bên Sidebar Menu
                 if (menuAdapter != null) {
-                    menuAdapter.setCompletedLessons(result.data.completedLessons);
+                    menuAdapter.setCompletedLessons(resource.data.completedLessons);
                 }
             }
         });
     }
 
-    public void openLessonFragment(String lessonId, String type, String contentJson) {
+    public void openLessonFragment(String lessonId, String type, String contentJson, String lessonTitle) {
+        this.currentLessonId = lessonId;
         Fragment fragment = null;
 
         switch (type.toLowerCase()) {
             case "video":
                 String videoId = "";
                 try {
-                    org.json.JSONObject contentObj = new org.json.JSONObject(contentJson);
+                    JSONObject contentObj = new JSONObject(contentJson);
                     if (contentObj.has("videoId")) {
                         videoId = contentObj.getString("videoId");
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    Toast.makeText(this, "Lỗi đọc dữ liệu video!", Toast.LENGTH_SHORT).show();
                 }
-
-                fragment = VideoFragment.newInstance(courseId, lessonId, videoId);
+                fragment = VideoFragment.newInstance(courseId, lessonId, videoId, lessonTitle);
                 break;
 
             case "quiz":
@@ -171,8 +162,84 @@ public class LearningActivity extends AppCompatActivity {
                     .replace(R.id.learning_fragment_container, fragment)
                     .commit();
 
-            drawerLayout.closeDrawers();
+            if (drawerLayout != null) {
+                drawerLayout.closeDrawers();
+            }
         }
+    }
+
+    private void showDiscussionBottomSheet() {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.bottom_sheet_discussions, null);
+        bottomSheetDialog.setContentView(view);
+
+        RecyclerView rvDiscussions = view.findViewById(R.id.rv_discussions);
+        rvDiscussions.setLayoutManager(new LinearLayoutManager(this));
+
+        DiscussionAdapter adapter = new DiscussionAdapter();
+
+        EditText etTitle = view.findViewById(R.id.et_discussion_title);
+        EditText etContent = view.findViewById(R.id.et_discussion_content);
+        Button btnPost = view.findViewById(R.id.btn_post_discussion);
+
+        adapter.setReplyListener(authorName -> {
+            etContent.setText("@" + authorName + " ");
+            etContent.setSelection(etContent.getText().length());
+            etContent.requestFocus();
+
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) imm.showSoftInput(etContent, InputMethodManager.SHOW_IMPLICIT);
+        });
+
+        rvDiscussions.setAdapter(adapter);
+
+        viewModel.getDiscussions(courseId, currentLessonId).observe(this, resource -> {
+            if (resource.status == Resource.Status.SUCCESS) {
+                adapter.setDiscussions(resource.data);
+            }
+        });
+
+        btnPost.setOnClickListener(v -> {
+            String title = etTitle.getText().toString().trim();
+            String content = etContent.getText().toString().trim();
+
+            if (title.isEmpty() || content.isEmpty()) {
+                Toast.makeText(this, "Vui lòng nhập tiêu đề và nội dung", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            CreateDiscussionRequest request = new CreateDiscussionRequest(title, content);
+
+            viewModel.createDiscussion(courseId, currentLessonId, request).observe(this, resource -> {
+                switch (resource.status) {
+                    case LOADING:
+                        btnPost.setEnabled(false);
+                        btnPost.setText("Đang gửi...");
+                        break;
+                    case SUCCESS:
+                        btnPost.setEnabled(true);
+                        btnPost.setText("Gửi câu hỏi");
+                        etTitle.setText("");
+                        etContent.setText("");
+                        Toast.makeText(this, "Gửi thảo luận thành công!", Toast.LENGTH_SHORT).show();
+
+                        viewModel.getDiscussions(courseId, currentLessonId).observe(this, listResource -> {
+                            if (listResource.status == Resource.Status.SUCCESS) {
+                                adapter.setDiscussions(listResource.data);
+                                rvDiscussions.smoothScrollToPosition(0);
+                            }
+                        });
+                        break;
+                    case ERROR:
+                        btnPost.setEnabled(true);
+                        btnPost.setText("Gửi câu hỏi");
+                        Toast.makeText(this, "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            });
+        });
+
+        bottomSheetDialog.show();
     }
 
     public LearningViewModel getViewModel() {

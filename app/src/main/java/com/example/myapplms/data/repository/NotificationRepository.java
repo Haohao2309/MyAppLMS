@@ -65,7 +65,7 @@ public class NotificationRepository {
      * Lấy danh sách thông báo từ API, cache vào Room, rồi trả về UI Model.
      * Callback được gọi trên Main Thread, an toàn để cập nhật LiveData.
      */
-    public void fetchNotifications(DataCallback<List<Notification>> callback) {
+    public void fetchNotifications(int studentId, DataCallback<List<Notification>> callback) {
         apiService.getMyNotifications().enqueue(new Callback<List<NotificationResponse>>() {
             @Override
             public void onResponse(Call<List<NotificationResponse>> call,
@@ -74,7 +74,7 @@ public class NotificationRepository {
                     List<NotificationResponse> dtos = response.body();
 
                     // Map DTO → Entity
-                    List<NotificationEntity> entities = NotificationMapper.fromDtoList(dtos);
+                    List<NotificationEntity> entities = NotificationMapper.fromDtoList(dtos, studentId);
 
                     // Lưu vào Room trên background thread
                     dbExecutor.execute(() -> {
@@ -105,9 +105,9 @@ public class NotificationRepository {
      * Bước 2: Gọi API ngầm để sync lên server.
      * Bước 3: Nếu thành công → cập nhật isSynced = true trong Room.
      */
-    public void markAsRead(String id) {
+    public void markAsRead(String id, int studentId) {
         // Bước 1: Cập nhật local ngay (trên background thread)
-        dbExecutor.execute(() -> notificationDao.markAsReadLocal(id));
+        dbExecutor.execute(() -> notificationDao.markAsReadLocal(id, studentId));
 
         // Bước 2: Sync lên server ngầm
         apiService.markAsRead(id).enqueue(new Callback<Void>() {
@@ -115,7 +115,7 @@ public class NotificationRepository {
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
                     // Bước 3: Đánh dấu đã sync thành công
-                    dbExecutor.execute(() -> notificationDao.markAsSynced(id));
+                    dbExecutor.execute(() -> notificationDao.markAsSynced(id, studentId));
                 }
                 // Nếu thất bại: giữ nguyên isSynced = false để retry sau
             }
@@ -131,8 +131,8 @@ public class NotificationRepository {
      * Đánh dấu TẤT CẢ đã đọc (local trước, sync server sau).
      * Gọi API markAllRead nếu backend có endpoint đó.
      */
-    public void markAllAsRead() {
-        dbExecutor.execute(() -> notificationDao.markAllAsReadLocal());
+    public void markAllAsRead(int studentId) {
+        dbExecutor.execute(() -> notificationDao.markAllAsReadLocal(studentId));
         // TODO: Gọi apiService.markAllAsRead() nếu backend có endpoint này
     }
 

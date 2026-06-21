@@ -4,15 +4,453 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    android:padding="16dp">
+    android:background="@color/background">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_reviews"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:paddingBottom="80dp" />
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Summary rating: điểm trung bình + biểu đồ phân bổ sao như App Store/Udemy -->
+            <LinearLayout
+                android:id="@+id/layout_rating_summary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/bg_module_container">
+
+                <!-- Cột trái: Điểm số trung bình -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.2"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:layout_gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tv_average_rating"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0.0"
+                        android:textSize="44sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary_dark" />
+
+                    <TextView
+                        android:id="@+id/tv_average_rating_stars"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="☆☆☆☆☆"
+                        android:textColor="#FFB300"
+                        android:textSize="13sp"
+                        android:layout_marginTop="2dp" />
+
+                    <TextView
+                        android:id="@+id/tv_review_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="0 đánh giá"
+                        android:textSize="12sp"
+                        android:textColor="@color/course_text_muted" />
+                </LinearLayout>
+
+                <!-- Đường ngăn cách ở giữa -->
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="80dp"
+                    android:background="@color/divider"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="12dp" />
+
+                <!-- Cột phải: Biểu đồ thanh tiến trình phân bổ sao -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:orientation="vertical"
+                    android:layout_gravity="center_vertical">
+
+                    <!-- Hàng 5 sao -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="2dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="5 ★"
+                            android:textSize="11sp"
+                            android:textColor="@color/course_text_muted"/>
+                        <ProgressBar
+                            android:id="@+id/bar_5_star"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="0dp"
+                            android:layout_height="4dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:max="100"
+                            android:progress="0"
+                            android:progressTint="@color/accent"
+                            android:progressBackgroundTint="@color/gray_200" />
+                        <TextView
+                            android:id="@+id/tv_5_star_percent"
+                            android:layout_width="32dp"
+                            android:layout_height="wrap_content"
+                            android:text="0%"
+                            android:gravity="end"
+                            android:textSize="11sp"
+                            android:textColor="@color/course_text_muted"/>
+                    </LinearLayout>
+
+                    <!-- Hàng 4 sao -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="2dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="4 ★"
+                            android:textSize="11sp"
+                            android:textColor="@color/course_text_muted"/>
+                        <ProgressBar
+                            android:id="@+id/bar_4_star"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="0dp"
+                            android:layout_height="4dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:max="100"
+                            android:progress="0"
+                            android:progressTint="@color/accent"
+                            android:progressBackgroundTint="@color/gray_200" />
+                        <TextView
+                            android:id="@+id/tv_4_star_percent"
+                            android:layout_width="32dp"
+                            android:layout_height="wrap_content"
+                            android:text="0%"
+                            android:gravity="end"
+                            android:textSize="11sp"
+                            android:textColor="@color/course_text_muted"/>
+                    </LinearLayout>
+
+                    <!-- Hàng 3 sao -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="2dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="3 ★"
+                            android:textSize="11sp"
+                            android:textColor="@color/course_text_muted"/>
+                        <ProgressBar
+                            android:id="@+id/bar_3_star"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="0dp"
+                            android:layout_height="4dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:max="100"
+                            android:progress="0"
+                            android:progressTint="@color/accent"
+                            android:progressBackgroundTint="@color/gray_200" />
+                        <TextView
+                            android:id="@+id/tv_3_star_percent"
+                            android:layout_width="32dp"
+                            android:layout_height="wrap_content"
+                            android:text="0%"
+                            android:gravity="end"
+                            android:textSize="11sp"
+                            android:textColor="@color/course_text_muted"/>
+                    </LinearLayout>
+
+                    <!-- Hàng 2 sao -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="2dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="2 ★"
+                            android:textSize="11sp"
+                            android:textColor="@color/course_text_muted"/>
+                        <ProgressBar
+                            android:id="@+id/bar_2_star"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="0dp"
+                            android:layout_height="4dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:max="100"
+                            android:progress="0"
+                            android:progressTint="@color/accent"
+                            android:progressBackgroundTint="@color/gray_200" />
+                        <TextView
+                            android:id="@+id/tv_2_star_percent"
+                            android:layout_width="32dp"
+                            android:layout_height="wrap_content"
+                            android:text="0%"
+                            android:gravity="end"
+                            android:textSize="11sp"
+                            android:textColor="@color/course_text_muted"/>
+                    </LinearLayout>
+
+                    <!-- Hàng 1 sao -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="1 ★"
+                            android:textSize="11sp"
+                            android:textColor="@color/course_text_muted"/>
+                        <ProgressBar
+                            android:id="@+id/bar_1_star"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="0dp"
+                            android:layout_height="4dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:max="100"
+                            android:progress="0"
+                            android:progressTint="@color/accent"
+                            android:progressBackgroundTint="@color/gray_200" />
+                        <TextView
+                            android:id="@+id/tv_1_star_percent"
+                            android:layout_width="32dp"
+                            android:layout_height="wrap_content"
+                            android:text="0%"
+                            android:gravity="end"
+                            android:textSize="11sp"
+                            android:textColor="@color/course_text_muted"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Nút mở form viết đánh giá (chỉ hiện khi user đã đăng ký/mua khóa học) -->
+            <Button
+                android:id="@+id/btn_write_review"
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:layout_marginBottom="12dp"
+                android:text="Viết đánh giá của bạn"
+                android:textAllCaps="false"
+                android:textSize="14sp"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/primary"
+                app:cornerRadius="8dp"
+                android:visibility="gone" />
+
+            <!-- Form viết đánh giá: ẩn theo mặc định, hiện khi user bấm "Viết đánh giá" -->
+            <LinearLayout
+                android:id="@+id/layout_write_review_form"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_module_container"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Đánh giá của bạn về khóa học"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="@color/course_text_title" />
+
+                <!-- Chọn số sao -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Mức độ hài lòng: "
+                        android:textSize="14sp"
+                        android:textColor="@color/course_text_body" />
+
+                    <RatingBar
+                        android:id="@+id/rating_bar_input"
+                        style="?android:attr/ratingBarStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:numStars="5"
+                        android:stepSize="1"
+                        android:rating="5"
+                        android:progressTint="@color/accent"
+                        android:secondaryProgressTint="@color/accent" />
+                </LinearLayout>
+
+                <!-- Tiêu đề -->
+                <EditText
+                    android:id="@+id/et_review_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="12dp"
+                    android:hint="Tiêu đề đánh giá (ví dụ: Khóa học rất dễ tiếp cận)"
+                    android:textColorHint="@color/course_text_muted"
+                    android:textSize="14sp"
+                    android:textColor="@color/course_text_title"
+                    android:background="@drawable/bg_input_field"
+                    android:maxLines="1"
+                    android:layout_marginBottom="8dp" />
+
+                <!-- Nội dung chi tiết -->
+                <EditText
+                    android:id="@+id/et_review_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="12dp"
+                    android:minLines="3"
+                    android:gravity="top"
+                    android:hint="Chia sẻ cảm nhận chi tiết của bạn về khóa học này..."
+                    android:textColorHint="@color/course_text_muted"
+                    android:textSize="14sp"
+                    android:textColor="@color/course_text_body"
+                    android:background="@drawable/bg_input_field"
+                    android:inputType="textMultiLine"
+                    android:layout_marginBottom="8dp" />
+
+                <!-- Điểm tốt -->
+                <EditText
+                    android:id="@+id/et_review_pros"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="12dp"
+                    android:hint="Điểm tốt (Ví dụ: Giảng viên nhiệt tình, Thực hành phong phú)"
+                    android:textColorHint="@color/course_text_muted"
+                    android:textSize="14sp"
+                    android:textColor="@color/course_text_body"
+                    android:background="@drawable/bg_input_field"
+                    android:maxLines="1"
+                    android:layout_marginBottom="8dp" />
+
+                <!-- Điểm cần cải thiện -->
+                <EditText
+                    android:id="@+id/et_review_cons"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="12dp"
+                    android:hint="Điểm cần cải thiện (Ví dụ: Chất lượng âm thanh video chưa đều)"
+                    android:textColorHint="@color/course_text_muted"
+                    android:textSize="14sp"
+                    android:textColor="@color/course_text_body"
+                    android:background="@drawable/bg_input_field"
+                    android:maxLines="1"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Các nút hành động -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="end">
+
+                    <Button
+                        android:id="@+id/btn_cancel_review"
+                        style="?android:attr/borderlessButtonStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Hủy bỏ"
+                        android:textAllCaps="false"
+                        android:textColor="@color/course_text_muted" />
+
+                    <Button
+                        android:id="@+id/btn_submit_review"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="Gửi đánh giá"
+                        android:textAllCaps="false"
+                        android:textColor="@color/white"
+                        android:backgroundTint="@color/primary"
+                        app:cornerRadius="6dp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Empty state: hiện khi danh sách review rỗng -->
+            <LinearLayout
+                android:id="@+id/layout_empty_state"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="32dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="📝"
+                    android:textSize="44sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Chưa có đánh giá nào"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="@color/course_text_title" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:gravity="center"
+                    android:text="Hãy là người đầu tiên chia sẻ cảm nghĩ của bạn về khóa học này nhé!"
+                    android:textSize="13sp"
+                    android:textColor="@color/course_text_muted" />
+            </LinearLayout>
+
+            <!-- Danh sách review -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_reviews"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:clipToPadding="false"
+                android:paddingBottom="24dp" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
     <ProgressBar
         android:id="@+id/progress_bar"
@@ -26,3 +464,4 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+

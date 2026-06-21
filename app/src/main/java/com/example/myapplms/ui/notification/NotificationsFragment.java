@@ -19,6 +19,7 @@ import com.example.myapplms.data.repository.NotificationRepository;
 import com.example.myapplms.databinding.FragmentNotificationsBinding;
 import com.example.myapplms.ui.base.BaseFragment;
 import com.example.myapplms.ui.notification.adapter.NotificationAdapter;
+import com.example.myapplms.utils.SessionManager;
 import com.google.android.material.chip.Chip;
 
 /**
@@ -56,8 +57,12 @@ public class NotificationsFragment extends BaseFragment<FragmentNotificationsBin
         // Khởi tạo Repository với cả hai dependency
         NotificationRepository repo = new NotificationRepository(apiService, notificationDao);
 
-        // Factory giờ nhận thêm DAO để truyền vào ViewModel
-        NotificationViewModelFactory factory = new NotificationViewModelFactory(repo, notificationDao);
+        // Lấy studentId từ SessionManager
+        SessionManager sessionManager = new SessionManager(requireContext());
+        int studentId = sessionManager.getStudentId() != null ? sessionManager.getStudentId() : -1;
+
+        // Factory giờ nhận thêm DAO và studentId để truyền vào ViewModel
+        NotificationViewModelFactory factory = new NotificationViewModelFactory(repo, notificationDao, studentId);
         viewModel = new ViewModelProvider(this, factory).get(NotificationsViewModel.class);
 
         setupRecyclerView();

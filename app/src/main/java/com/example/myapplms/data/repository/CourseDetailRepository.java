@@ -4,8 +4,11 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.myapplms.data.remote.api.LmsApiService;
+import com.example.myapplms.data.remote.dto.request.CreateReviewRequest;
 import com.example.myapplms.data.remote.dto.request.PaymentCheckoutRequest;
+import com.example.myapplms.data.remote.dto.request.VoteRequest;
 import com.example.myapplms.data.remote.dto.response.CourseResponse;
+import com.example.myapplms.data.remote.dto.response.EnrollmentStatusResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentCheckoutResponse;
 import com.example.myapplms.data.remote.dto.response.ReviewResponse;
 import com.example.myapplms.data.remote.dto.response.course_content.CourseContentResponse;
@@ -122,6 +125,89 @@ public class CourseDetailRepository {
 
             @Override
             public void onFailure(Call<PaymentCheckoutResponse> call, Throwable t) {
+                result.postValue(Resource.error("Lỗi mạng: " + t.getMessage(), null));
+            }
+        });
+        return result;
+    }
+
+    /**
+     * Check trạng thái mua khóa học — GET thuần, không side-effect, không
+     * tạo Payment/PayOS như checkoutCourse(). Dùng để hiện/ẩn form viết
+     * đánh giá và biết enrollmentId hợp lệ.
+     */
+    public LiveData<Resource<EnrollmentStatusResponse>> getEnrollmentStatus(int courseId) {
+        MutableLiveData<Resource<EnrollmentStatusResponse>> result = new MutableLiveData<>();
+        result.postValue(Resource.loading());
+
+        apiService.getEnrollmentStatus(courseId).enqueue(new Callback<EnrollmentStatusResponse>() {
+            @Override
+            public void onResponse(Call<EnrollmentStatusResponse> call, Response<EnrollmentStatusResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    result.postValue(Resource.success(response.body()));
+                } else {
+                    result.postValue(Resource.error("Lỗi kiểm tra trạng thái mua khóa học: " + response.code(), null));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<EnrollmentStatusResponse> call, Throwable t) {
+                result.postValue(Resource.error("Lỗi mạng: " + t.getMessage(), null));
+            }
+        });
+        return result;
+    }
+
+    /**
+     * Gửi đánh giá mới. BE tự lấy studentId từ JWT và validate enrollment
+     * Active — không cần Android gửi enrollmentId/studentId.
+     */
+    public LiveData<Resource<ReviewResponse>> submitReview(int courseId, CreateReviewRequest request) {
+        MutableLiveData<Resource<ReviewResponse>> result = new MutableLiveData<>();
+        result.postValue(Resource.loading());
+
+        apiService.createReview(courseId, request).enqueue(new Callback<ReviewResponse>() {
+            @Override
+            public void onResponse(Call<ReviewResponse> call, Response<ReviewResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    result.postValue(Resource.success(response.body()));
+                } else {
+                    result.postValue(Resource.error("Gửi đánh giá thất bại: " + response.code(), null));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ReviewResponse> call, Throwable t) {
+                result.postValue(Resource.error("Lỗi mạng: " + t.getMessage(), null));
+            }
+        });
+        return result;
+    }
+
+    public LiveData<Resource<ReviewResponse>> voteReview(int courseId, String reviewId, VoteRequest request) {
+        MutableLiveData<Resource<ReviewResponse>> result = new MutableLiveData<>();
+        result.postValue(Resource.loading());
+
+        apiService.voteReview(courseId, reviewId, request).enqueue(new Callback<ReviewResponse>() {
+            @Override
+            public void onResponse(Call<ReviewResponse> call, Response<ReviewResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    result.postValue(Resource.success(response.body()));
+                } else {
+                    String errorBody = "";
+                    try {
+                        if (response.errorBody() != null) {
+                            errorBody = response.errorBody().string();
+                        }
+                    } catch (Exception e) {
+                        errorBody = "";
+                    }
+                    result.postValue(Resource.error("Bình chọn thất bại: " + response.code() + " — " + errorBody, null));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ReviewResponse> call, Throwable t) {
                 result.postValue(Resource.error("Lỗi mạng: " + t.getMessage(), null));
             }
         });

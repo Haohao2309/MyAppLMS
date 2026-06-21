@@ -1,4 +1,4 @@
-package com.example.myapplms.util;
+package com.example.myapplms.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

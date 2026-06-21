@@ -34,7 +34,6 @@ public class QuizFragment extends Fragment {
     private String lessonId;
     private String contentJson;
 
-    // Các thành phần UI
     private LinearLayout layoutQuizForm;
     private LinearLayout layoutQuizResult;
     private LinearLayout container;
@@ -72,7 +71,6 @@ public class QuizFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Ánh xạ View
         layoutQuizForm = view.findViewById(R.id.layout_quiz_form);
         layoutQuizResult = view.findViewById(R.id.layout_quiz_result);
         container = view.findViewById(R.id.layout_questions_container);
@@ -81,13 +79,10 @@ public class QuizFragment extends Fragment {
         Button btnSubmit = view.findViewById(R.id.btn_submit_quiz);
         Button btnRetake = view.findViewById(R.id.btn_retake_quiz);
 
-        // Chuẩn bị form làm bài
         renderQuestions();
 
-        // Nút nộp bài
         btnSubmit.setOnClickListener(v -> submitQuiz());
 
-        // Nút làm lại bài (Reset Form)
         btnRetake.setOnClickListener(v -> {
             layoutQuizResult.setVisibility(View.GONE);
             layoutQuizForm.setVisibility(View.VISIBLE);
@@ -96,27 +91,29 @@ public class QuizFragment extends Fragment {
             }
         });
 
-        // 🟢 KIỂM TRA TRẠNG THÁI: Đã làm bài chưa?
+        // 🟢 BƯỚC KIỂM TRA ĐẦU VÀO: Truy vấn dữ liệu tiến độ thực tế từ Sổ điểm (Gradebook)
         LearningActivity parentActivity = (LearningActivity) getActivity();
         if (parentActivity != null) {
             parentActivity.getViewModel().getProgress(courseId).observe(getViewLifecycleOwner(), resource -> {
                 if (resource.status == Resource.Status.SUCCESS && resource.data != null) {
                     ProgressResponse progress = resource.data;
 
-                    // Nếu bài thi nằm trong danh sách đã hoàn thành
-                    if (progress.completedLessons != null && progress.completedLessons.contains(lessonId)) {
-                        int score = 0;
-                        if (progress.lessonDetails != null) {
-                            for (ProgressResponse.LessonDetailProgress detail : progress.lessonDetails) {
-                                if (lessonId.equals(detail.lessonId)) {
-                                    score = detail.score != null ? detail.score : 0;
-                                    break;
-                                }
+                    boolean identityFound = false;
+                    int finalScoreValue = 0;
+
+                    if (progress.lessonDetails != null) {
+                        for (ProgressResponse.LessonDetailProgress detail : progress.lessonDetails) {
+                            if (lessonId.equals(detail.lessonId) && detail.score != null) {
+                                finalScoreValue = detail.score;
+                                identityFound = true;
+                                break;
                             }
                         }
-                        showResultUI(score);
+                    }
+
+                    if (identityFound) {
+                        showResultUI(finalScoreValue);
                     } else {
-                        // Nếu chưa làm -> Hiện Form
                         layoutQuizForm.setVisibility(View.VISIBLE);
                         layoutQuizResult.setVisibility(View.GONE);
                     }
@@ -128,16 +125,7 @@ public class QuizFragment extends Fragment {
     private void showResultUI(int score) {
         layoutQuizForm.setVisibility(View.GONE);
         layoutQuizResult.setVisibility(View.VISIBLE);
-
-        int passScore = 10; // Giả sử điểm tối đa là 10
-        try {
-            JSONObject mainObj = new JSONObject(contentJson);
-            if (mainObj.has("passScore")) {
-                passScore = mainObj.getInt("passScore"); // Hoặc lấy MaxScore nếu DB bạn cấu hình
-            }
-        } catch (Exception e) { e.printStackTrace(); }
-
-        tvResultScore.setText(score + " / " + passScore);
+        tvResultScore.setText(score + " / 100");
     }
 
     private void renderQuestions() {
@@ -169,10 +157,8 @@ public class QuizFragment extends Fragment {
 
                 for (int j = 0; j < options.length(); j++) {
                     RadioButton rb = new RadioButton(getContext());
-                    // 🔥 FIX LỖI 0 ĐIỂM: Tạo ID chống trùng lặp và giấu index vào Tag
                     rb.setId(View.generateViewId());
-                    rb.setTag(j);
-
+                    rb.setTag(j); // Gán index thực tế vào Tag để Backend đối chiếu
                     rb.setText(options.getString(j));
                     rb.setTextColor(textColor);
                     rb.setTextSize(15f);
@@ -186,7 +172,7 @@ public class QuizFragment extends Fragment {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(getContext(), "Lỗi tải câu hỏi!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Lỗi cấu trúc câu hỏi!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -199,7 +185,6 @@ public class QuizFragment extends Fragment {
 
             int selectedViewId = group.getCheckedRadioButtonId();
             if (selectedViewId != -1) {
-                // 🔥 FIX LỖI 0 ĐIỂM: Rút chính xác Index đáp án ra từ Tag
                 RadioButton selectedRb = group.findViewById(selectedViewId);
                 if (selectedRb != null && selectedRb.getTag() != null) {
                     int answerIndex = (int) selectedRb.getTag();
@@ -209,7 +194,7 @@ public class QuizFragment extends Fragment {
         }
 
         if (studentAnswers.size() < questionGroups.size()) {
-            Toast.makeText(getContext(), "Vui lòng làm hết tất cả các câu hỏi!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Vui lòng hoàn thành tất cả câu hỏi!", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -220,16 +205,32 @@ public class QuizFragment extends Fragment {
             parentActivity.getViewModel().submitQuiz(courseId, lessonId, request).observe(getViewLifecycleOwner(), resource -> {
                 switch (resource.status) {
                     case LOADING:
-                        Toast.makeText(getContext(), "Hệ thống đang chấm điểm...", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Đang gửi bài và chấm điểm...", Toast.LENGTH_SHORT).show();
                         break;
                     case SUCCESS:
                         Toast.makeText(getContext(), "Nộp bài thành công!", Toast.LENGTH_SHORT).show();
-                        // Hàm này gọi lên cha, cha sẽ gọi API lấy Progress mới nhất
-                        // Progress thay đổi -> Fragment sẽ tự động nhảy vào hàm showResultUI() ở trên!
+
+                        // 1. Cập nhật lại thanh tiến độ và dấu tích xanh ở thanh Menu bên ngoài
                         parentActivity.loadProgress();
+
+                        // 2. TỰ ĐỘNG LẬT SANG TRANG KẾT QUẢ VÀ HIỆN ĐIỂM NGAY LẬP TỨC
+                        if (resource.data != null) {
+                            int finalScore = 0;
+                            // Tìm điểm số của bài học hiện tại trong cục Data trả về
+                            if (resource.data.lessonDetails != null) {
+                                for (ProgressResponse.LessonDetailProgress detail : resource.data.lessonDetails) {
+                                    if (lessonId.equals(detail.lessonId) && detail.score != null) {
+                                        finalScore = detail.score;
+                                        break;
+                                    }
+                                }
+                            }
+                            // Gọi hàm ẩn Form thi và show Bảng điểm
+                            showResultUI(finalScore);
+                        }
                         break;
                     case ERROR:
-                        Toast.makeText(getContext(), "Lỗi nộp bài: " + resource.message, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
                         break;
                 }
             });

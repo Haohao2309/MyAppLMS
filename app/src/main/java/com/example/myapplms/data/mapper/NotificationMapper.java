@@ -33,7 +33,7 @@ public class NotificationMapper {
      * Chuyển một NotificationResponse (từ Retrofit) thành NotificationEntity (để lưu Room).
      * Tính toán dateGroup ngay tại đây để tránh tính toán lặp lại khi hiển thị.
      */
-    public static NotificationEntity fromDto(NotificationResponse dto) {
+    public static NotificationEntity fromDto(NotificationResponse dto, int studentId) {
         return new NotificationEntity(
                 dto.getId(),
                 dto.getTitle(),
@@ -44,17 +44,18 @@ public class NotificationMapper {
                 dto.getCreatedAt(),
                 calculateDateGroup(dto.getCreatedAt()),   // Tính sẵn khi lưu
                 System.currentTimeMillis(),               // Timestamp đồng bộ hiện tại
-                true                                      // Vừa lấy từ server → đã synced
+                true,                                     // Vừa lấy từ server → đã synced
+                studentId
         );
     }
 
     /**
      * Chuyển hàng loạt DTO → Entity (dùng khi nhận List từ API).
      */
-    public static List<NotificationEntity> fromDtoList(List<NotificationResponse> dtos) {
+    public static List<NotificationEntity> fromDtoList(List<NotificationResponse> dtos, int studentId) {
         List<NotificationEntity> entities = new ArrayList<>();
         for (NotificationResponse dto : dtos) {
-            entities.add(fromDto(dto));
+            entities.add(fromDto(dto, studentId));
         }
         return entities;
     }
