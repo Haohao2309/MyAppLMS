@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -58,6 +59,9 @@ public class LearningActivity extends AppCompatActivity {
 
         SessionManager sessionManager = new SessionManager(this);
         LmsApiService apiService = RetrofitClient.getInstance(sessionManager).create(LmsApiService.class);
+
+        // 🔴 Xử lý Fullscreen khi xoay ngang (Landscape) lúc mới mở màn hình
+        handleOrientationChange(getResources().getConfiguration().orientation);
 
         // 1. Khởi tạo LearningViewModel (Để quản lý điểm, tiến độ, Q&A)
         LearningRepository learningRepo = new LearningRepository(apiService);
@@ -240,6 +244,37 @@ public class LearningActivity extends AppCompatActivity {
         });
 
         bottomSheetDialog.show();
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull android.content.res.Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        handleOrientationChange(newConfig.orientation);
+    }
+
+    private void handleOrientationChange(int orientation) {
+        View appBar = findViewById(R.id.toolbar_learning);
+        if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+            if (appBar != null && appBar.getParent() instanceof View) {
+                ((View) appBar.getParent()).setVisibility(View.GONE);
+            }
+            if (fabDiscussion != null) {
+                fabDiscussion.setVisibility(View.GONE);
+            }
+        } else {
+            // Xoay dọc: khôi phục giao diện
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+            if (appBar != null && appBar.getParent() instanceof View) {
+                ((View) appBar.getParent()).setVisibility(View.VISIBLE);
+            }
+            if (fabDiscussion != null) {
+                fabDiscussion.setVisibility(View.VISIBLE);
+            }
+        }
     }
 
     public LearningViewModel getViewModel() {
