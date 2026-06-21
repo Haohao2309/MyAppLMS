@@ -61,11 +61,14 @@ public class NotificationEntity {
     @ColumnInfo(name = "is_synced")
     private boolean isSynced;
 
+    @ColumnInfo(name = "student_id")
+    private int studentId;
+
     // ── Constructor ───────────────────────────────────────────────────────────────
 
     public NotificationEntity(@NonNull String id, String title, String body, String link,
                               String type, boolean isRead, String createdAt, String dateGroup,
-                              long localUpdatedAt, boolean isSynced) {
+                              long localUpdatedAt, boolean isSynced, int studentId) {
         this.id = id;
         this.title = title;
         this.body = body;
@@ -76,9 +79,13 @@ public class NotificationEntity {
         this.dateGroup = dateGroup;
         this.localUpdatedAt = localUpdatedAt;
         this.isSynced = isSynced;
+        this.studentId = studentId;
     }
 
     // ── Getters & Setters ─────────────────────────────────────────────────────────
+
+    public int getStudentId() { return studentId; }
+    public void setStudentId(int studentId) { this.studentId = studentId; }
 
     @NonNull
     public String getId() { return id; }

@@ -3,6 +3,7 @@ package com.example.myapplms.data.remote.api;
 import com.example.myapplms.data.remote.dto.request.CourseRequest;
 import com.example.myapplms.data.remote.dto.request.CreateCommentRequest;
 import com.example.myapplms.data.remote.dto.request.CreatePostRequest;
+import com.example.myapplms.data.remote.dto.request.CreateReviewRequest;
 import com.example.myapplms.data.remote.dto.request.LoginRequest;
 import com.example.myapplms.data.remote.dto.request.PaymentCheckoutRequest;
 import com.example.myapplms.data.remote.dto.request.PaymentWebhookRequest;
@@ -17,6 +18,7 @@ import com.example.myapplms.data.remote.dto.request.TeacherRequest;
 import com.example.myapplms.data.remote.dto.response.ApiResponse;
 import com.example.myapplms.data.remote.dto.response.AuthResponse;
 import com.example.myapplms.data.remote.dto.response.CategoryResponse;
+import com.example.myapplms.data.remote.dto.response.EnrollmentStatusResponse;
 import com.example.myapplms.data.remote.dto.response.NotificationResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentCheckoutResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentWebhookResponse;
@@ -165,8 +167,18 @@ public interface LmsApiService {
     Call<List<ReviewResponse>> getCourseReviews(@Path("courseId") int courseId);
 
     // Vote review (Để sẵn cho tính năng vote sau này)
-    @PUT("v1/courses/{courseId}/reviews/{reviewId}/vote")
+    @PUT("courses/{courseId}/reviews/{reviewId}/vote")
     Call<ReviewResponse> voteReview(@Path("courseId") int courseId, @Path("reviewId") String reviewId, @Body VoteRequest request);
+
+    // MỚI: Gửi đánh giá mới — BE tự lấy studentId từ JWT, không gửi từ client
+    @POST("courses/{courseId}/reviews")
+    Call<ReviewResponse> createReview(@Path("courseId") int courseId, @Body CreateReviewRequest request);
+
+    // MỚI: Check trạng thái mua khóa học (enrolled + enrollmentId) — GET thuần,
+    // không tạo Payment/PayOS như checkout(). Dùng để hiện/ẩn form review,
+    // và để biết enrollmentId trước khi cho phép review.
+    @GET("courses/{courseId}/enrollment-status")
+    Call<EnrollmentStatusResponse> getEnrollmentStatus(@Path("courseId") int courseId);
     @POST("v1/courses")
     Call<CourseResponse> createCourse(@Body CourseRequest request);
 
@@ -192,6 +204,19 @@ public interface LmsApiService {
 
     @POST("v1/learn/courses/{courseId}/lessons/{lessonId}/submit-assignment")
     Call<ProgressResponse> submitAssignment(@Path("courseId") int courseId, @Path("lessonId") String lessonId, @Body SubmitAssignmentRequest request);
+
+    @GET("v1/learn/courses/{courseId}/lessons/{lessonId}/discussions")
+    Call<List<com.example.myapplms.data.remote.dto.response.DiscussionResponse>> getDiscussions(
+            @Path("courseId") int courseId,
+            @Path("lessonId") String lessonId
+    );
+
+    @POST("v1/learn/courses/{courseId}/lessons/{lessonId}/discussions")
+    Call<com.example.myapplms.data.remote.dto.response.DiscussionResponse> createDiscussion(
+            @Path("courseId") int courseId,
+            @Path("lessonId") String lessonId,
+            @Body com.example.myapplms.data.remote.dto.request.CreateDiscussionRequest request
+    );
 }
 
 

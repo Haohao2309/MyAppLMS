@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/bg_bottom_sheet"
+    android:paddingTop="16dp">
+
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:background="@color/gray_300"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Q&amp;A Bài học"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:textColor="@color/text_primary"
+        android:layout_marginBottom="16dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_discussions"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="@color/surface"
+        android:elevation="8dp">
+
+        <EditText
+            android:id="@+id/et_discussion_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Tóm tắt câu hỏi của bạn..."
+            android:textColor="@color/gray_800"
+            android:textColorHint="@color/gray_400"
+            android:background="@android:color/transparent"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/et_discussion_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Viết chi tiết câu hỏi..."
+            android:textColor="@color/gray_800"
+            android:textColorHint="@color/gray_400"
+            android:background="@android:color/transparent"
+            android:layout_marginBottom="12dp"/>
+
+        <Button
+            android:id="@+id/btn_post_discussion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Gửi câu hỏi"
+            android:backgroundTint="@color/primary"/>
+    </LinearLayout>
+
+</LinearLayout>

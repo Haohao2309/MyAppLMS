@@ -44,6 +44,7 @@ public class NotificationsViewModel extends ViewModel {
 
     private final NotificationRepository repository;
     private final NotificationDao notificationDao;
+    private final int studentId;
 
     // ── LiveData nguồn từ Room (tự động update khi DB thay đổi) ──────────────────
     private final LiveData<List<NotificationEntity>> allNotificationsLive;
@@ -57,19 +58,20 @@ public class NotificationsViewModel extends ViewModel {
     private final MediatorLiveData<Integer> unreadCount = new MediatorLiveData<>();
 
     // ── Constructor ───────────────────────────────────────────────────────────────
-    public NotificationsViewModel(NotificationRepository repository, NotificationDao notificationDao) {
+    public NotificationsViewModel(NotificationRepository repository, NotificationDao notificationDao, int studentId) {
         this.repository = repository;
         this.notificationDao = notificationDao;
+        this.studentId = studentId;
 
         // 1. Lấy LiveData trực tiếp từ Room DAO — tự động observe DB
-        allNotificationsLive = notificationDao.getAllNotifications();
+        allNotificationsLive = notificationDao.getAllNotifications(studentId);
 
         // 2. Mỗi khi Room data thay đổi → re-apply filter → emit displayedNotifications
         displayedNotifications.addSource(allNotificationsLive, entities -> recompute());
         displayedNotifications.addSource(currentFilterLive, filter -> recompute());
 
         // 3. Đếm unread từ Room trực tiếp
-        unreadCount.addSource(notificationDao.getUnreadCount(), count ->
+        unreadCount.addSource(notificationDao.getUnreadCount(studentId), count ->
                 unreadCount.setValue(count != null ? count : 0));
 
         // 4. Fetch data mới từ API về (sẽ insert vào Room → Room LiveData tự trigger)
@@ -101,7 +103,7 @@ public class NotificationsViewModel extends ViewModel {
      *   2. Gọi API ngầm để sync lên server
      */
     public void markAsRead(String id) {
-        repository.markAsRead(id);
+        repository.markAsRead(id, studentId);
         // KHÔNG cần sửa allNotifications thủ công nữa.
         // Room tự emit LiveData mới → recompute() chạy → UI cập nhật.
     }
@@ -110,7 +112,7 @@ public class NotificationsViewModel extends ViewModel {
      * Đánh dấu TẤT CẢ đã đọc.
      */
     public void markAllAsRead() {
-        repository.markAllAsRead();
+        repository.markAllAsRead(studentId);
         // Tương tự, Room tự trigger update UI.
     }
 
@@ -119,7 +121,7 @@ public class NotificationsViewModel extends ViewModel {
      * Data từ API sẽ được Repository insert vào Room → Room LiveData tự emit.
      */
     public void fetchFromApi() {
-        repository.fetchNotifications(new NotificationRepository.DataCallback<List<Notification>>() {
+        repository.fetchNotifications(studentId, new NotificationRepository.DataCallback<List<Notification>>() {
             @Override
             public void onSuccess(List<Notification> data) {
                 // Không cần làm gì ở đây.

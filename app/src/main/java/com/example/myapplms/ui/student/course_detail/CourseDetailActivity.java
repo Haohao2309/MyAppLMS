@@ -43,6 +43,11 @@ public class CourseDetailActivity extends AppCompatActivity {
         viewPager = findViewById(R.id.view_pager);
         tvCourseTitle = findViewById(R.id.tv_course_title);
         tvCategory = findViewById(R.id.tv_category);
+        
+        android.widget.ImageButton btnBack = findViewById(R.id.btn_back);
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> finish());
+        }
     }
 
     private void setupViewModel() {

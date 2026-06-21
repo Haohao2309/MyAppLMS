@@ -3,7 +3,6 @@ package com.example.myapplms.ui.community;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -23,7 +22,7 @@ import com.example.myapplms.data.remote.dto.response.community_response.PostResp
 import com.example.myapplms.data.repository.CommunityRepository;
 import com.example.myapplms.ui.community.adapter.CommentAdapter;
 import com.example.myapplms.utils.SessionManager;
-import com.example.myapplms.util.TimeUtils;
+import com.example.myapplms.utils.TimeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
