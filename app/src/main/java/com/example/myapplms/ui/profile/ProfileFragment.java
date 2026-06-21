@@ -9,10 +9,11 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.myapplms.LMSApplication;
 import com.example.myapplms.R;
 import com.example.myapplms.data.repository.AuthRepository;
@@ -28,22 +29,12 @@ import com.example.myapplms.ui.base.BaseFragment;
 import com.example.myapplms.ui.teacher.TeacherViewModel;
 import com.example.myapplms.utils.SessionManager;
 
-/**
- * ProfileFragment — hiển thị thông tin cá nhân cho cả STUDENT và TEACHER.
- *
- * Điều hướng sang EditProfileFragment qua FragmentManager (không dùng NavController
- * vì app dùng replaceFragment thủ công, không có NavHost).
- *
- * Nhận kết quả reload từ EditProfileFragment qua FragmentResultListener:
- *   setFragmentResult(RESULT_KEY_UPDATED, bundle) → loadProfileByRole()
- */
 public class ProfileFragment extends BaseFragment<FragmentProfileBinding> {
 
     private static final String TAG          = "ProfileFragment";
     private static final String ROLE_STUDENT = "STUDENT";
     private static final String ROLE_TEACHER = "TEACHER";
 
-    // Key nhận kết quả từ EditProfileFragment qua FragmentResultListener
     public static final String RESULT_KEY_UPDATED = "edit_profile_updated";
     public static final String RESULT_BUNDLE_KEY  = "updated";
 
@@ -52,11 +43,8 @@ public class ProfileFragment extends BaseFragment<FragmentProfileBinding> {
     private AuthViewModel    authViewModel;
     private SessionManager   sessionManager;
 
-    // Lưu data hiện tại để truyền sang EditProfileFragment
     private Student currentStudent;
     private Teacher currentTeacher;
-
-    // ── Inflate ───────────────────────────────────────────────────────────────
 
     @NonNull
     @Override
@@ -64,8 +52,6 @@ public class ProfileFragment extends BaseFragment<FragmentProfileBinding> {
                                                     @Nullable ViewGroup container) {
         return FragmentProfileBinding.inflate(inflater, container, false);
     }
-
-    // ── onCreate — khởi tạo ViewModel theo role ───────────────────────────────
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -75,39 +61,36 @@ public class ProfileFragment extends BaseFragment<FragmentProfileBinding> {
         sessionManager = new SessionManager(requireContext());
         String role = sessionManager.getRole();
 
-        // TeacherViewModel
-        TeacherRepository teacherRepo =
-                new TeacherRepository(app.getRetrofitClient().getApiService());
-        teacherViewModel = new ViewModelProvider(this,
-                new TeacherViewModel.Factory(teacherRepo)).get(TeacherViewModel.class);
-
-        // StudentViewModel — chỉ khởi tạo khi role = STUDENT
         if (ROLE_STUDENT.equalsIgnoreCase(role)) {
             StudentRepository studentRepo =
                     new StudentRepository(app.getRetrofitClient().getApiService());
             studentViewModel = new ViewModelProvider(this,
                     new StudentViewModel.Factory(studentRepo)).get(StudentViewModel.class);
+        } else{
+            TeacherRepository teacherRepo =
+                    new TeacherRepository(app.getRetrofitClient().getApiService());
+            teacherViewModel = new ViewModelProvider(this,
+                    new TeacherViewModel.Factory(teacherRepo)).get(TeacherViewModel.class);
         }
 
-        // AuthViewModel
+
         AuthRepository authRepo = new AuthRepository(
                 app.getRetrofitClient().getApiService(), sessionManager);
         authViewModel = new ViewModelProvider(this,
                 new AuthViewModelFactory(authRepo)).get(AuthViewModel.class);
     }
 
-    // ── onViewCreated ─────────────────────────────────────────────────────────
-
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Hiển thị avatar đã lưu trong session (tránh nhìn trống khi đang load)
+        loadAvatarFromSession();
+
         observeLogout();
-        observeEditResult();   // Lắng nghe kết quả từ EditProfileFragment
+        observeEditResult();
         loadProfileByRole();
     }
-
-    // ── setupViews / setupListeners ───────────────────────────────────────────
 
     @Override
     protected void setupViews() {}
@@ -120,7 +103,6 @@ public class ProfileFragment extends BaseFragment<FragmentProfileBinding> {
         getBinding().btnLanguage.setOnClickListener(v ->
                 showToast("Open Language Selection"));
 
-        // Nút Edit → mở EditProfileFragment qua FragmentManager
         getBinding().btnEdit.setOnClickListener(v -> openEditProfile());
 
         getBinding().btnLogout.setOnClickListener(v -> {
@@ -129,21 +111,32 @@ public class ProfileFragment extends BaseFragment<FragmentProfileBinding> {
         });
     }
 
-    // ── Mở EditProfileFragment ────────────────────────────────────────────────
+    // ── Hiển thị avatar từ URL ────────────────────────────────
+    private void loadAvatarFromUrl(String imageUrl) {
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            Glide.with(this)
+                    .load(imageUrl)
+                    .placeholder(R.drawable.ic_profile)
+                    .error(R.drawable.ic_profile)
+                    .into(getBinding().ivAvatar);
+        } else {
+            getBinding().ivAvatar.setImageResource(R.drawable.ic_profile);
+        }
+    }
 
-    /**
-     * Dùng FragmentManager.beginTransaction() thay NavController.
-     * addToBackStack() để bấm Back tự quay về ProfileFragment.
-     */
+    // Hiển thị ảnh từ session (cached URL) khi mới vào trang
+    private void loadAvatarFromSession() {
+        String imageUrl = sessionManager.getImageUrl();
+        loadAvatarFromUrl(imageUrl);
+    }
+
+    // ── Mở EditProfileFragment ────────────────────────────────
     private void openEditProfile() {
         String role = sessionManager.getRole();
         Bundle args;
 
         if (ROLE_STUDENT.equalsIgnoreCase(role)) {
-            if (currentStudent == null) {
-                showToast("Đang tải thông tin, vui lòng thử lại");
-                return;
-            }
+            if (currentStudent == null) { showToast("Đang tải thông tin..."); return; }
             args = EditProfileFragment.buildArgs(
                     role,
                     currentStudent.getStudentId(),
@@ -152,13 +145,11 @@ public class ProfileFragment extends BaseFragment<FragmentProfileBinding> {
                     currentStudent.getPhone(),
                     currentStudent.getLocation(),
                     currentStudent.getBio(),
-                    currentStudent.getSchool()
+                    currentStudent.getSchool(),
+                    sessionManager.getImageUrl()  // ← truyền imageUrl
             );
         } else {
-            if (currentTeacher == null) {
-                showToast("Đang tải thông tin, vui lòng thử lại");
-                return;
-            }
+            if (currentTeacher == null) { showToast("Đang tải thông tin..."); return; }
             args = EditProfileFragment.buildArgs(
                     role,
                     currentTeacher.getTeacherId(),
@@ -167,97 +158,72 @@ public class ProfileFragment extends BaseFragment<FragmentProfileBinding> {
                     currentTeacher.getPhone(),
                     currentTeacher.getLocation(),
                     currentTeacher.getBio(),
-                    currentTeacher.getDegree()
+                    currentTeacher.getDegree(),
+                    sessionManager.getImageUrl()  // ← truyền imageUrl
             );
         }
 
         EditProfileFragment editFragment = new EditProfileFragment();
         editFragment.setArguments(args);
 
-        // Dùng đúng container id mà MainActivity dùng để replaceFragment
         requireActivity().getSupportFragmentManager()
                 .beginTransaction()
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .replace(R.id.fragment_container, editFragment)
-                .addToBackStack("edit_profile")   // Back tự pop về ProfileFragment
+                .addToBackStack("edit_profile")
                 .commit();
     }
 
-    // ── Nhận kết quả từ EditProfileFragment ──────────────────────────────────
-
-    /**
-     * EditProfileFragment gọi:
-     *   getParentFragmentManager().setFragmentResult(RESULT_KEY_UPDATED, bundle)
-     * ProfileFragment lắng nghe ở đây → reload profile.
-     *
-     * setFragmentResultListener phải gọi trong onCreate() hoặc onViewCreated()
-     * trước khi EditProfileFragment được tạo.
-     */
+    // ── Nhận kết quả từ EditProfileFragment ──────────────────
     private void observeEditResult() {
         getParentFragmentManager().setFragmentResultListener(
                 RESULT_KEY_UPDATED,
                 getViewLifecycleOwner(),
                 (requestKey, result) -> {
                     if (result.getBoolean(RESULT_BUNDLE_KEY, false)) {
-                        Log.d(TAG, "EditProfile saved → reload profile");
                         loadProfileByRole();
+                        // Reload avatar sau khi edit xong
+                        loadAvatarFromSession();
                     }
                 }
         );
     }
 
-    // ── Load profile theo role ────────────────────────────────────────────────
-
+    // ── Load profile theo role ────────────────────────────────
     private void loadProfileByRole() {
+        String role = sessionManager.getRole();
+        if (role == null) { navigateToLogin(); return; }
 
-        String role      = sessionManager.getRole();
-
-
-        if (role == null) {
-            showToast("Phiên đăng nhập không hợp lệ, vui lòng đăng nhập lại.");
-            navigateToLogin();
-            return;
-        }
-
-        try {
-            if (ROLE_STUDENT.equalsIgnoreCase(role)) {
-                int userId = sessionManager.getStudentId();
+        if (ROLE_STUDENT.equalsIgnoreCase(role)) {
+            Integer studentId = sessionManager.getStudentId();
+            if (studentId != null) {
                 observeStudentProfile();
-                studentViewModel.getStudentByUserId(userId);
-            } else {
-                int userId = sessionManager.getTeacherId();
-                observeTeacherProfile();
-                teacherViewModel.getTeacherbyId(userId);
+                studentViewModel.getStudentByUserId(studentId);
             }
-
-        } catch (NumberFormatException e) {
-            showToast("ID không hợp lệ!");
+        } else {
+            Integer teacherId = sessionManager.getTeacherId();
+            if (teacherId != null) {
+                observeTeacherProfile();
+                teacherViewModel.getTeacherbyId(teacherId);
+            }
         }
     }
 
-    // ── Observer Student ──────────────────────────────────────────────────────
-
+    // ── Observer Student ──────────────────────────────────────
     private void observeStudentProfile() {
         studentViewModel.student.observe(getViewLifecycleOwner(), resource -> {
             if (resource == null) return;
-            Log.d(TAG, "Student | Status=" + resource.status);
-
             switch (resource.status) {
-                case LOADING:
-                    showLoading(true);
-                    break;
+                case LOADING: showLoading(true); break;
                 case SUCCESS:
                     showLoading(false);
                     if (resource.data != null) {
                         currentStudent = resource.data;
                         bindStudentData(resource.data);
-                    } else {
-                        Log.w(TAG, "SUCCESS nhưng data null");
                     }
                     break;
                 case ERROR:
                     showLoading(false);
-                    Log.e(TAG, "Lỗi tải student profile: " + resource.message);
                     showToast("Lỗi: " + resource.message);
                     break;
             }
@@ -268,32 +234,25 @@ public class ProfileFragment extends BaseFragment<FragmentProfileBinding> {
         getBinding().tvName.setText(data.getFullName());
         getBinding().tvBio.setText(safe(data.getBio()));
         getBinding().tvRole.setText(safe(data.getSchool()));
-        Log.d(TAG, "Hiển thị student: " + data.getFullName());
+        // Avatar lấy từ sessionManager (đã lưu khi login hoặc sau upload)
+        loadAvatarFromSession();
     }
 
-    // ── Observer Teacher ──────────────────────────────────────────────────────
-
+    // ── Observer Teacher ──────────────────────────────────────
     private void observeTeacherProfile() {
         teacherViewModel.teacher.observe(getViewLifecycleOwner(), resource -> {
             if (resource == null) return;
-            Log.d(TAG, "Teacher | Status=" + resource.status);
-
             switch (resource.status) {
-                case LOADING:
-                    showLoading(true);
-                    break;
+                case LOADING: showLoading(true); break;
                 case SUCCESS:
                     showLoading(false);
                     if (resource.data != null) {
                         currentTeacher = resource.data;
                         bindTeacherData(resource.data);
-                    } else {
-                        Log.w(TAG, "SUCCESS nhưng data null");
                     }
                     break;
                 case ERROR:
                     showLoading(false);
-                    Log.e(TAG, "Lỗi tải teacher profile: " + resource.message);
                     showToast("Lỗi: " + resource.message);
                     break;
             }
@@ -304,27 +263,20 @@ public class ProfileFragment extends BaseFragment<FragmentProfileBinding> {
         getBinding().tvName.setText(data.getFullName());
         getBinding().tvBio.setText(safe(data.getBio()));
         getBinding().tvRole.setText(safe(data.getDegree()));
-        Log.d(TAG, "Hiển thị teacher: " + data.getFullName());
+        loadAvatarFromSession();
     }
 
-    // ── Observer Logout ───────────────────────────────────────────────────────
-
+    // ── Observer Logout ───────────────────────────────────────
     private void observeLogout() {
         authViewModel.logoutResult.observe(getViewLifecycleOwner(), resource -> {
             if (resource == null) return;
-            Log.d(TAG, "Logout | Status=" + resource.status);
-
             switch (resource.status) {
-                case LOADING:
-                    break;
                 case SUCCESS:
-                    Log.d(TAG, "Đăng xuất thành công");
                     sessionManager.clearSession();
                     navigateToLogin();
                     break;
                 case ERROR:
-                    Log.e(TAG, "Đăng xuất lỗi: " + resource.message);
-                    showToast("Đăng xuất thất bại, đang đăng xuất khỏi thiết bị...");
+                    showToast("Đang đăng xuất...");
                     sessionManager.clearSession();
                     navigateToLogin();
                     break;
@@ -332,8 +284,7 @@ public class ProfileFragment extends BaseFragment<FragmentProfileBinding> {
         });
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
-
+    // ── Helpers ───────────────────────────────────────────────
     private void showLoading(boolean show) {
         getBinding().progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
     }

@@ -77,7 +77,7 @@ public class RegisterActivity extends AppCompatActivity {
     // ── Role Tabs ──────────────────────────────────────────────────────────────
     private void setupTabs() {
         tabStudent.setOnClickListener(v    -> selectTab("STUDENT"));
-        tabInstructor.setOnClickListener(v -> selectTab("INSTRUCTOR"));
+        tabInstructor.setOnClickListener(v -> selectTab("TEACHER"));
         selectTab("STUDENT"); // default highlight
     }
 

@@ -22,6 +22,8 @@ import com.example.myapplms.data.remote.dto.response.EnrollmentStatusResponse;
 import com.example.myapplms.data.remote.dto.response.NotificationResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentCheckoutResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentWebhookResponse;
+import com.example.myapplms.data.remote.dto.response.TeacherStatsResponse;
+import com.example.myapplms.data.remote.dto.response.UserResponse;
 import com.example.myapplms.data.remote.dto.response.ProgressResponse;
 import com.example.myapplms.data.remote.dto.response.community_response.CommentResponse;
 import com.example.myapplms.data.remote.dto.response.community_response.CommunityActionResponse;
@@ -39,13 +41,16 @@ import com.example.myapplms.model.Course;
 
 import java.util.List;
 
+import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.Multipart;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -198,6 +203,20 @@ public interface LmsApiService {
 
     @PUT("v1/learn/courses/{courseId}/lessons/{lessonId}/sync")
     Call<Void> syncVideoProgress(@Path("courseId") int courseId, @Path("lessonId") String lessonId, @Body SyncVideoRequest request);
+
+    // Upload ảnh — multipart
+    @Multipart
+    @POST("upload/avatar")
+    Call<UserResponse> uploadAvatar(@Part MultipartBody.Part file);
+
+    @Multipart
+    @POST("upload/course-thumbnail")   // chỉnh lại đúng endpoint của bạn
+    Call<CourseResponse> uploadCourseImage(@Part MultipartBody.Part file);
+
+    // API Lấy dữ liệu Dashboard cho Giáo viên
+    @GET("teachers/{id}/dashboard")
+    Call<TeacherStatsResponse> getTeacherDashboardStats(@Path("id") Integer teacherId);
+
 
     @POST("v1/learn/courses/{courseId}/lessons/{lessonId}/submit-quiz")
     Call<ProgressResponse> submitQuiz(@Path("courseId") int courseId, @Path("lessonId") String lessonId, @Body SubmitQuizRequest request);

@@ -1,5 +1,6 @@
 package com.example.myapplms.ui.teacher;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -7,7 +8,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
@@ -17,6 +21,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.myapplms.LMSApplication;
 import com.example.myapplms.R;
 import com.example.myapplms.data.repository.CourseRepository;
+import com.example.myapplms.data.repository.MediaRepository;
+import com.example.myapplms.data.repository.TeacherRepository;
 import com.example.myapplms.databinding.FragmentTeacherHomeBinding;
 import com.example.myapplms.model.Course;
 import com.example.myapplms.ui.base.BaseFragment;
@@ -26,13 +32,16 @@ import com.example.myapplms.utils.SessionManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding> {
 
     private TeacherCourseViewModel courseViewModel;
     private TeacherCourseAdapter courseAdapter;
+    private TeacherHomeViewModel dashboardViewModel;
     private final List<Course> myCourseList = new ArrayList<>();
     private boolean coursesLoaded = false; // tránh load lại nhiều lần
+    private Integer teacherId;
 
     @NonNull
     @Override
@@ -40,6 +49,12 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
                                                         @Nullable ViewGroup container) {
         return FragmentTeacherHomeBinding.inflate(inflater, container, false);
     }
+    private final ActivityResultLauncher<Intent> courseFormLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && teacherId != null) {
+                    courseViewModel.loadMyCourses(teacherId); // reload sau khi tạo/sửa
+                }
+            });
 
     @Override
     protected void setupViews() {
@@ -61,28 +76,46 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
 
         LMSApplication app = (LMSApplication) requireActivity().getApplication();
         CourseRepository repo = new CourseRepository(app.getRetrofitClient().getApiService());
+        MediaRepository mediaRepo = new MediaRepository(
+                app.getRetrofitClient().getApiService(),
+                new SessionManager(requireContext())
+        );
+        // 2. Khởi tạo ViewModel cho Thống kê Dashboard
+        TeacherRepository teacherRepo = new TeacherRepository(app.getRetrofitClient().getApiService());
+        dashboardViewModel = new ViewModelProvider(this,
+                new TeacherHomeViewModelFactory(teacherRepo))
+                .get(TeacherHomeViewModel.class);
+
         courseViewModel = new ViewModelProvider(this,
-                new TeacherCourseViewModelFactory(repo))
+                new TeacherCourseViewModelFactory(repo, mediaRepo))
                 .get(TeacherCourseViewModel.class);
 
-        // Adapter mở CourseFormActivity với ĐỦ dữ liệu để điền vào form sửa
+        // Lấy teacherId
+        teacherId = new SessionManager(requireContext()).getTeacherId();
+
+        // ── Adapter: nút Edit → mở CourseFormActivity chế độ SỬA ──
         courseAdapter = new TeacherCourseAdapter(myCourseList, course -> {
             Intent intent = new Intent(getContext(), CourseFormActivity.class);
-            intent.putExtra(CourseFormActivity.EXTRA_COURSE_ID, course.id);
-            intent.putExtra(CourseFormActivity.EXTRA_COURSE_TITLE, course.title);
-            intent.putExtra(CourseFormActivity.EXTRA_COURSE_DESCRIPTION, course.instructor); // tạm dùng
-            intent.putExtra(CourseFormActivity.EXTRA_COURSE_PRICE, course.priceText);
-            intent.putExtra(CourseFormActivity.EXTRA_COURSE_IMAGE_URL, ""); // sau thêm imageUrl vào Course model
-            startActivity(intent);
+            intent.putExtra(CourseFormActivity.EXTRA_COURSE_ID,          course.id);
+            intent.putExtra(CourseFormActivity.EXTRA_COURSE_TITLE,       course.title);
+            intent.putExtra(CourseFormActivity.EXTRA_COURSE_DESCRIPTION, course.description); // ← dùng description
+            intent.putExtra(CourseFormActivity.EXTRA_COURSE_PRICE,       course.priceText);
+            intent.putExtra(CourseFormActivity.EXTRA_COURSE_IMAGE_URL,   course.imageUrl != null ? course.imageUrl : "");
+            courseFormLauncher.launch(intent);  // ← dùng launcher để reload sau khi sửa
         });
 
-        RecyclerView rvCourses =
-                new RecyclerView(requireContext());
+        RecyclerView rvCourses = new RecyclerView(requireContext());
         rvCourses.setLayoutManager(new LinearLayoutManager(getContext()));
         rvCourses.setAdapter(courseAdapter);
         getBinding().layoutMyCourses.addView(rvCourses);
 
         observeMyCourses();
+        observeDashboardData();
+
+        // 5. Gọi API lấy thống kê ngay khi vào màn hình
+        if (teacherId != null) {
+            dashboardViewModel.loadDashboard(teacherId);
+        }
     }
 
     @Override
@@ -90,9 +123,16 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
         getBinding().tabOverview.setOnClickListener(v -> showTab(0));
         getBinding().tabMyCourses.setOnClickListener(v -> {
             showTab(1);
-            if (!coursesLoaded) loadMyCourses(); // chỉ load 1 lần
+            if (!coursesLoaded) loadMyCourses();
         });
         getBinding().tabStudents.setOnClickListener(v -> showTab(2));
+
+        // ── Nút Create New Course ──────────────────────────────
+        getBinding().btnCreateCourseHome.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), CourseFormActivity.class);
+            // Không truyền EXTRA_COURSE_ID → mặc định -1 → chế độ tạo mới
+            courseFormLauncher.launch(intent);
+        });
     }
 
     private void showTab(int index) {
@@ -161,10 +201,40 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
                         myCourseList.clear();
                         myCourseList.addAll(result.data);
                         courseAdapter.notifyDataSetChanged();
+
                     }
                     break;
                 case ERROR:
                     showToast(result.message);
+                    break;
+            }
+        });
+    }
+
+    private void observeDashboardData() {
+        dashboardViewModel.dashboardData.observe(getViewLifecycleOwner(), result -> {
+            if (result == null) return;
+            switch (result.status) {
+                case LOADING:
+                    break;
+                case SUCCESS:
+                    if (result.data != null) {
+                        // Gọi đúng ID tvEarnings, tvTotalStudents... trong file fragment_teacher_home.xml
+                        getBinding().tvEarnings.setText(String.format(Locale.US, "$%,.0f", result.data.totalRevenue));
+                        getBinding().tvTotalStudents.setText(String.valueOf(result.data.totalStudents));
+                        getBinding().tvRevenue.setText(String.format(Locale.US, "$%,.0f", result.data.totalRevenue));
+                        getBinding().tvAvgRating.setText(String.valueOf(result.data.avgRating));
+                        getBinding().tvTotalCourses.setText(String.valueOf(result.data.totalCourses));
+
+                        // Cập nhật các dòng text phụ (ví dụ: +18%, 834 enrollments)
+                        if (result.data.earningsChange != null) {
+                            getBinding().tvEarningsChange.setText(result.data.earningsChange);
+                        }
+                        getBinding().tvEnrollments.setText(result.data.enrollmentsThisMonth + " enrollments");
+                    }
+                    break;
+                case ERROR:
+                    Toast.makeText(getContext(), result.message, Toast.LENGTH_SHORT).show();
                     break;
             }
         });

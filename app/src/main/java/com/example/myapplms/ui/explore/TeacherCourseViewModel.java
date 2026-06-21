@@ -6,9 +6,11 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.myapplms.data.remote.dto.request.CourseRequest;
 import com.example.myapplms.data.repository.CourseRepository;
+import com.example.myapplms.data.repository.MediaRepository;
 import com.example.myapplms.model.Course;
 import com.example.myapplms.utils.Resource;
 
+import java.io.File;
 import java.util.List;
 
 public class TeacherCourseViewModel extends ViewModel {
@@ -24,8 +26,14 @@ public class TeacherCourseViewModel extends ViewModel {
     private final MutableLiveData<Resource<Course>> _updateResult = new MutableLiveData<>();
     public final LiveData<Resource<Course>> updateResult = _updateResult;
 
-    public TeacherCourseViewModel(CourseRepository courseRepository) {
+    private final MutableLiveData<Resource<String>> _uploadResult = new MutableLiveData<>();
+    public final LiveData<Resource<String>> uploadResult = _uploadResult;
+
+    private final MediaRepository mediaRepository;
+
+    public TeacherCourseViewModel(CourseRepository courseRepository, MediaRepository mediaRepository) {
         this.courseRepository = courseRepository;
+        this.mediaRepository = mediaRepository;
     }
 
     // ── Load khóa học của giảng viên ─────────────────────────
@@ -50,5 +58,10 @@ public class TeacherCourseViewModel extends ViewModel {
                 description, imageUrl, price);
         courseRepository.updateCourse(courseId, request)
                 .observeForever(result -> _updateResult.setValue(result));
+    }
+
+    public void uploadCourseImage(File imageFile) {
+        mediaRepository.uploadCourseImage(imageFile)
+                .observeForever(result -> _uploadResult.setValue(result));
     }
 }

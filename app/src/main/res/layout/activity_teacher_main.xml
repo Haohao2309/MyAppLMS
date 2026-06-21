@@ -16,15 +16,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/white"
-        app:itemIconTint="@color/gray_500"
-        app:itemRippleColor="@color/indigo_100"
-        app:itemTextColor="@color/gray_500"
-        app:labelVisibilityMode="labeled"
+        android:background="?android:attr/windowBackground"
+        app:menu="@menu/bottom__nav_menu"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:menu="@menu/bottom__nav_menu" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
