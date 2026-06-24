@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    KHÔNG dùng <include> được vì không truyền text qua include trong XML.
+    File này chỉ để THAM KHẢO cấu trúc 1 tiêu chí. Thực tế đã inline
+    từng tiêu chí trong activity_grading.xml (xem section 02).
+
+    Nếu bạn muốn dùng lại bằng code Java, tham khảo layout dưới đây
+    rồi inflate thủ công trong GradingActivity.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginBottom="16dp">
+
+    <!-- Row: label + input + max -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="6dp">
+
+        <!-- Label (title + subtitle) -->
+        <LinearLayout
+            android:id="@+id/ll_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_criteria_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tên tiêu chí"
+                android:textColor="@color/gray_800"
+                android:textSize="14sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/tv_criteria_subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mô tả tiêu chí"
+                android:textColor="@color/gray_500"
+                android:textSize="12sp"/>
+        </LinearLayout>
+
+        <!-- Ô nhập điểm -->
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_criteria_score"
+            android:layout_width="56dp"
+            android:layout_height="44dp"
+            android:gravity="center"
+            android:hint="0"
+            android:inputType="number"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary"
+            android:background="@drawable/bg_score_input"/>
+
+        <!-- Điểm tối đa -->
+        <TextView
+            android:id="@+id/tv_criteria_max"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:text="/25"
+            android:textColor="@color/gray_400"
+            android:textSize="14sp"/>
+    </LinearLayout>
+
+    <!-- Progress bar -->
+    <ProgressBar
+        android:id="@+id/pb_criteria"
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:progress="0"
+        android:max="25"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:progressTint="@color/primary"
+        android:progressBackgroundTint="@color/gray_200"/>
+
+</LinearLayout>
