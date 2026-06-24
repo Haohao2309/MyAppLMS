@@ -16,6 +16,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".ui.teacher.grading.GradingActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.student.learning.LearningActivity"
             android:exported="false" />
         <activity

@@ -4,11 +4,13 @@ import com.example.myapplms.data.remote.dto.request.CourseRequest;
 import com.example.myapplms.data.remote.dto.request.CreateCommentRequest;
 import com.example.myapplms.data.remote.dto.request.CreatePostRequest;
 import com.example.myapplms.data.remote.dto.request.CreateReviewRequest;
+import com.example.myapplms.data.remote.dto.request.GradeSubmissionRequest;
 import com.example.myapplms.data.remote.dto.request.LoginRequest;
 import com.example.myapplms.data.remote.dto.request.PaymentCheckoutRequest;
 import com.example.myapplms.data.remote.dto.request.PaymentWebhookRequest;
 import com.example.myapplms.data.remote.dto.request.RefreshTokenRequest;
 import com.example.myapplms.data.remote.dto.request.SubmitAssignmentRequest;
+import com.example.myapplms.data.remote.dto.request.SubmitGradeRequest;
 import com.example.myapplms.data.remote.dto.request.SubmitQuizRequest;
 import com.example.myapplms.data.remote.dto.request.SyncVideoRequest;
 import com.example.myapplms.data.remote.dto.request.VoteRequest;
@@ -18,10 +20,13 @@ import com.example.myapplms.data.remote.dto.request.TeacherRequest;
 import com.example.myapplms.data.remote.dto.response.ApiResponse;
 import com.example.myapplms.data.remote.dto.response.AuthResponse;
 import com.example.myapplms.data.remote.dto.response.CategoryResponse;
+import com.example.myapplms.data.remote.dto.response.DiscussionResponse;
 import com.example.myapplms.data.remote.dto.response.EnrollmentStatusResponse;
+import com.example.myapplms.data.remote.dto.response.GradingListResponse;
 import com.example.myapplms.data.remote.dto.response.NotificationResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentCheckoutResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentWebhookResponse;
+import com.example.myapplms.data.remote.dto.response.SubmissionResponse;
 import com.example.myapplms.data.remote.dto.response.TeacherStatsResponse;
 import com.example.myapplms.data.remote.dto.response.UserResponse;
 import com.example.myapplms.data.remote.dto.response.ProgressResponse;
@@ -156,7 +161,7 @@ public interface LmsApiService {
     Call<StudentResponse> updateStudent(@Path("id") Integer studentId,
                                         @Body StudentRequest request);
 
-    @GET("v1/courses")
+    @GET("v1/courses/explore")
     Call<List<CourseResponse>> getCourses();
     @GET("v1/courses/teacher/{id}")
     Call<List<CourseResponse>> getCoursesByTeacherId(@Path("id") Integer id);
@@ -231,11 +236,23 @@ public interface LmsApiService {
     );
 
     @POST("v1/learn/courses/{courseId}/lessons/{lessonId}/discussions")
-    Call<com.example.myapplms.data.remote.dto.response.DiscussionResponse> createDiscussion(
+    Call<DiscussionResponse> createDiscussion(
             @Path("courseId") int courseId,
             @Path("lessonId") String lessonId,
             @Body com.example.myapplms.data.remote.dto.request.CreateDiscussionRequest request
     );
+// Thêm vào cuối interface LmsApiService.java (trước dấu } cuối cùng)
+
+// ── Grading (Teacher) ──────────────────────────────────────────────────────
+
+    /** Danh sách sinh viên + trạng thái chấm điểm theo khóa học */
+    @GET("v1/course-grades/grading/{courseId}")
+    Call<GradingListResponse> getGradingList(@Path("courseId") int courseId);
+
+    /** Giáo viên nhập examScore → BE tính quizAvg, finalScore, gradeLevel → ghi CourseGrade */
+    @POST("v1/course-grades/grading/submit")
+    Call<GradingListResponse.StudentGradingItem> submitGrade(@Body SubmitGradeRequest request);
+
 }
 
 
