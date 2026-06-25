@@ -28,6 +28,11 @@ import com.example.myapplms.data.remote.dto.response.PaymentCheckoutResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentWebhookResponse;
 import com.example.myapplms.data.remote.dto.response.SubmissionResponse;
 import com.example.myapplms.data.remote.dto.response.TeacherStatsResponse;
+import com.example.myapplms.data.remote.dto.response.DashboardOverviewResponse;
+import com.example.myapplms.data.remote.dto.response.RecentActivityResponse;
+import com.example.myapplms.data.remote.dto.response.WeeklyActivityResponse;
+import com.example.myapplms.data.remote.dto.response.TaskItemResponse;
+import com.example.myapplms.data.remote.dto.response.TeacherTaskResponse;
 import com.example.myapplms.data.remote.dto.response.UserResponse;
 import com.example.myapplms.data.remote.dto.response.ProgressResponse;
 import com.example.myapplms.data.remote.dto.response.community_response.CommentResponse;
@@ -218,9 +223,22 @@ public interface LmsApiService {
     @POST("upload/course-thumbnail")   // chỉnh lại đúng endpoint của bạn
     Call<CourseResponse> uploadCourseImage(@Part MultipartBody.Part file);
 
-    // API Lấy dữ liệu Dashboard cho Giáo viên
+    // API Lấy dữ liệu Dashboard cho Giáo viên (legacy)
     @GET("teachers/{id}/dashboard")
     Call<TeacherStatsResponse> getTeacherDashboardStats(@Path("id") Integer teacherId);
+
+    // ── Teacher Dashboard v2 ──────────────────────────────────
+    @GET("teacher-dashboard/overview")
+    Call<DashboardOverviewResponse> getTeacherOverview();
+
+    @GET("teacher-dashboard/recent-activities")
+    Call<List<RecentActivityResponse>> getRecentActivities();
+
+    @GET("teacher-dashboard/weekly-activity")
+    Call<WeeklyActivityResponse> getWeeklyActivity();
+
+    @GET("teacher-dashboard/tasks")
+    Call<TeacherTaskResponse> getTasks();
 
 
     @POST("v1/learn/courses/{courseId}/lessons/{lessonId}/submit-quiz")
