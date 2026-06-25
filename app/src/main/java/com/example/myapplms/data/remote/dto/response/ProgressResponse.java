@@ -15,5 +15,7 @@ public class ProgressResponse {
         public String status;
         public Double progressPercent;
         public Integer score;
+        public Integer attemptCount;
+        public Integer maxAttempts;
     }
 }

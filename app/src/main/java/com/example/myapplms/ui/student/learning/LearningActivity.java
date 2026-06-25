@@ -53,7 +53,12 @@ public class LearningActivity extends AppCompatActivity {
         setContentView(R.layout.activity_learning);
 
         courseId = getIntent().getIntExtra("COURSE_ID", -1);
-        drawerLayout = findViewById(R.id.drawer_layout);
+        View dl = findViewById(R.id.drawer_layout);
+        if (dl instanceof DrawerLayout) {
+            drawerLayout = (DrawerLayout) dl;
+        } else {
+            drawerLayout = null; // Trên Tablet là giao diện phẳng, không có Drawer
+        }
         fabDiscussion = findViewById(R.id.fab_discussion);
         ivMenuToggle = findViewById(R.id.iv_menu_toggle);
 
@@ -94,7 +99,7 @@ public class LearningActivity extends AppCompatActivity {
                 // Đổ dữ liệu vào Adapter
                 menuAdapter = new ModuleAdapter(resource.data.modules, lesson -> {
                     String contentStr = lesson.content != null ? new Gson().toJson(lesson.content) : "{}";
-                    openLessonFragment(lesson.lessonId, lesson.type, contentStr, lesson.title);
+                    openLessonFragment(lesson.lessonId, lesson.type, contentStr, lesson.title, lesson.duration);
                 });
                 rvMenu.setAdapter(menuAdapter);
 
@@ -117,9 +122,10 @@ public class LearningActivity extends AppCompatActivity {
         String initialType = getIntent().getStringExtra("LESSON_TYPE");
         String initialContent = getIntent().getStringExtra("CONTENT_JSON");
         String initialTitle = getIntent().getStringExtra("LESSON_TITLE");
+        int initialDuration = getIntent().getIntExtra("LESSON_DURATION", 0);
 
         if (initialLessonId != null && initialType != null) {
-            openLessonFragment(initialLessonId, initialType, initialContent, initialTitle);
+            openLessonFragment(initialLessonId, initialType, initialContent, initialTitle, initialDuration);
         }
     }
 
@@ -134,7 +140,7 @@ public class LearningActivity extends AppCompatActivity {
         });
     }
 
-    public void openLessonFragment(String lessonId, String type, String contentJson, String lessonTitle) {
+    public void openLessonFragment(String lessonId, String type, String contentJson, String lessonTitle, int duration) {
         this.currentLessonId = lessonId;
         Fragment fragment = null;
 
@@ -153,7 +159,7 @@ public class LearningActivity extends AppCompatActivity {
                 break;
 
             case "quiz":
-                fragment = QuizFragment.newInstance(courseId, lessonId, contentJson);
+                fragment = QuizFragment.newInstance(courseId, lessonId, contentJson, duration);
                 break;
 
             case "assignment":
@@ -246,15 +252,49 @@ public class LearningActivity extends AppCompatActivity {
         bottomSheetDialog.show();
     }
 
+    private boolean isFullscreen = false;
+
+    public void toggleFullscreen() {
+        isFullscreen = !isFullscreen;
+        applyFullscreenState();
+    }
+
     @Override
     public void onConfigurationChanged(@NonNull android.content.res.Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        handleOrientationChange(newConfig.orientation);
+        View rightColumn = findViewById(R.id.nav_view_curriculum);
+        boolean isPhone = rightColumn instanceof com.google.android.material.navigation.NavigationView;
+        
+        // Trên điện thoại, xoay ngang tự động bật Fullscreen. Trên Tablet thì không.
+        if (isPhone) {
+            isFullscreen = (newConfig.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE);
+            applyFullscreenState();
+        }
     }
 
     private void handleOrientationChange(int orientation) {
+        // Chỉ chạy lúc onCreate() để set trạng thái ban đầu
+        View rightColumn = findViewById(R.id.nav_view_curriculum);
+        boolean isPhone = rightColumn instanceof com.google.android.material.navigation.NavigationView;
+        if (isPhone && orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
+            isFullscreen = true;
+        }
+        applyFullscreenState();
+    }
+
+    private void applyFullscreenState() {
         View appBar = findViewById(R.id.toolbar_learning);
-        if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
+        View rightColumn = findViewById(R.id.nav_view_curriculum);
+        View separator = findViewById(R.id.view_separator);
+        boolean isPhone = rightColumn instanceof com.google.android.material.navigation.NavigationView;
+
+        // Báo cho VideoFragment biết trạng thái Fullscreen
+        androidx.fragment.app.Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.learning_fragment_container);
+        if (fragment instanceof VideoFragment) {
+            ((VideoFragment) fragment).setFullscreenState(isFullscreen);
+        }
+
+        if (isFullscreen) {
             getWindow().getDecorView().setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_FULLSCREEN
                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
@@ -262,17 +302,29 @@ public class LearningActivity extends AppCompatActivity {
             if (appBar != null && appBar.getParent() instanceof View) {
                 ((View) appBar.getParent()).setVisibility(View.GONE);
             }
-            if (fabDiscussion != null) {
-                fabDiscussion.setVisibility(View.GONE);
+            if (fabDiscussion != null) fabDiscussion.setVisibility(View.GONE);
+            
+            // Ẩn Menu giáo trình trên Tablet để Video chiếm 100%
+            if (!isPhone && rightColumn != null) rightColumn.setVisibility(View.GONE);
+            if (separator != null) separator.setVisibility(View.GONE);
+            
+            // Ép xoay ngang nếu là điện thoại
+            if (isPhone) {
+                setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
             }
         } else {
-            // Xoay dọc: khôi phục giao diện
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
             if (appBar != null && appBar.getParent() instanceof View) {
                 ((View) appBar.getParent()).setVisibility(View.VISIBLE);
             }
-            if (fabDiscussion != null) {
-                fabDiscussion.setVisibility(View.VISIBLE);
+            if (fabDiscussion != null) fabDiscussion.setVisibility(View.VISIBLE);
+            
+            if (!isPhone && rightColumn != null) rightColumn.setVisibility(View.VISIBLE);
+            if (separator != null) separator.setVisibility(View.VISIBLE);
+            
+            // Khôi phục dọc nếu là điện thoại
+            if (isPhone) {
+                setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             }
         }
     }

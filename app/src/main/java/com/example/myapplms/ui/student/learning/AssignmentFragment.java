@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -51,6 +52,37 @@ public class AssignmentFragment extends Fragment {
         EditText etDriveLink = view.findViewById(R.id.et_drive_link);
         EditText etNotes = view.findViewById(R.id.et_student_notes);
         Button btnSubmit = view.findViewById(R.id.btn_submit_assignment);
+        TextView tvAttempts = view.findViewById(R.id.tv_assignment_attempts);
+
+        LearningActivity parentActivity = (LearningActivity) getActivity();
+        if (parentActivity != null) {
+            parentActivity.getViewModel().getProgress(courseId).observe(getViewLifecycleOwner(), resource -> {
+                if (resource != null && resource.data != null) {
+                    com.example.myapplms.data.remote.dto.response.ProgressResponse progress = resource.data;
+                    int attempts = 0;
+                    int maxAttempts = 1;
+
+                    if (progress.lessonDetails != null) {
+                        for (com.example.myapplms.data.remote.dto.response.ProgressResponse.LessonDetailProgress detail : progress.lessonDetails) {
+                            if (lessonId.equals(detail.lessonId)) {
+                                if (detail.attemptCount != null) attempts = detail.attemptCount;
+                                if (detail.maxAttempts != null) maxAttempts = detail.maxAttempts;
+                                break;
+                            }
+                        }
+                    }
+
+                    tvAttempts.setText("🔄 Lượt: " + attempts + " / " + maxAttempts);
+                    if (attempts >= maxAttempts) {
+                        btnSubmit.setEnabled(false);
+                        btnSubmit.setText("Hết lượt");
+                    } else {
+                        btnSubmit.setEnabled(true);
+                        btnSubmit.setText(R.string.action_submit);
+                    }
+                }
+            });
+        }
 
         btnSubmit.setOnClickListener(v -> {
             String link = etDriveLink.getText().toString().trim();
@@ -64,7 +96,6 @@ public class AssignmentFragment extends Fragment {
             SubmitAssignmentRequest request = new SubmitAssignmentRequest(link, notes);
 
             // GỌI API NỘP BÀI TẬP:
-            LearningActivity parentActivity = (LearningActivity) getActivity();
             if (parentActivity != null) {
                 parentActivity.getViewModel().submitAssignment(courseId, lessonId, request).observe(getViewLifecycleOwner(), resource -> {
                     switch (resource.status) {
@@ -73,7 +104,7 @@ public class AssignmentFragment extends Fragment {
                             break;
                         case SUCCESS:
                             Toast.makeText(getContext(), "Đã nộp! Chờ giảng viên chấm.", Toast.LENGTH_LONG).show();
-                            // 👉 BẢO ACTIVITY CHA TẢI LẠI TIẾN ĐỘ ĐỂ HIỆN ✅
+                            // BÁO ACTIVITY CHA TẢI LẠI TIẾN ĐỘ ĐỂ HIỆN %
                             parentActivity.loadProgress();
                             break;
                         case ERROR:

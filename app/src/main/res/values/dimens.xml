@@ -3,7 +3,9 @@
     <!-- Spacing -->
     <dimen name="spacing_tiny">4dp</dimen>
     <dimen name="spacing_small">8dp</dimen>
+    <dimen name="spacing_12">12dp</dimen>
     <dimen name="spacing_medium">16dp</dimen>
+    <dimen name="spacing_20">20dp</dimen>
     <dimen name="spacing_large">24dp</dimen>
     <dimen name="spacing_xlarge">32dp</dimen>
 
@@ -28,7 +30,12 @@
     <dimen name="icon_size_small">20dp</dimen>
     <dimen name="icon_size_medium">24dp</dimen>
     <dimen name="icon_size_large">32dp</dimen>
+    <dimen name="icon_size_xlarge">40dp</dimen>
+    <dimen name="icon_size_xxlarge">64dp</dimen>
 
-    <!-- Button -->
+    <!-- Specific Components -->
     <dimen name="button_height">56dp</dimen>
+    <dimen name="nav_drawer_width">320dp</dimen>
+    <dimen name="elevation_nav">16dp</dimen>
+    <dimen name="text_size_appbar">20sp</dimen>
 </resources>
