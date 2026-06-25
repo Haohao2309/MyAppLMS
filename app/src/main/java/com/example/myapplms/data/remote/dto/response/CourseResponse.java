@@ -24,4 +24,13 @@ public class CourseResponse {
 
     @SerializedName("categoryName")
     public String categoryName;
+
+    @SerializedName("totalStudents")
+    public Integer totalStudents;
+
+    @SerializedName("totalLessons")
+    public Integer totalLessons;
+
+    @SerializedName("averageRating")
+    public Double averageRating;
 }

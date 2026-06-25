@@ -22,6 +22,14 @@ public class OverviewFragment extends Fragment {
     private TextView tvDescription, tvInstructor, tvCategory, tvPrice;
 
 
+    public static OverviewFragment newInstance(int courseId) {
+        OverviewFragment f = new OverviewFragment();
+        Bundle args = new Bundle();
+        args.putInt("COURSE_ID", courseId);
+        f.setArguments(args);
+        return f;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_overview, container, false);
@@ -44,7 +52,7 @@ public class OverviewFragment extends Fragment {
         // Lấy Shared ViewModel từ Activity
         sharedViewModel = new ViewModelProvider(requireActivity()).get(CourseDetailViewModel.class);
 
-        int courseId = requireActivity().getIntent().getIntExtra("COURSE_ID", -1);
+        int courseId = getArguments() != null ? getArguments().getInt("COURSE_ID", -1) : -1;
 
         // Lắng nghe dữ liệu PostgreSQL từ Shared ViewModel
         if (courseId != -1) {

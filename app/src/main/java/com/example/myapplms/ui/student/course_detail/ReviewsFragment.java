@@ -34,7 +34,7 @@ import java.util.Map;
 public class ReviewsFragment extends Fragment {
 
     private CourseDetailViewModel sharedViewModel;
-    
+
     // Core views
     private RecyclerView rvReviews;
     private ProgressBar progressBar;
@@ -62,6 +62,13 @@ public class ReviewsFragment extends Fragment {
     private final Map<String, Long> lastVoteTimeMap = new HashMap<>();
     private static final long VOTE_COOLDOWN_MS = 2000; // 2 giây chặn click
     private LiveData<Resource<List<ReviewResponse>>> activeReviewsLiveData;
+    public static ReviewsFragment newInstance(int courseId) {
+        ReviewsFragment f = new ReviewsFragment();
+        Bundle args = new Bundle();
+        args.putInt("COURSE_ID", courseId);
+        f.setArguments(args);
+        return f;
+    }
 
     private final androidx.lifecycle.Observer<Resource<List<ReviewResponse>>> reviewsObserver = resource -> {
         if (resource == null) return;
@@ -128,7 +135,7 @@ public class ReviewsFragment extends Fragment {
         tvAverageRating = view.findViewById(R.id.tv_average_rating);
         tvAverageRatingStars = view.findViewById(R.id.tv_average_rating_stars);
         tvReviewCount = view.findViewById(R.id.tv_review_count);
-        
+
         bar5 = view.findViewById(R.id.bar_5_star);
         bar4 = view.findViewById(R.id.bar_4_star);
         bar3 = view.findViewById(R.id.bar_3_star);
@@ -249,7 +256,7 @@ public class ReviewsFragment extends Fragment {
                     clearForm();
                     layoutWriteForm.setVisibility(View.GONE);
                     btnWriteReview.setVisibility(View.VISIBLE);
-                    
+
                     // Tải lại danh sách review mới nhất
                     loadReviews(courseId);
                 } else if (resource.status == com.example.myapplms.utils.Resource.Status.ERROR) {
@@ -275,7 +282,7 @@ public class ReviewsFragment extends Fragment {
             tvAverageRating.setText("0.0");
             tvAverageRatingStars.setText("☆☆☆☆☆");
             tvReviewCount.setText("0 đánh giá");
-            
+
             bar5.setProgress(0); bar4.setProgress(0); bar3.setProgress(0); bar2.setProgress(0); bar1.setProgress(0);
             pct5.setText("0%"); pct4.setText("0%"); pct3.setText("0%"); pct2.setText("0%"); pct1.setText("0%");
             return;
@@ -337,7 +344,7 @@ public class ReviewsFragment extends Fragment {
         if (lastVoteTime != null && currentTime - lastVoteTime < VOTE_COOLDOWN_MS) {
             return; // Đang trong thời gian chờ (cooldown), bỏ qua click (chống spam)
         }
-        
+
         if (pendingVoteReviewIds.contains(review.id)) {
             return; // Chặn click trùng lặp khi request cũ đang chạy
         }
