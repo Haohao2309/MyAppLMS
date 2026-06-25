@@ -30,6 +30,16 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/title_assignment"
+                    android:layout_marginBottom="@dimen/spacing_medium"/>
+
+                <TextView
+                    android:id="@+id/tv_assignment_attempts"
+                    style="@style/TextBody1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="🔄 Lượt: 0 / 1"
+                    android:textColor="@color/primary_dark"
+                    android:textStyle="bold"
                     android:layout_marginBottom="@dimen/spacing_large"/>
 
                 <TextView

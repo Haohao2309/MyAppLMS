@@ -41,12 +41,18 @@ public class QuizFragment extends Fragment {
 
     private Map<String, RadioGroup> questionGroups = new HashMap<>();
 
-    public static QuizFragment newInstance(int courseId, String lessonId, String contentJson) {
+    private int durationSeconds;
+    private TextView tvQuizTimer;
+    private TextView tvQuizAttempts;
+    private android.os.CountDownTimer countDownTimer;
+
+    public static QuizFragment newInstance(int courseId, String lessonId, String contentJson, int duration) {
         QuizFragment fragment = new QuizFragment();
         Bundle args = new Bundle();
         args.putInt("COURSE_ID", courseId);
         args.putString("LESSON_ID", lessonId);
         args.putString("CONTENT_JSON", contentJson);
+        args.putInt("DURATION", duration);
         fragment.setArguments(args);
         return fragment;
     }
@@ -58,6 +64,7 @@ public class QuizFragment extends Fragment {
             courseId = getArguments().getInt("COURSE_ID");
             lessonId = getArguments().getString("LESSON_ID");
             contentJson = getArguments().getString("CONTENT_JSON");
+            durationSeconds = getArguments().getInt("DURATION", 0);
         }
     }
 
@@ -75,6 +82,8 @@ public class QuizFragment extends Fragment {
         layoutQuizResult = view.findViewById(R.id.layout_quiz_result);
         container = view.findViewById(R.id.layout_questions_container);
         tvResultScore = view.findViewById(R.id.tv_result_score);
+        tvQuizTimer = view.findViewById(R.id.tv_quiz_timer);
+        tvQuizAttempts = view.findViewById(R.id.tv_quiz_attempts);
 
         Button btnSubmit = view.findViewById(R.id.btn_submit_quiz);
         Button btnRetake = view.findViewById(R.id.btn_retake_quiz);
@@ -89,6 +98,7 @@ public class QuizFragment extends Fragment {
             for (RadioGroup group : questionGroups.values()) {
                 group.clearCheck();
             }
+            startTimer();
         });
 
         // 🟢 BƯỚC KIỂM TRA ĐẦU VÀO: Truy vấn dữ liệu tiến độ thực tế từ Sổ điểm (Gradebook)
@@ -100,12 +110,18 @@ public class QuizFragment extends Fragment {
 
                     boolean identityFound = false;
                     int finalScoreValue = 0;
+                    int attempts = 0;
+                    int maxAttempts = 5; // Mặc định
 
                     if (progress.lessonDetails != null) {
                         for (ProgressResponse.LessonDetailProgress detail : progress.lessonDetails) {
-                            if (lessonId.equals(detail.lessonId) && detail.score != null) {
-                                finalScoreValue = detail.score;
-                                identityFound = true;
+                            if (lessonId.equals(detail.lessonId)) {
+                                if (detail.attemptCount != null) attempts = detail.attemptCount;
+                                if (detail.maxAttempts != null) maxAttempts = detail.maxAttempts;
+                                if (detail.score != null && "completed".equals(detail.status)) {
+                                    finalScoreValue = detail.score;
+                                    identityFound = true;
+                                }
                                 break;
                             }
                         }
@@ -117,6 +133,20 @@ public class QuizFragment extends Fragment {
                         layoutQuizForm.setVisibility(View.VISIBLE);
                         layoutQuizResult.setVisibility(View.GONE);
                     }
+                    
+                    // LUÔN CẬP NHẬT GIAO DIỆN SỐ LƯỢT LÀM BÀI ĐỂ KHI BẤM 'LÀM LẠI' NÓ KHÔNG BỊ HIỆN 0/5
+                    tvQuizAttempts.setText("🔄 Lượt: " + attempts + " / " + maxAttempts);
+                    if (attempts >= maxAttempts) {
+                        Toast.makeText(getContext(), "Bạn đã hết lượt làm bài!", Toast.LENGTH_LONG).show();
+                        btnSubmit.setEnabled(false);
+                        btnSubmit.setText("Hết lượt");
+                    } else {
+                        btnSubmit.setEnabled(true);
+                        btnSubmit.setText("Nộp bài");
+                        if (!identityFound) {
+                            startTimer();
+                        }
+                    }
                 }
             });
         }
@@ -126,6 +156,48 @@ public class QuizFragment extends Fragment {
         layoutQuizForm.setVisibility(View.GONE);
         layoutQuizResult.setVisibility(View.VISIBLE);
         tvResultScore.setText(score + " / 100");
+        stopTimer();
+    }
+
+    private void startTimer() {
+        if (durationSeconds <= 0) {
+            tvQuizTimer.setText("⏱ Không giới hạn");
+            return;
+        }
+
+        stopTimer();
+        countDownTimer = new android.os.CountDownTimer(durationSeconds * 1000L, 1000) {
+            public void onTick(long millisUntilFinished) {
+                long totalSecs = millisUntilFinished / 1000;
+                long minutes = totalSecs / 60;
+                long seconds = totalSecs % 60;
+                tvQuizTimer.setText(String.format("⏱ %02d:%02d", minutes, seconds));
+                
+                // Cảnh báo khi còn dưới 1 phút
+                if (totalSecs <= 60 && isAdded()) {
+                    tvQuizTimer.setTextColor(ContextCompat.getColor(requireContext(), R.color.red));
+                }
+            }
+
+            public void onFinish() {
+                tvQuizTimer.setText("⏱ 00:00");
+                Toast.makeText(getContext(), "Hết giờ làm bài! Hệ thống tự động nộp bài.", Toast.LENGTH_LONG).show();
+                submitQuiz();
+            }
+        }.start();
+    }
+
+    private void stopTimer() {
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+            countDownTimer = null;
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        stopTimer();
     }
 
     private void renderQuestions() {

@@ -161,13 +161,8 @@ public class VideoFragment extends Fragment {
         ImageView btnFullscreen = getView() != null ? getView().findViewById(R.id.btn_fullscreen) : null;
         if (btnFullscreen != null) {
             btnFullscreen.setOnClickListener(v -> {
-                if (getActivity() != null) {
-                    int currentOrientation = getResources().getConfiguration().orientation;
-                    if (currentOrientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
-                        getActivity().setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                    } else {
-                        getActivity().setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                    }
+                if (getActivity() instanceof LearningActivity) {
+                    ((LearningActivity) getActivity()).toggleFullscreen();
                 }
             });
         }
@@ -210,15 +205,9 @@ public class VideoFragment extends Fragment {
         syncHandler.postDelayed(syncRunnable, 10000);
     }
 
-    @Override
-    public void onConfigurationChanged(@NonNull android.content.res.Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
+    public void setFullscreenState(boolean isFullscreen) {
         if (tvLessonTitle != null) {
-            if (newConfig.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
-                tvLessonTitle.setVisibility(View.GONE);
-            } else {
-                tvLessonTitle.setVisibility(View.VISIBLE);
-            }
+            tvLessonTitle.setVisibility(isFullscreen ? View.GONE : View.VISIBLE);
         }
     }
 
