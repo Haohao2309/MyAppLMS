@@ -24,12 +24,15 @@
     <color name="text_hint">#9CA3AF</color>
     <color name="text_grey">#9098A3</color>
     <color name="text_dark">#1A1A2E</color>
+    <color name="success_light">#63DE8B</color>
 
     <!-- Status Colors -->
     <color name="success">#10B981</color>
     <color name="error">#EF4444</color>
     <color name="warning">#F59E0B</color>
     <color name="info">#3B82F6</color>
+    <color name="warning_light">#FF9800</color>
+
 
     <!-- Other Colors -->
     <color name="white">#FFFFFF</color>
@@ -97,6 +100,8 @@
     <color name="course_text_body">#424242</color>
     <color name="course_text_muted">#757575</color>
 
+    <color name="success_green">#4CAF50</color>
+
     <!-- Home UI Colors -->
     <color name="home_header_blue">#4F46E5</color>
     <color name="home_streak_orange">#FF9800</color>
@@ -111,4 +116,8 @@
     <color name="home_quick_action_bg_yellow">#FFFBEB</color>
     <color name="home_quick_action_bg_green">#F0FDF4</color>
     <color name="home_quick_action_bg_purple">#FAF5FF</color>
+
+
+
+
 </resources>

@@ -85,56 +85,91 @@
                         android:textStyle="bold"
                         android:layout_marginBottom="12dp"/>
 
-                    <!-- Preview ảnh khi sửa -->
-                    <ImageView
-                        android:id="@+id/ivThumbnailPreview"
+                    <!-- FrameLayout để stack preview + placeholder + uploading -->
+                    <FrameLayout
                         android:layout_width="match_parent"
-                        android:layout_height="160dp"
-                        android:scaleType="centerCrop"
-                        android:visibility="gone"
-                        android:contentDescription="@null"/>
+                        android:layout_height="160dp">
 
-                    <!-- Upload placeholder -->
-                    <LinearLayout
-                        android:id="@+id/layoutUploadPlaceholder"
-                        android:layout_width="match_parent"
-                        android:layout_height="160dp"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:background="@drawable/bg_placeholder">
-
+                        <!-- Preview ảnh sau khi upload xong -->
                         <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:src="@drawable/ic_upload"
-                            app:tint="#6C63FF"
+                            android:id="@+id/ivThumbnailPreview"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="centerCrop"
+                            android:visibility="gone"
                             android:contentDescription="@null"/>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Upload thumbnail"
-                            android:textColor="#6C63FF"
-                            android:textSize="14sp"
-                            android:layout_marginTop="8dp"/>
+                        <!-- Placeholder khi chưa chọn ảnh — clickable để mở gallery -->
+                        <LinearLayout
+                            android:id="@+id/layoutUploadPlaceholder"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:background="@drawable/bg_placeholder">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="16:9 ratio recommended"
-                            android:textColor="#888888"
-                            android:textSize="12sp"/>
+                            <ImageView
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:src="@drawable/ic_upload"
+                                app:tint="#6C63FF"
+                                android:contentDescription="@null"/>
 
-                    </LinearLayout>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Nhấn để chọn ảnh"
+                                android:textColor="#6C63FF"
+                                android:textSize="14sp"
+                                android:layout_marginTop="8dp"/>
 
-                    <EditText
-                        android:id="@+id/etImageUrl"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_input_field"
-                        android:hint="Hoặc nhập Image URL"
-                        android:inputType="textUri"
-                        android:layout_marginTop="12dp"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="16:9 ratio recommended"
+                                android:textColor="#888888"
+                                android:textSize="12sp"/>
+                        </LinearLayout>
+
+                        <!-- Overlay uploading — hiện trong lúc đang upload -->
+                        <LinearLayout
+                            android:id="@+id/layoutUploading"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:background="#CC000000"
+                            android:visibility="gone">
+
+                            <ProgressBar
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:indeterminateTint="@color/white"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Đang upload..."
+                                android:textColor="@color/white"
+                                android:textSize="13sp"
+                                android:layout_marginTop="8dp"/>
+                        </LinearLayout>
+
+                    </FrameLayout>
+
+                    <!-- Nút đổi ảnh — chỉ hiện sau khi đã có ảnh -->
+                    <Button
+                        android:id="@+id/btnChangeThumbnail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_marginTop="8dp"
+                        android:text="Đổi ảnh"
+                        android:textSize="13sp"
+                        android:backgroundTint="#F0EFFF"
+                        android:textColor="#6C63FF"
+                        android:visibility="gone"/>
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>

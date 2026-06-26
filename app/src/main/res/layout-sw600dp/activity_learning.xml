@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:background="@color/gray_50">
+
+    <!-- Cột Trái: Video & Thảo luận (Chiếm 6 phần) -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="6"
+        android:orientation="vertical">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:elevation="@dimen/spacing_tiny">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar_learning"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/indigo_600"
+                app:title="Đang học"
+                app:titleTextColor="@color/white">
+                
+                <!-- Bỏ iv_menu_toggle đi vì giao diện Tablet luôn hiện sẵn menu bên phải, không cần nút bật/tắt nữa -->
+                
+            </androidx.appcompat.widget.Toolbar>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <FrameLayout
+                android:id="@+id/learning_fragment_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <!-- Extended FAB nhìn hiện đại hơn -->
+            <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+                android:id="@+id/fab_discussion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="@dimen/spacing_large"
+                android:text="Thảo luận"
+                android:textColor="@color/white"
+                app:icon="@android:drawable/ic_dialog_email"
+                app:iconTint="@color/white"
+                app:backgroundTint="@color/success"
+                app:elevation="@dimen/elevation_fab" />
+        </FrameLayout>
+    </LinearLayout>
+
+    <!-- Phân cách giữa 2 cột (Tuỳ chọn) -->
+    <View
+        android:id="@+id/view_separator"
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:background="#E0E0E0" />
+
+    <!-- Cột Phải: Curriculum Menu (Chiếm 4 phần) -->
+    <LinearLayout
+        android:id="@+id/nav_view_curriculum"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="4"
+        android:background="@color/white"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/indigo_600"
+            android:padding="@dimen/spacing_large"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nội dung khóa học"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_size_appbar"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_tiny"
+                android:text="Chọn bài để học"
+                android:textColor="@color/indigo_100"
+                android:textSize="@dimen/text_size_body" />
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_curriculum_menu"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingTop="@dimen/spacing_small"
+            android:paddingBottom="@dimen/spacing_large"/>
+    </LinearLayout>
+
+</LinearLayout>

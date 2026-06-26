@@ -22,6 +22,14 @@ public class OverviewFragment extends Fragment {
     private TextView tvDescription, tvInstructor, tvCategory, tvPrice;
 
 
+    public static OverviewFragment newInstance(int courseId) {
+        OverviewFragment f = new OverviewFragment();
+        Bundle args = new Bundle();
+        args.putInt("COURSE_ID", courseId);
+        f.setArguments(args);
+        return f;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_overview, container, false);
@@ -44,10 +52,12 @@ public class OverviewFragment extends Fragment {
         // Lấy Shared ViewModel từ Activity
         sharedViewModel = new ViewModelProvider(requireActivity()).get(CourseDetailViewModel.class);
 
+        int courseId = getArguments() != null ? getArguments().getInt("COURSE_ID", -1) : -1;
+
         // Lắng nghe dữ liệu PostgreSQL từ Shared ViewModel
-        // Không cần bọc trong if (courseId != -1) ở đây nữa vì LiveData trong ViewModel đã được Activity kích hoạt chạy rồi
-        sharedViewModel.getCourseDetail(1).observe(getViewLifecycleOwner(), resource -> {
-            if (resource == null) return;
+        if (courseId != -1) {
+            sharedViewModel.getCourseDetail(courseId).observe(getViewLifecycleOwner(), resource -> {
+                if (resource == null) return;
 
             switch (resource.status) {
                 case SUCCESS:
@@ -61,13 +71,13 @@ public class OverviewFragment extends Fragment {
 
                         // 2. Hiển thị tên giảng viên
                         String instructorName = resource.data.instructor != null ? resource.data.instructor : "Đang cập nhật";
-                        tvInstructor.setText("Instructor: " + instructorName.replace("by ", ""));
+                        tvInstructor.setText(instructorName.replace("by ", ""));
 
                         // 3. Hiển thị danh mục
-                        tvCategory.setText("Category: " + (resource.data.category != null ? resource.data.category : "General"));
+                        tvCategory.setText(resource.data.category != null ? resource.data.category : "Chung");
 
                         // 4. Hiển thị giá tiền
-                        tvPrice.setText("Price: " + (resource.data.priceText != null ? resource.data.priceText : "FREE"));
+                        tvPrice.setText(resource.data.priceText != null ? resource.data.priceText : "Miễn phí");
                     }
                     break;
 
@@ -80,7 +90,8 @@ public class OverviewFragment extends Fragment {
                     tvDescription.setText("Đang tải dữ liệu mô tả...");
                     break;
             }
-        });
+            });
+        }
     }
     // Giả sử bạn có nút này trong layout fragment_overview.xml
     // getBinding().btnBuyCourse.setOnClickListener(v -> handleCheckout());
@@ -105,13 +116,14 @@ public class OverviewFragment extends Fragment {
                             // SỬA Ở ĐÂY: Xóa (hoặc comment) dòng gọi Dialog cũ
                             // showQrDialog(data.amount, courseId, data.paymentId);
 
-                            // THÊM MỚI: Mở trình duyệt với link thanh toán PayOS
+                            // THÊM MỚI: Mở trình duyệt với link thanh toán PayOS bên trong app
                             if (data.checkoutUrl != null && !data.checkoutUrl.isEmpty()) {
-                                android.content.Intent browserIntent = new android.content.Intent(
-                                        android.content.Intent.ACTION_VIEW,
-                                        android.net.Uri.parse(data.checkoutUrl)
+                                android.content.Intent webViewIntent = new android.content.Intent(
+                                        getContext(),
+                                        PaymentWebViewActivity.class
                                 );
-                                startActivity(browserIntent);
+                                webViewIntent.putExtra("PAYMENT_URL", data.checkoutUrl);
+                                startActivity(webViewIntent);
                             } else {
                                 Toast.makeText(getContext(), "Lỗi: Backend chưa trả về checkoutUrl", Toast.LENGTH_LONG).show();
                             }

@@ -1,91 +1,228 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    android:padding="16dp">
+    android:background="@color/gray_50"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="16dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="About this course"
-            android:textColor="@color/course_text_title"
-            android:textSize="18sp"
+            android:layout_marginBottom="12dp"
+            android:text="Về khóa học này"
+            android:textColor="@color/gray_800"
+            android:textSize="20sp"
             android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tv_course_description"
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:lineSpacingExtra="6dp"
-            android:text="Đang tải dữ liệu mô tả..."
-            android:textColor="@color/course_text_body"
-            android:textSize="15sp" />
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="@color/white"
+            android:layout_marginBottom="24dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/tv_course_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:lineSpacingExtra="6dp"
+                    android:text="Đang tải dữ liệu mô tả..."
+                    android:textColor="@color/gray_600"
+                    android:textSize="15sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Course Details"
-            android:textColor="@color/course_text_title"
-            android:textSize="18sp"
+            android:layout_marginBottom="12dp"
+            android:text="Thông tin chi tiết"
+            android:textColor="@color/gray_800"
+            android:textSize="20sp"
             android:textStyle="bold" />
 
-        <LinearLayout
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/bg_module_container"
-            android:orientation="vertical"
-            android:padding="16dp">
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="@color/white"
+            android:layout_marginBottom="32dp">
 
-            <TextView
-                android:id="@+id/tv_instructor"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="Instructor: "
-                android:textColor="@color/course_text_body"
-                android:textSize="15sp" />
+                android:orientation="vertical"
+                android:padding="16dp">
 
-            <TextView
-                android:id="@+id/tv_category"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="Category: "
-                android:textColor="@color/course_text_body"
-                android:textSize="15sp" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
 
-            <TextView
-                android:id="@+id/tv_price"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Price: "
-                android:textColor="@color/course_text_body"
-                android:textSize="15sp"
-                android:textStyle="bold" />
-        </LinearLayout>
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_myplaces"
+                        app:tint="@color/primary"
+                        android:layout_marginEnd="12dp"/>
 
-        <Button
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Giảng viên"
+                            android:textColor="@color/gray_500"
+                            android:textSize="13sp" />
+
+                        <TextView
+                            android:id="@+id/tv_instructor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Đang tải..."
+                            android:textColor="@color/gray_900"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/divider"
+                    android:layout_marginBottom="16dp"
+                    android:layout_marginStart="36dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_sort_by_size"
+                        app:tint="@color/success"
+                        android:layout_marginEnd="12dp"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Thể loại"
+                            android:textColor="@color/gray_500"
+                            android:textSize="13sp" />
+
+                        <TextView
+                            android:id="@+id/tv_category"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Đang tải..."
+                            android:textColor="@color/gray_900"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/divider"
+                    android:layout_marginBottom="16dp"
+                    android:layout_marginStart="36dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_agenda"
+                        app:tint="@color/warning"
+                        android:layout_marginEnd="12dp"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Giá khóa học"
+                            android:textColor="@color/gray_500"
+                            android:textSize="13sp" />
+
+                        <TextView
+                            android:id="@+id/tv_price"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Đang tải..."
+                            android:textColor="@color/error"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Spacer để đẩy nút xuống dưới cùng nếu màn hình dài -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_buy_course"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="24dp"
-            android:backgroundTint="#4CAF50"
-            android:padding="14dp"
+            android:layout_height="60dp"
             android:text="Mua khóa học ngay"
             android:textColor="@color/white"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            app:cornerRadius="30dp"
+            app:backgroundTint="@color/indigo_600"
+            app:icon="@android:drawable/ic_menu_add"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
+            app:elevation="4dp"
+            app:rippleColor="@color/primary_light" />
 
     </LinearLayout>
 

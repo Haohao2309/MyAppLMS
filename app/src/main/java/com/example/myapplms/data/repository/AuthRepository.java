@@ -44,7 +44,8 @@ public class AuthRepository {
                             body.userId,
                             body.email,
                             body.teacherId,
-                            body.studentId
+                            body.studentId,
+                            body.imageUrl
                     );
                     return Resource.success(body);
                 }
@@ -79,7 +80,8 @@ public class AuthRepository {
                             body.userId,
                             body.email,
                             body.teacherId,
-                            body.studentId
+                            body.studentId,
+                            body.imageUrl
                     );
                     return Resource.success(body);
                 }

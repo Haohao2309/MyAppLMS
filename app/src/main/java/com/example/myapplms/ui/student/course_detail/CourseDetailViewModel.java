@@ -4,6 +4,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.myapplms.data.remote.dto.request.CreateReviewRequest;
+import com.example.myapplms.data.remote.dto.request.VoteRequest;
+import com.example.myapplms.data.remote.dto.response.EnrollmentStatusResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentCheckoutResponse;
 import com.example.myapplms.data.remote.dto.response.ReviewResponse;
 import com.example.myapplms.data.repository.CourseDetailRepository;
@@ -60,4 +63,19 @@ public class CourseDetailViewModel extends ViewModel {
     public LiveData<Resource<PaymentCheckoutResponse>> checkoutCourse(int courseId) {
         return repository.checkoutCourse(courseId);
     }
-}
+
+    // Bổ sung hàm kiểm tra trạng thái mua khóa học
+    public LiveData<Resource<EnrollmentStatusResponse>> getEnrollmentStatus(int courseId) {
+        return repository.getEnrollmentStatus(courseId);
+    }
+
+    // Bổ sung hàm gửi đánh giá mới
+    public LiveData<Resource<ReviewResponse>> submitReview(int courseId, CreateReviewRequest request) {
+        return repository.submitReview(courseId, request);
+    }
+
+    // Bổ sung hàm bình chọn đánh giá
+    public LiveData<Resource<ReviewResponse>> voteReview(int courseId, String reviewId, VoteRequest request) {
+        return repository.voteReview(courseId, reviewId, request);
+    }
+}

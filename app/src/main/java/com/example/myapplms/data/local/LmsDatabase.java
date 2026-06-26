@@ -29,7 +29,7 @@ import com.example.myapplms.data.local.entity.NotificationEntity;
  */
 @Database(
         entities = { NotificationEntity.class },
-        version = 2,
+        version = 3,
         exportSchema = false
 )
 public abstract class LmsDatabase extends RoomDatabase {
@@ -47,6 +47,15 @@ public abstract class LmsDatabase extends RoomDatabase {
         }
     };
 
+    static final Migration MIGRATION_2_3 = new Migration(2, 3) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL(
+                    "ALTER TABLE notifications ADD COLUMN student_id INTEGER NOT NULL DEFAULT -1"
+            );
+        }
+    };
+
     public static LmsDatabase getInstance(Context context) {
         if (INSTANCE == null) {
             synchronized (LmsDatabase.class) {
@@ -56,7 +65,7 @@ public abstract class LmsDatabase extends RoomDatabase {
                                     LmsDatabase.class,
                                     "lms_database"
                             )
-                            .addMigrations(MIGRATION_1_2)
+                            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                             .build();
                 }
             }

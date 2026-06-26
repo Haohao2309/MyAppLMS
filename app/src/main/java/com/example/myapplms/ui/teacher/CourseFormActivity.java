@@ -5,15 +5,22 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
 import com.example.myapplms.LMSApplication;
 import com.example.myapplms.data.repository.CourseRepository;
+import com.example.myapplms.data.repository.MediaRepository;
 import com.example.myapplms.databinding.ActivityCourseFormBinding;
 import com.example.myapplms.ui.explore.TeacherCourseViewModel;
 import com.example.myapplms.ui.explore.TeacherCourseViewModelFactory;
 import com.example.myapplms.utils.SessionManager;
+import com.example.myapplms.utils.UriToFileUtil;
+
+import java.io.File;
 
 public class CourseFormActivity extends AppCompatActivity {
 
@@ -31,6 +38,23 @@ public class CourseFormActivity extends AppCompatActivity {
     private int teacherId = -1;
     private int categoryId = 1;
     private String selectedLevel = "Beginner";
+
+    private String uploadedImageUrl = "";
+
+    private final ActivityResultLauncher<String> pickImageLauncher =
+            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+                if (uri == null) return;
+                // Hiện overlay uploading
+                showUploadingState(true);
+                // Convert URI → File rồi upload
+                File imageFile = UriToFileUtil.from(this, uri);
+                if (imageFile != null) {
+                    viewModel.uploadCourseImage(imageFile);
+                } else {
+                    showUploadingState(false);
+                    Toast.makeText(this, "Không đọc được file ảnh", Toast.LENGTH_SHORT).show();
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +74,7 @@ public class CourseFormActivity extends AppCompatActivity {
         setupFormMode();
         setupListeners();
         observeResults();
+        observeUpload();
     }
 
     private int getTeacherId() {
@@ -60,8 +85,16 @@ public class CourseFormActivity extends AppCompatActivity {
 
     private void setupViewModel() {
         LMSApplication app = (LMSApplication) getApplication();
-        CourseRepository repository = new CourseRepository(app.getRetrofitClient().getApiService());
-        viewModel = new ViewModelProvider(this, new TeacherCourseViewModelFactory(repository))
+        CourseRepository courseRepo = new CourseRepository(app.getRetrofitClient().getApiService());
+
+        // ── Thêm MediaRepository ───────────────────────────────
+        MediaRepository mediaRepo = new MediaRepository(
+                app.getRetrofitClient().getApiService(),
+                new SessionManager(this)
+        );
+
+        viewModel = new ViewModelProvider(this,
+                new TeacherCourseViewModelFactory(courseRepo, mediaRepo))
                 .get(TeacherCourseViewModel.class);
     }
 
@@ -139,7 +172,7 @@ public class CourseFormActivity extends AppCompatActivity {
 
             if (title != null) binding.etTitle.setText(title);
             if (description != null) binding.etDescription.setText(description);
-            if (imageUrl != null) binding.etImageUrl.setText(imageUrl);
+//            if (imageUrl != null) binding.etImageUrl.setText(imageUrl);
             if (priceText != null && !priceText.equals("FREE")) {
                 binding.etPrice.setText(priceText.replace("$", "").trim());
             }
@@ -151,31 +184,35 @@ public class CourseFormActivity extends AppCompatActivity {
         }
     }
 
+    // Sửa lại:
     private boolean isEditMode() {
-        return false;
+        return courseId != -1;  // ← tự động detect dựa vào courseId
     }
-
     private void setupListeners() {
         binding.btnBack.setOnClickListener(v -> finish());
         binding.btnCancel.setOnClickListener(v -> finish());
         binding.btnSubmit.setOnClickListener(v -> attemptSubmit());
+        binding.layoutUploadPlaceholder.setOnClickListener(v ->
+                pickImageLauncher.launch("image/*"));
+        binding.btnChangeThumbnail.setOnClickListener(v ->
+                pickImageLauncher.launch("image/*"));
     }
 
     private void attemptSubmit() {
         String title       = binding.etTitle.getText().toString().trim();
         String description = binding.etDescription.getText().toString().trim();
-        String imageUrl    = binding.etImageUrl.getText().toString().trim();
         String priceStr    = binding.etPrice.getText().toString().trim();
 
-        // Validate
         if (title.isEmpty()) {
             binding.etTitle.setError("Tiêu đề không được để trống");
-            binding.etTitle.requestFocus();
-            return;
+            binding.etTitle.requestFocus(); return;
         }
         if (description.isEmpty()) {
             binding.etDescription.setError("Mô tả không được để trống");
-            binding.etDescription.requestFocus();
+            binding.etDescription.requestFocus(); return;
+        }
+        if (uploadedImageUrl.isEmpty()) {
+            Toast.makeText(this, "Vui lòng chọn ảnh thumbnail", Toast.LENGTH_SHORT).show();
             return;
         }
         if (teacherId == -1) {
@@ -185,25 +222,48 @@ public class CourseFormActivity extends AppCompatActivity {
 
         double price = 0.0;
         if (!priceStr.isEmpty()) {
-            try {
-                price = Double.parseDouble(priceStr);
-            } catch (NumberFormatException e) {
-                binding.etPrice.setError("Giá không hợp lệ");
-                return;
+            try { price = Double.parseDouble(priceStr); }
+            catch (NumberFormatException e) {
+                binding.etPrice.setError("Giá không hợp lệ"); return;
             }
         }
 
         binding.progressBar.setVisibility(View.VISIBLE);
         binding.btnSubmit.setEnabled(false);
 
+        // ── Dùng uploadedImageUrl thay vì etImageUrl ──────────
         if (isEditMode()) {
             viewModel.updateCourse(courseId, teacherId, categoryId,
-                    title, description, imageUrl, price);
+                    title, description, uploadedImageUrl, price);
         } else {
-            System.out.println("teacher ID: "+teacherId);
             viewModel.createCourse(teacherId, categoryId,
-                    title, description, imageUrl, price);
+                    title, description, uploadedImageUrl, price);
         }
+    }
+
+    private void observeUpload() {
+        viewModel.uploadResult.observe(this, result -> {
+            if (result == null) return;
+            switch (result.status) {
+                case LOADING:
+                    showUploadingState(true);
+                    break;
+                case SUCCESS:
+                    showUploadingState(false);
+                    uploadedImageUrl = result.data != null ? result.data : "";
+                    // Hiển thị preview
+                    Glide.with(this).load(uploadedImageUrl).into(binding.ivThumbnailPreview);
+                    binding.ivThumbnailPreview.setVisibility(View.VISIBLE);
+                    binding.layoutUploadPlaceholder.setVisibility(View.GONE);
+                    binding.btnChangeThumbnail.setVisibility(View.VISIBLE);
+                    break;
+                case ERROR:
+                    showUploadingState(false);
+                    Toast.makeText(this, "Upload ảnh thất bại: " + result.message,
+                            Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        });
     }
 
     private void observeResults() {
@@ -245,4 +305,10 @@ public class CourseFormActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void showUploadingState(boolean isUploading) {
+        binding.layoutUploading.setVisibility(isUploading ? View.VISIBLE : View.GONE);
+        binding.btnSubmit.setEnabled(!isUploading);
+    }
+
 }

@@ -1,8 +1,7 @@
 package com.example.myapplms.model;
 
-
-import com.example.myapplms.R;
 import com.example.myapplms.data.remote.dto.response.CourseResponse;
+import java.text.NumberFormat;
 import java.util.Locale;
 
 public class Course {
@@ -17,46 +16,55 @@ public class Course {
     public String priceText;
     public String category;
     public String level;
-    public int imageRes; // Tạm dùng int vì dùng ảnh local, sau này đổi thành String cho URL
+    public String imageUrl;
 
-    public Course(int id, String title, String description, String instructor, String rating, String students,
-                  String lessons, String duration, String priceText, String category,
-                  String level, int imageRes) {
-        this.id = id;
-        this.title = title;
+    public Course(int id, String title, String description, String instructor, String rating,
+                  String students, String lessons, String duration, String priceText,
+                  String category, String level, String imageUrl) {
+        this.id          = id;
+        this.title       = title;
         this.description = description;
-        this.instructor = instructor;
-        this.rating = rating;
-        this.students = students;
-        this.lessons = lessons;
-        this.duration = duration;
-        this.priceText = priceText;
-        this.category = category;
-        this.level = level;
-        this.imageRes = imageRes;
+        this.instructor  = instructor;
+        this.rating      = rating;
+        this.students    = students;
+        this.lessons     = lessons;
+        this.duration    = duration;
+        this.priceText   = priceText;
+        this.category    = category;
+        this.level       = level;
+        this.imageUrl    = imageUrl;
     }
 
-    // Mapper: Chuyển DTO thành Domain Model
     public static Course fromResponse(CourseResponse res) {
         String displayPrice = (res.price == null || res.price <= 0)
                 ? "FREE"
                 : String.format(Locale.US, "$%.2f", res.price);
 
-        String instructorName = res.teacherName != null ? "by " + res.teacherName : "by Unknown";
+        String instructorName = res.teacherName != null
+                ? "by " + res.teacherName
+                : "by Unknown";
+
+        // Xử lý hiển thị số học sinh thực tế (ví dụ: "1,200 students")
+        int studentsCount = res.totalStudents != null ? res.totalStudents : 0;
+        String studentsDisplay = NumberFormat.getNumberInstance(Locale.US).format(studentsCount) + " students";
+
+        // Xử lý hiển thị tổng số bài học thực tế
+        int lessonsCount = res.totalLessons != null ? res.totalLessons : 0;
+        String lessonsDisplay = lessonsCount + " lessons";
 
         return new Course(
                 res.courseId != null ? res.courseId : 0,
                 res.title,
                 res.description,
                 instructorName,
-                "4.5 (1k+)",     // Fake data vì DB chưa có
-                "10k students",  // Fake data
-                "12 lessons",    // Fake data
-                "2h 00m",        // Fake data
+                res.averageRating != null ? String.valueOf(res.averageRating) : "0.0",             // Tạm thời mock rating vì BE chưa có
+                studentsDisplay,         // <-- Lấy từ dữ liệu thật
+                lessonsDisplay,          // <-- Lấy từ dữ liệu thật
+                "2h 00m",                // Tạm thời mock thời lượng
                 displayPrice,
                 res.categoryName != null ? res.categoryName : "General",
-                "Beginner",      // Fake data
-                R.drawable.ic_launcher_background // Ảnh mặc định
+                "Beginner",              // Tạm thời mock level
+                res.imageUrl != null ? res.imageUrl : ""
         );
     }
 }

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#000000">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!-- YouTube Player -->
+        <com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
+            android:id="@+id/youtube_player_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:enableAutomaticInitialization="false" />
+
+        <!-- Giao diện Custom UI đè lên trên (Overlay) -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <!-- Vùng bấm vào giữa màn hình để Play/Pause và Hiện/Ẩn Controls -->
+            <View
+                android:id="@+id/view_center_click"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <!-- Nút Play/Pause to ở giữa màn hình (Tuỳ chọn) -->
+            <ImageView
+                android:id="@+id/btn_play_pause_center"
+                android:layout_width="@dimen/icon_size_xxlarge"
+                android:layout_height="@dimen/icon_size_xxlarge"
+                android:layout_centerInParent="true"
+                android:src="@android:drawable/ic_media_pause"
+                android:background="@drawable/bg_circle_translucent"
+                android:padding="@dimen/spacing_medium"
+                android:visibility="gone"
+                app:tint="@android:color/white" />
+
+            <!-- Thanh điều khiển mờ đè lên dưới cùng của video -->
+            <LinearLayout
+                android:id="@+id/layout_controls"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:background="#99000000"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/spacing_12">
+
+                <ImageView
+                    android:id="@+id/btn_play_pause"
+                    android:layout_width="@dimen/icon_size_large"
+                    android:layout_height="@dimen/icon_size_large"
+                    android:src="@android:drawable/ic_media_pause"
+                    app:tint="@android:color/white" />
+
+                <TextView
+                    android:id="@+id/tv_current_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_12"
+                    android:text="0:00"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/text_size_body" />
+
+                <SeekBar
+                    android:id="@+id/seekbar_video"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginHorizontal="@dimen/spacing_small" />
+
+                <TextView
+                    android:id="@+id/tv_total_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0:00"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/text_size_body" />
+
+                <!-- Nút Fullscreen -->
+                <ImageView
+                    android:id="@+id/btn_fullscreen"
+                    android:layout_width="@dimen/icon_size_large"
+                    android:layout_height="@dimen/icon_size_large"
+                    android:layout_marginStart="@dimen/spacing_small"
+                    android:padding="@dimen/spacing_tiny"
+                    android:src="@drawable/ic_fullscreen"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    app:tint="@android:color/white" />
+            </LinearLayout>
+        </RelativeLayout>
+    </FrameLayout>
+
+    <!-- Tiêu đề bài học (Sẽ bị ẩn khi xoay ngang) -->
+    <TextView
+        android:id="@+id/tv_lesson_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/spacing_20"
+        android:text="Tiêu đề bài học"
+        android:textSize="@dimen/text_size_title"
+        android:textStyle="bold"
+        android:textColor="#1E293B"
+        android:background="#FFFFFF"
+        android:elevation="@dimen/elevation_card"
+        android:lineSpacingExtra="@dimen/spacing_tiny"/>
+</LinearLayout>

@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.myapplms.LMSApplication;
 import com.example.myapplms.data.repository.CourseRepository;
+import com.example.myapplms.data.repository.MediaRepository;
 import com.example.myapplms.databinding.FragmentTeacherMyCoursesBinding;
 import com.example.myapplms.model.Course;
 import com.example.myapplms.ui.base.BaseFragment;
@@ -72,7 +73,12 @@ public class TeacherMyCoursesFragment extends BaseFragment<FragmentTeacherMyCour
 
         LMSApplication app = (LMSApplication) requireActivity().getApplication();
         CourseRepository repository = new CourseRepository(app.getRetrofitClient().getApiService());
-        viewModel = new ViewModelProvider(this, new TeacherCourseViewModelFactory(repository))
+        MediaRepository mediaRepo = new MediaRepository(
+                app.getRetrofitClient().getApiService(),
+                new SessionManager(requireContext())
+        );
+        viewModel = new ViewModelProvider(this,
+                new TeacherCourseViewModelFactory(repository, mediaRepo))
                 .get(TeacherCourseViewModel.class);
 
         // Lấy teacherId local để dùng lại

@@ -4,6 +4,12 @@ import com.example.myapplms.data.mapper.TeacherMapper;
 import com.example.myapplms.data.remote.api.LmsApiService;
 import com.example.myapplms.data.remote.dto.request.TeacherRequest;
 import com.example.myapplms.data.remote.dto.response.TeacherResponse;
+import com.example.myapplms.data.remote.dto.response.TeacherStatsResponse;
+import com.example.myapplms.data.remote.dto.response.DashboardOverviewResponse;
+import com.example.myapplms.data.remote.dto.response.RecentActivityResponse;
+import com.example.myapplms.data.remote.dto.response.WeeklyActivityResponse;
+import com.example.myapplms.data.remote.dto.response.TaskItemResponse;
+import com.example.myapplms.data.remote.dto.response.TeacherTaskResponse;
 import com.example.myapplms.model.Teacher;
 import com.example.myapplms.utils.Resource;
 
@@ -55,6 +61,68 @@ public class TeacherRepository {
                 return Resource.success(TeacherMapper.toModel(response.body()));
             }
             return Resource.error("Lỗi " + response.code() + ": Cập nhật thất bại", null);
+        } catch (IOException e) {
+            return Resource.error("Không có kết nối mạng", null);
+        }
+    }
+
+    public Resource<TeacherStatsResponse> getDashboardStats(Integer teacherId) {
+        try {
+            Response<TeacherStatsResponse> response = lmsApi.getTeacherDashboardStats(teacherId).execute();
+            if (response.isSuccessful() && response.body() != null) {
+                return Resource.success(response.body());
+            }
+            return Resource.error("Lỗi: " + response.code(), null);
+        } catch (IOException e) {
+            return Resource.error("Không có kết nối mạng", null);
+        }
+    }
+
+    // ── Dashboard v2 ──────────────────────────────────
+    public Resource<DashboardOverviewResponse> getOverview() {
+        try {
+            Response<DashboardOverviewResponse> response = lmsApi.getTeacherOverview().execute();
+            if (response.isSuccessful() && response.body() != null) {
+                return Resource.success(response.body());
+            }
+            return Resource.error("Lỗi overview: " + response.code(), null);
+        } catch (IOException e) {
+            return Resource.error("Không có kết nối mạng", null);
+        }
+    }
+
+    public Resource<java.util.List<RecentActivityResponse>> getRecentActivities() {
+        try {
+            Response<java.util.List<RecentActivityResponse>> response =
+                    lmsApi.getRecentActivities().execute();
+            if (response.isSuccessful() && response.body() != null) {
+                return Resource.success(response.body());
+            }
+            return Resource.error("Lỗi activities: " + response.code(), null);
+        } catch (IOException e) {
+            return Resource.error("Không có kết nối mạng", null);
+        }
+    }
+
+    public Resource<WeeklyActivityResponse> getWeeklyActivity() {
+        try {
+            Response<WeeklyActivityResponse> response = lmsApi.getWeeklyActivity().execute();
+            if (response.isSuccessful() && response.body() != null) {
+                return Resource.success(response.body());
+            }
+            return Resource.error("Lỗi weekly: " + response.code(), null);
+        } catch (IOException e) {
+            return Resource.error("Không có kết nối mạng", null);
+        }
+    }
+
+    public Resource<TeacherTaskResponse> getTasks() {
+        try {
+            Response<TeacherTaskResponse> response = lmsApi.getTasks().execute();
+            if (response.isSuccessful() && response.body() != null) {
+                return Resource.success(response.body());
+            }
+            return Resource.error("Lỗi tasks: " + response.code(), null);
         } catch (IOException e) {
             return Resource.error("Không có kết nối mạng", null);
         }

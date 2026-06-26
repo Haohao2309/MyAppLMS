@@ -30,34 +30,34 @@ public interface NotificationDao {
      * Lấy TẤT CẢ thông báo, sắp xếp mới nhất trên đầu.
      * Trả về LiveData → Fragment tự observe, UI tự cập nhật khi DB thay đổi.
      */
-    @Query("SELECT * FROM notifications ORDER BY created_at DESC")
-    LiveData<List<NotificationEntity>> getAllNotifications();
+    @Query("SELECT * FROM notifications WHERE student_id = :studentId ORDER BY created_at DESC")
+    LiveData<List<NotificationEntity>> getAllNotifications(int studentId);
 
     /**
      * Lấy thông báo theo TYPE để phục vụ bộ lọc chip.
      * Ví dụ: type = "achievement", "grade", "message"...
      */
-    @Query("SELECT * FROM notifications WHERE type = :type ORDER BY created_at DESC")
-    LiveData<List<NotificationEntity>> getNotificationsByType(String type);
+    @Query("SELECT * FROM notifications WHERE type = :type AND student_id = :studentId ORDER BY created_at DESC")
+    LiveData<List<NotificationEntity>> getNotificationsByType(String type, int studentId);
 
     /**
      * Lấy danh sách thông báo CHƯA đọc (dùng để đếm badge).
      */
-    @Query("SELECT * FROM notifications WHERE is_read = 0 ORDER BY created_at DESC")
-    LiveData<List<NotificationEntity>> getUnreadNotifications();
+    @Query("SELECT * FROM notifications WHERE is_read = 0 AND student_id = :studentId ORDER BY created_at DESC")
+    LiveData<List<NotificationEntity>> getUnreadNotifications(int studentId);
 
     /**
      * Đếm số lượng chưa đọc (dùng cho badge số góc icon nav).
      */
-    @Query("SELECT COUNT(*) FROM notifications WHERE is_read = 0")
-    LiveData<Integer> getUnreadCount();
+    @Query("SELECT COUNT(*) FROM notifications WHERE is_read = 0 AND student_id = :studentId")
+    LiveData<Integer> getUnreadCount(int studentId);
 
     /**
      * Lấy danh sách các thông báo chưa đồng bộ lên server.
      * Chạy trên background thread (không LiveData) để WorkManager xử lý.
      */
-    @Query("SELECT * FROM notifications WHERE is_synced = 0")
-    List<NotificationEntity> getUnsyncedNotifications();
+    @Query("SELECT * FROM notifications WHERE is_synced = 0 AND student_id = :studentId")
+    List<NotificationEntity> getUnsyncedNotifications(int studentId);
 
     // ── GHI (WRITE) ──────────────────────────────────────────────────────────────
 
@@ -81,31 +81,31 @@ public interface NotificationDao {
      * isSynced = 0 → sẽ được sync lên server sau (qua WorkManager hoặc Retrofit).
      * Không dùng @Update để tránh ghi đè các trường khác.
      */
-    @Query("UPDATE notifications SET is_read = 1, is_synced = 0 WHERE id = :id")
-    void markAsReadLocal(String id);
+    @Query("UPDATE notifications SET is_read = 1, is_synced = 0 WHERE id = :id AND student_id = :studentId")
+    void markAsReadLocal(String id, int studentId);
 
     /**
      * Đánh dấu TẤT CẢ là đã đọc trên local.
      */
-    @Query("UPDATE notifications SET is_read = 1, is_synced = 0")
-    void markAllAsReadLocal();
+    @Query("UPDATE notifications SET is_read = 1, is_synced = 0 WHERE student_id = :studentId")
+    void markAllAsReadLocal(int studentId);
 
     /**
      * Sau khi sync thành công lên server, cập nhật cờ isSynced = true.
      */
-    @Query("UPDATE notifications SET is_synced = 1 WHERE id = :id")
-    void markAsSynced(String id);
+    @Query("UPDATE notifications SET is_synced = 1 WHERE id = :id AND student_id = :studentId")
+    void markAsSynced(String id, int studentId);
 
     /**
      * Xóa toàn bộ cache (dùng khi logout hoặc force refresh).
      */
-    @Query("DELETE FROM notifications")
-    void clearAll();
+    @Query("DELETE FROM notifications WHERE student_id = :studentId")
+    void clearAll(int studentId);
 
     /**
      * Xóa các thông báo cũ hơn N ngày để giữ DB không phình to.
      * Tham số: cutoffTimestamp là epoch ms tính từ System.currentTimeMillis() - N_days_ms
      */
-    @Query("DELETE FROM notifications WHERE created_at < :cutoffIsoDate")
-    void deleteOlderThan(String cutoffIsoDate);
+    @Query("DELETE FROM notifications WHERE created_at < :cutoffIsoDate AND student_id = :studentId")
+    void deleteOlderThan(String cutoffIsoDate, int studentId);
 }

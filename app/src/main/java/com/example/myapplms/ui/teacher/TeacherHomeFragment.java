@@ -1,13 +1,19 @@
 package com.example.myapplms.ui.teacher;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
@@ -16,7 +22,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplms.LMSApplication;
 import com.example.myapplms.R;
+import com.example.myapplms.data.remote.dto.response.RecentActivityResponse;
+import com.example.myapplms.data.remote.dto.response.TaskItemResponse;
+import com.example.myapplms.data.remote.dto.response.WeeklyActivityResponse;
 import com.example.myapplms.data.repository.CourseRepository;
+import com.example.myapplms.data.repository.MediaRepository;
+import com.example.myapplms.data.repository.TeacherRepository;
 import com.example.myapplms.databinding.FragmentTeacherHomeBinding;
 import com.example.myapplms.model.Course;
 import com.example.myapplms.ui.base.BaseFragment;
@@ -26,13 +37,23 @@ import com.example.myapplms.utils.SessionManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding> {
 
     private TeacherCourseViewModel courseViewModel;
     private TeacherCourseAdapter courseAdapter;
+    private TeacherHomeViewModel dashboardViewModel;
+
     private final List<Course> myCourseList = new ArrayList<>();
-    private boolean coursesLoaded = false; // tránh load lại nhiều lần
+    private final List<RecentActivityResponse> activityList = new ArrayList<>();
+    private final List<TaskItemResponse> taskList = new ArrayList<>();
+
+    private RecentActivityAdapter activityAdapter;
+    private TaskAdapter taskAdapter;
+
+    private boolean coursesLoaded = false;
+    private Integer teacherId;
 
     @NonNull
     @Override
@@ -41,18 +62,16 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
         return FragmentTeacherHomeBinding.inflate(inflater, container, false);
     }
 
+    private final ActivityResultLauncher<Intent> courseFormLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && teacherId != null) {
+                    courseViewModel.loadMyCourses(teacherId);
+                }
+            });
+
     @Override
     protected void setupViews() {
-        // Dữ liệu giả cho stats — sau thay bằng API
-        getBinding().tvEarnings.setText("$12.450");
-        getBinding().tvEarningsChange.setText("+18% from last month");
-        getBinding().tvEnrollments.setText("834 enrollments");
-        getBinding().tvTotalStudents.setText("87.650");
-        getBinding().tvRevenue.setText("$125k");
-        getBinding().tvAvgRating.setText("4.8");
-        getBinding().tvTotalCourses.setText("4");
-
-        showTab(0); // mặc định Overview
+        showTab(0);
     }
 
     @Override
@@ -61,28 +80,58 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
 
         LMSApplication app = (LMSApplication) requireActivity().getApplication();
         CourseRepository repo = new CourseRepository(app.getRetrofitClient().getApiService());
+        MediaRepository mediaRepo = new MediaRepository(
+                app.getRetrofitClient().getApiService(),
+                new SessionManager(requireContext())
+        );
+
+        TeacherRepository teacherRepo = new TeacherRepository(app.getRetrofitClient().getApiService());
+        dashboardViewModel = new ViewModelProvider(this,
+                new TeacherHomeViewModelFactory(teacherRepo))
+                .get(TeacherHomeViewModel.class);
+
         courseViewModel = new ViewModelProvider(this,
-                new TeacherCourseViewModelFactory(repo))
+                new TeacherCourseViewModelFactory(repo, mediaRepo))
                 .get(TeacherCourseViewModel.class);
 
-        // Adapter mở CourseFormActivity với ĐỦ dữ liệu để điền vào form sửa
+        teacherId = new SessionManager(requireContext()).getTeacherId();
+
+        // ── Adapters ──────────────────────────────────────────────
         courseAdapter = new TeacherCourseAdapter(myCourseList, course -> {
             Intent intent = new Intent(getContext(), CourseFormActivity.class);
-            intent.putExtra(CourseFormActivity.EXTRA_COURSE_ID, course.id);
-            intent.putExtra(CourseFormActivity.EXTRA_COURSE_TITLE, course.title);
-            intent.putExtra(CourseFormActivity.EXTRA_COURSE_DESCRIPTION, course.instructor); // tạm dùng
-            intent.putExtra(CourseFormActivity.EXTRA_COURSE_PRICE, course.priceText);
-            intent.putExtra(CourseFormActivity.EXTRA_COURSE_IMAGE_URL, ""); // sau thêm imageUrl vào Course model
-            startActivity(intent);
+            intent.putExtra(CourseFormActivity.EXTRA_COURSE_ID,          course.id);
+            intent.putExtra(CourseFormActivity.EXTRA_COURSE_TITLE,       course.title);
+            intent.putExtra(CourseFormActivity.EXTRA_COURSE_DESCRIPTION, course.description);
+            intent.putExtra(CourseFormActivity.EXTRA_COURSE_PRICE,       course.priceText);
+            intent.putExtra(CourseFormActivity.EXTRA_COURSE_IMAGE_URL,   course.imageUrl != null ? course.imageUrl : "");
+            courseFormLauncher.launch(intent);
         });
 
-        RecyclerView rvCourses =
-                new RecyclerView(requireContext());
+        // RecyclerView courses
+        RecyclerView rvCourses = new RecyclerView(requireContext());
         rvCourses.setLayoutManager(new LinearLayoutManager(getContext()));
         rvCourses.setAdapter(courseAdapter);
         getBinding().layoutMyCourses.addView(rvCourses);
 
+        // RecyclerView hoạt động gần đây
+        activityAdapter = new RecentActivityAdapter(activityList);
+        getBinding().rvRecentActivities.setLayoutManager(new LinearLayoutManager(getContext()));
+        getBinding().rvRecentActivities.setAdapter(activityAdapter);
+        getBinding().rvRecentActivities.setNestedScrollingEnabled(false);
+
+        // RecyclerView nhiệm vụ
+        taskAdapter = new TaskAdapter(taskList);
+        getBinding().rvTasks.setLayoutManager(new LinearLayoutManager(getContext()));
+        getBinding().rvTasks.setAdapter(taskAdapter);
+        getBinding().rvTasks.setNestedScrollingEnabled(false);
+
+        // ── Observe & Load ────────────────────────────────────────
         observeMyCourses();
+        observeDashboardData();
+
+        if (teacherId != null) {
+            dashboardViewModel.loadAllDashboard();
+        }
     }
 
     @Override
@@ -90,26 +139,31 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
         getBinding().tabOverview.setOnClickListener(v -> showTab(0));
         getBinding().tabMyCourses.setOnClickListener(v -> {
             showTab(1);
-            if (!coursesLoaded) loadMyCourses(); // chỉ load 1 lần
+            if (!coursesLoaded) loadMyCourses();
         });
         getBinding().tabStudents.setOnClickListener(v -> showTab(2));
+
+        getBinding().btnCreateCourseHome.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), CourseFormActivity.class);
+            courseFormLauncher.launch(intent);
+        });
     }
 
+    // ════════════════════════════════════════════════════════════
+    //  Tab switching
+    // ════════════════════════════════════════════════════════════
     private void showTab(int index) {
         int colorSelected   = 0xFF6C63FF;
         int colorUnselected = 0xFF888888;
 
-        // 1. Reset màu chữ về mặc định
         getBinding().tabOverview.setTextColor(colorUnselected);
         getBinding().tabMyCourses.setTextColor(colorUnselected);
         getBinding().tabStudents.setTextColor(colorUnselected);
 
-        // 2. Xóa background (viền ngoài) của tất cả các tab bằng cách truyền số 0
         getBinding().tabOverview.setBackgroundResource(0);
         getBinding().tabMyCourses.setBackgroundResource(0);
         getBinding().tabStudents.setBackgroundResource(0);
 
-        // 3. Ẩn tất cả nội dung layout
         getBinding().layoutOverview.setVisibility(View.GONE);
         getBinding().layoutMyCourses.setVisibility(View.GONE);
         getBinding().layoutStudents.setVisibility(View.GONE);
@@ -118,37 +172,144 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
         getBinding().tabMyCourses.setTypeface(null, Typeface.NORMAL);
         getBinding().tabStudents.setTypeface(null, Typeface.NORMAL);
 
-        // 4. Áp dụng màu chữ, background và hiển thị layout cho tab được chọn
         switch (index) {
             case 0:
                 getBinding().tabOverview.setTextColor(colorSelected);
-                getBinding().tabOverview.setBackgroundResource(R.drawable.bg_tab_selected); // Thêm viền
+                getBinding().tabOverview.setBackgroundResource(R.drawable.bg_tab_selected);
                 getBinding().tabOverview.setTypeface(null, Typeface.BOLD);
                 getBinding().layoutOverview.setVisibility(View.VISIBLE);
                 break;
             case 1:
                 getBinding().tabMyCourses.setTextColor(colorSelected);
-                getBinding().tabMyCourses.setBackgroundResource(R.drawable.bg_tab_selected); // Thêm viền
+                getBinding().tabMyCourses.setBackgroundResource(R.drawable.bg_tab_selected);
                 getBinding().tabMyCourses.setTypeface(null, Typeface.BOLD);
                 getBinding().layoutMyCourses.setVisibility(View.VISIBLE);
                 break;
             case 2:
                 getBinding().tabStudents.setTextColor(colorSelected);
-                getBinding().tabStudents.setBackgroundResource(R.drawable.bg_tab_selected); // Thêm viền
+                getBinding().tabStudents.setBackgroundResource(R.drawable.bg_tab_selected);
                 getBinding().tabStudents.setTypeface(null, Typeface.BOLD);
                 getBinding().layoutStudents.setVisibility(View.VISIBLE);
                 break;
         }
     }
 
-    private void loadMyCourses() {
-        SessionManager session = new SessionManager(requireContext());
-        Integer teacherId = session.getTeacherId();
-        if (teacherId != null) {
-            coursesLoaded = true;
-            courseViewModel.loadMyCourses(teacherId);
+    // ════════════════════════════════════════════════════════════
+    //  Observers
+    // ════════════════════════════════════════════════════════════
+    private void observeDashboardData() {
+
+        // 1. Overview → 4 stats cards + tên GV
+        dashboardViewModel.overview.observe(getViewLifecycleOwner(), result -> {
+            if (result == null) return;
+            if (result.data != null) {
+                getBinding().tvStatCourses.setText(String.valueOf(result.data.totalActiveCourses));
+                getBinding().tvStatStudents.setText(String.valueOf(result.data.totalStudents));
+                getBinding().tvStatPending.setText(String.valueOf(result.data.pendingGrading));
+                getBinding().tvStatAvgScore.setText(
+                        String.format(Locale.US, "%.1f", result.data.avgScore));
+                if (result.data.teacherName != null) {
+                    getBinding().tvTeacherName.setText("Thầy " + result.data.teacherName);
+                    // Lấy 2 chữ cái đầu làm initials
+                    String[] parts = result.data.teacherName.trim().split("\\s+");
+                    String initials = parts.length >= 2
+                            ? String.valueOf(parts[0].charAt(0)) + String.valueOf(parts[parts.length - 1].charAt(0))
+                            : result.data.teacherName.substring(0, Math.min(2, result.data.teacherName.length()));
+                    getBinding().tvTeacherInitials.setText(initials.toUpperCase(Locale.ROOT));
+                }
+            }
+            if (result.message != null && !result.message.isEmpty()) {
+                // Không toast để tránh spam, chỉ log
+            }
+        });
+
+        // 2. Recent activities
+        dashboardViewModel.recentActivities.observe(getViewLifecycleOwner(), result -> {
+            if (result == null || result.data == null) return;
+            activityList.clear();
+            activityList.addAll(result.data);
+            activityAdapter.notifyDataSetChanged();
+        });
+
+        // 3. Weekly activity → vẽ bar chart
+        dashboardViewModel.weeklyActivity.observe(getViewLifecycleOwner(), result -> {
+            if (result == null || result.data == null) return;
+            renderBarChart(result.data);
+        });
+
+        // 4. Tasks
+        dashboardViewModel.tasks.observe(getViewLifecycleOwner(), result -> {
+            if (result == null || result.data == null) return;
+            taskList.clear();
+            if (result.data.tasks != null) {
+                taskList.addAll(result.data.tasks);
+            }
+            taskAdapter.notifyDataSetChanged();
+            getBinding().tvTaskCount.setText(String.valueOf(result.data.pendingCount));
+        });
+    }
+
+    // ════════════════════════════════════════════════════════════
+    //  Bar chart (vẽ bằng View thuần — không cần thư viện)
+    // ════════════════════════════════════════════════════════════
+    private void renderBarChart(WeeklyActivityResponse data) {
+        if (data.dailySubmissions == null || data.dailySubmissions.isEmpty()) return;
+
+        LinearLayout chartContainer = getBinding().chartBars;
+        chartContainer.removeAllViews();
+
+        long maxVal = 1;
+        for (WeeklyActivityResponse.DailyCount v : data.dailySubmissions) if (v.count > maxVal) maxVal = v.count;
+
+        // Tìm ngày có giá trị cao nhất để tô màu highlight
+        int maxIdx = 0;
+        for (int i = 1; i < data.dailySubmissions.size(); i++) {
+            if (data.dailySubmissions.get(i).count > data.dailySubmissions.get(maxIdx).count) maxIdx = i;
+        }
+
+        int chartHeightPx = (int) (100 * getResources().getDisplayMetrics().density);
+
+        for (int i = 0; i < data.dailySubmissions.size(); i++) {
+            long val = data.dailySubmissions.get(i).count;
+
+            // Wrapper column
+            LinearLayout col = new LinearLayout(requireContext());
+            col.setOrientation(LinearLayout.VERTICAL);
+            col.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL);
+            LinearLayout.LayoutParams colParams = new LinearLayout.LayoutParams(
+                    0, chartHeightPx, 1f);
+            colParams.setMarginStart(4);
+            colParams.setMarginEnd(4);
+            col.setLayoutParams(colParams);
+
+            // Cột bar
+            View bar = new View(requireContext());
+            int barHeightPx = maxVal == 0 ? 4 : (int) ((float) val / maxVal * (chartHeightPx - 8));
+            barHeightPx = Math.max(barHeightPx, 8); // min height
+            LinearLayout.LayoutParams barParams = new LinearLayout.LayoutParams(
+                    (int)(20 * getResources().getDisplayMetrics().density), barHeightPx);
+            bar.setLayoutParams(barParams);
+
+            // Màu: highlight ngày cao nhất bằng tím đậm, còn lại tím nhạt
+            bar.setBackgroundResource(i == maxIdx
+                    ? R.drawable.bg_chart_bar
+                    : R.drawable.bg_step_inactive);
+
+            col.addView(bar);
+            chartContainer.addView(col);
+        }
+
+        // Cập nhật badge %
+        String sign = data.weeklyChangePercent >= 0 ? "+" : "";
+        getBinding().tvWeeklyPercent.setText(sign + data.weeklyChangePercent + "%");
+
+        // Nếu âm, đổi màu đỏ
+        if (data.weeklyChangePercent < 0) {
+            getBinding().tvWeeklyPercent.setTextColor(0xFFE74C3C);
+            getBinding().cardWeeklyPercent.setCardBackgroundColor(0xFFFFF0F0);
         } else {
-            showToast("Không tìm thấy thông tin giảng viên");
+            getBinding().tvWeeklyPercent.setTextColor(0xFF2ECC71);
+            getBinding().cardWeeklyPercent.setCardBackgroundColor(0xFFF0FFF8);
         }
     }
 
@@ -168,5 +329,16 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
                     break;
             }
         });
+    }
+
+    private void loadMyCourses() {
+        SessionManager session = new SessionManager(requireContext());
+        Integer tid = session.getTeacherId();
+        if (tid != null) {
+            coursesLoaded = true;
+            courseViewModel.loadMyCourses(tid);
+        } else {
+            showToast("Không tìm thấy thông tin giảng viên");
+        }
     }
 }

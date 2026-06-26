@@ -16,11 +16,21 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".ui.teacher.grading.GradingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.student.learning.LearningActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
+            android:exported="false" />
+        <activity
             android:name=".ui.teacher.CourseFormActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".ui.student.course_detail.CourseDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.student.course_detail.PaymentWebViewActivity"
             android:exported="false" />
         <activity
             android:name=".ui.TeacherMainActivity"

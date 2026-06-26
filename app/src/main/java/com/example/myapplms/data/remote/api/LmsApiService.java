@@ -3,10 +3,16 @@ package com.example.myapplms.data.remote.api;
 import com.example.myapplms.data.remote.dto.request.CourseRequest;
 import com.example.myapplms.data.remote.dto.request.CreateCommentRequest;
 import com.example.myapplms.data.remote.dto.request.CreatePostRequest;
+import com.example.myapplms.data.remote.dto.request.CreateReviewRequest;
+import com.example.myapplms.data.remote.dto.request.GradeSubmissionRequest;
 import com.example.myapplms.data.remote.dto.request.LoginRequest;
 import com.example.myapplms.data.remote.dto.request.PaymentCheckoutRequest;
 import com.example.myapplms.data.remote.dto.request.PaymentWebhookRequest;
 import com.example.myapplms.data.remote.dto.request.RefreshTokenRequest;
+import com.example.myapplms.data.remote.dto.request.SubmitAssignmentRequest;
+import com.example.myapplms.data.remote.dto.request.SubmitGradeRequest;
+import com.example.myapplms.data.remote.dto.request.SubmitQuizRequest;
+import com.example.myapplms.data.remote.dto.request.SyncVideoRequest;
 import com.example.myapplms.data.remote.dto.request.VoteRequest;
 import com.example.myapplms.data.remote.dto.request.RegisterRequest;
 import com.example.myapplms.data.remote.dto.request.StudentRequest;
@@ -14,9 +20,21 @@ import com.example.myapplms.data.remote.dto.request.TeacherRequest;
 import com.example.myapplms.data.remote.dto.response.ApiResponse;
 import com.example.myapplms.data.remote.dto.response.AuthResponse;
 import com.example.myapplms.data.remote.dto.response.CategoryResponse;
+import com.example.myapplms.data.remote.dto.response.DiscussionResponse;
+import com.example.myapplms.data.remote.dto.response.EnrollmentStatusResponse;
+import com.example.myapplms.data.remote.dto.response.GradingListResponse;
 import com.example.myapplms.data.remote.dto.response.NotificationResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentCheckoutResponse;
 import com.example.myapplms.data.remote.dto.response.PaymentWebhookResponse;
+import com.example.myapplms.data.remote.dto.response.SubmissionResponse;
+import com.example.myapplms.data.remote.dto.response.TeacherStatsResponse;
+import com.example.myapplms.data.remote.dto.response.DashboardOverviewResponse;
+import com.example.myapplms.data.remote.dto.response.RecentActivityResponse;
+import com.example.myapplms.data.remote.dto.response.WeeklyActivityResponse;
+import com.example.myapplms.data.remote.dto.response.TaskItemResponse;
+import com.example.myapplms.data.remote.dto.response.TeacherTaskResponse;
+import com.example.myapplms.data.remote.dto.response.UserResponse;
+import com.example.myapplms.data.remote.dto.response.ProgressResponse;
 import com.example.myapplms.data.remote.dto.response.community_response.CommentResponse;
 import com.example.myapplms.data.remote.dto.response.community_response.CommunityActionResponse;
 import com.example.myapplms.data.remote.dto.response.community_response.CommunityStatsResponse;
@@ -33,13 +51,16 @@ import com.example.myapplms.model.Course;
 
 import java.util.List;
 
+import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.Multipart;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -145,7 +166,7 @@ public interface LmsApiService {
     Call<StudentResponse> updateStudent(@Path("id") Integer studentId,
                                         @Body StudentRequest request);
 
-    @GET("v1/courses")
+    @GET("v1/courses/explore")
     Call<List<CourseResponse>> getCourses();
     @GET("v1/courses/teacher/{id}")
     Call<List<CourseResponse>> getCoursesByTeacherId(@Path("id") Integer id);
@@ -161,8 +182,18 @@ public interface LmsApiService {
     Call<List<ReviewResponse>> getCourseReviews(@Path("courseId") int courseId);
 
     // Vote review (Để sẵn cho tính năng vote sau này)
-    @PUT("v1/courses/{courseId}/reviews/{reviewId}/vote")
+    @PUT("courses/{courseId}/reviews/{reviewId}/vote")
     Call<ReviewResponse> voteReview(@Path("courseId") int courseId, @Path("reviewId") String reviewId, @Body VoteRequest request);
+
+    // MỚI: Gửi đánh giá mới — BE tự lấy studentId từ JWT, không gửi từ client
+    @POST("courses/{courseId}/reviews")
+    Call<ReviewResponse> createReview(@Path("courseId") int courseId, @Body CreateReviewRequest request);
+
+    // MỚI: Check trạng thái mua khóa học (enrolled + enrollmentId) — GET thuần,
+    // không tạo Payment/PayOS như checkout(). Dùng để hiện/ẩn form review,
+    // và để biết enrollmentId trước khi cho phép review.
+    @GET("courses/{courseId}/enrollment-status")
+    Call<EnrollmentStatusResponse> getEnrollmentStatus(@Path("courseId") int courseId);
     @POST("v1/courses")
     Call<CourseResponse> createCourse(@Body CourseRequest request);
 
@@ -176,6 +207,70 @@ public interface LmsApiService {
     // data/remote/LmsApiService.java
     @GET("v1/categories")
     Call<List<CategoryResponse>> getCategories();
+    // --- LEARNING WORKSPACE ---
+    @GET("v1/learn/courses/{courseId}/progress")
+    Call<ProgressResponse> getProgress(@Path("courseId") int courseId);
+
+    @PUT("v1/learn/courses/{courseId}/lessons/{lessonId}/sync")
+    Call<Void> syncVideoProgress(@Path("courseId") int courseId, @Path("lessonId") String lessonId, @Body SyncVideoRequest request);
+
+    // Upload ảnh — multipart
+    @Multipart
+    @POST("upload/avatar")
+    Call<UserResponse> uploadAvatar(@Part MultipartBody.Part file);
+
+    @Multipart
+    @POST("upload/course-thumbnail")   // chỉnh lại đúng endpoint của bạn
+    Call<CourseResponse> uploadCourseImage(@Part MultipartBody.Part file);
+
+    // API Lấy dữ liệu Dashboard cho Giáo viên (legacy)
+    @GET("teachers/{id}/dashboard")
+    Call<TeacherStatsResponse> getTeacherDashboardStats(@Path("id") Integer teacherId);
+
+    // ── Teacher Dashboard v2 ──────────────────────────────────
+    @GET("teacher-dashboard/overview")
+    Call<DashboardOverviewResponse> getTeacherOverview();
+
+    @GET("teacher-dashboard/recent-activities")
+    Call<List<RecentActivityResponse>> getRecentActivities();
+
+    @GET("teacher-dashboard/weekly-activity")
+    Call<WeeklyActivityResponse> getWeeklyActivity();
+
+    @GET("teacher-dashboard/tasks")
+    Call<TeacherTaskResponse> getTasks();
+
+
+    @POST("v1/learn/courses/{courseId}/lessons/{lessonId}/submit-quiz")
+    Call<ProgressResponse> submitQuiz(@Path("courseId") int courseId, @Path("lessonId") String lessonId, @Body SubmitQuizRequest request);
+
+    @POST("v1/learn/courses/{courseId}/lessons/{lessonId}/submit-assignment")
+    Call<ProgressResponse> submitAssignment(@Path("courseId") int courseId, @Path("lessonId") String lessonId, @Body SubmitAssignmentRequest request);
+
+    @GET("v1/learn/courses/{courseId}/lessons/{lessonId}/discussions")
+    Call<List<com.example.myapplms.data.remote.dto.response.DiscussionResponse>> getDiscussions(
+            @Path("courseId") int courseId,
+            @Path("lessonId") String lessonId
+    );
+
+    @POST("v1/learn/courses/{courseId}/lessons/{lessonId}/discussions")
+    Call<DiscussionResponse> createDiscussion(
+            @Path("courseId") int courseId,
+            @Path("lessonId") String lessonId,
+            @Body com.example.myapplms.data.remote.dto.request.CreateDiscussionRequest request
+    );
+// Thêm vào cuối interface LmsApiService.java (trước dấu } cuối cùng)
+
+// ── Grading (Teacher) ──────────────────────────────────────────────────────
+
+    /** Danh sách sinh viên + trạng thái chấm điểm theo khóa học */
+    @GET("v1/course-grades/grading/{courseId}")
+    Call<GradingListResponse> getGradingList(@Path("courseId") int courseId);
+
+    /** Giáo viên nhập examScore → BE tính quizAvg, finalScore, gradeLevel → ghi CourseGrade */
+    @POST("v1/course-grades/grading/submit")
+    Call<GradingListResponse.StudentGradingItem> submitGrade(@Body SubmitGradeRequest request);
+
 }
 
 

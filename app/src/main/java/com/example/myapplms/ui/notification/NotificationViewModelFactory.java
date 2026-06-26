@@ -17,17 +17,20 @@ public class NotificationViewModelFactory implements ViewModelProvider.Factory {
 
     private final NotificationRepository repository;
     private final NotificationDao notificationDao;
+    private final int studentId;
 
     public NotificationViewModelFactory(NotificationRepository repository,
-                                        NotificationDao notificationDao) {
+                                        NotificationDao notificationDao,
+                                        int studentId) {
         this.repository = repository;
         this.notificationDao = notificationDao;
+        this.studentId = studentId;
     }
 
     @NonNull
     @Override
     @SuppressWarnings("unchecked")
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new NotificationsViewModel(repository, notificationDao);
+        return (T) new NotificationsViewModel(repository, notificationDao, studentId);
     }
 }

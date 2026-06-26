@@ -17,12 +17,21 @@ public class ModuleAdapter extends RecyclerView.Adapter<ModuleAdapter.ModuleView
     private final List<CourseModule> moduleList;
     // Mảng lưu trạng thái đóng/mở của từng module
     private final boolean[] isExpandedArray;
+    private final LessonAdapter.OnLessonClickListener lessonClickListener; // <-- 1. Khai báo
+    private java.util.List<String> completedLessons = new java.util.ArrayList<>();
 
-    public ModuleAdapter(List<CourseModule> moduleList) {
+    // <-- 2. Sửa lại Constructor
+    public ModuleAdapter(List<CourseModule> moduleList, LessonAdapter.OnLessonClickListener listener) {
         this.moduleList = moduleList;
+        this.lessonClickListener = listener;
         this.isExpandedArray = new boolean[moduleList.size()];
-        // Mặc định cho Module đầu tiên mở ra (giống ảnh)
         if(isExpandedArray.length > 0) isExpandedArray[0] = true;
+    }
+    public void setCompletedLessons(java.util.List<String> completedLessons) {
+        if (completedLessons != null) {
+            this.completedLessons = completedLessons;
+            notifyDataSetChanged();
+        }
     }
 
     @NonNull
@@ -39,24 +48,24 @@ public class ModuleAdapter extends RecyclerView.Adapter<ModuleAdapter.ModuleView
 
         holder.tvModuleTitle.setText(module.title);
         holder.tvLessonCount.setText(module.lessons.size() + " lessons");
-
-        // Đổi icon mũi tên lên/xuống
         holder.ivArrow.setRotation(isExpanded ? 180f : 0f);
 
-        // Hiển thị hoặc ẩn RecyclerView con (Bài học)
         if (isExpanded) {
             holder.rvLessons.setVisibility(View.VISIBLE);
-            LessonAdapter lessonAdapter = new LessonAdapter(module.lessons);
+            LessonAdapter lessonAdapter = new LessonAdapter(module.lessons, lessonClickListener);
+
+            // THÊM ĐÚNG DÒNG NÀY:
+            lessonAdapter.setCompletedLessons(completedLessons);
+
             holder.rvLessons.setLayoutManager(new LinearLayoutManager(holder.itemView.getContext()));
             holder.rvLessons.setAdapter(lessonAdapter);
         } else {
             holder.rvLessons.setVisibility(View.GONE);
         }
 
-        // Bắt sự kiện click vào Header của Module để thu/phóng
         holder.layoutHeader.setOnClickListener(v -> {
             isExpandedArray[position] = !isExpandedArray[position];
-            notifyItemChanged(position); // Render lại đúng item này mượt mà
+            notifyItemChanged(position);
         });
     }
 
