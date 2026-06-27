@@ -27,7 +27,7 @@ public class CurriculumFragment extends Fragment {
     private ProgressBar progressBar;
     private TextView tvStats;
 
-    private boolean isPurchased = true;
+    private boolean isPurchased;
     private com.example.myapplms.ui.student.course_detail.adapter.ModuleAdapter adapter;
 
     public static CurriculumFragment newInstance(int courseId) {
@@ -70,6 +70,16 @@ public class CurriculumFragment extends Fragment {
 
         int courseId = requireActivity().getIntent().getIntExtra("COURSE_ID", -1);
         if (courseId != -1) {
+            // Lắng nghe trạng thái khóa học để gán isPurchased
+            sharedViewModel.getEnrollmentStatus(courseId).observe(getViewLifecycleOwner(), resource -> {
+                if (resource != null && resource.status == com.example.myapplms.utils.Resource.Status.SUCCESS && resource.data != null) {
+                    isPurchased = resource.data.enrolled;
+                    if (isPurchased && adapter != null) {
+                        loadProgressIntoAdapter(adapter, courseId);
+                    }
+                }
+            });
+
             observeCourseContent(courseId);
         }
     }
@@ -105,9 +115,17 @@ public class CurriculumFragment extends Fragment {
                                 }
                                 startActivity(intent);
                             } else {
-                                // 🔥 FIX CRASH 2: Kiểm tra an toàn cho Boolean isPreview để tránh NullPointer
-                                if (Boolean.TRUE.equals(lesson.isPreview)) {
-                                    Toast.makeText(getContext(), "Tính năng xem thử đang phát triển: " + lesson.title, Toast.LENGTH_SHORT).show();
+                                if (lesson.isPreview) {
+                                    Intent intent = new Intent(getContext(), LearningActivity.class);
+                                    intent.putExtra("COURSE_ID", courseId);
+                                    intent.putExtra("LESSON_ID", lesson.lessonId);
+                                    intent.putExtra("LESSON_TYPE", lesson.type);
+                                    intent.putExtra("LESSON_TITLE", lesson.title);
+                                    intent.putExtra("IS_PREVIEW_MODE", true);
+                                    if (lesson.content != null) {
+                                        intent.putExtra("CONTENT_JSON", new com.google.gson.Gson().toJson(lesson.content));
+                                    }
+                                    startActivity(intent);
                                 } else {
                                     Toast.makeText(getContext(), "Vui lòng mua khóa học để xem bài giảng này!", Toast.LENGTH_SHORT).show();
                                 }

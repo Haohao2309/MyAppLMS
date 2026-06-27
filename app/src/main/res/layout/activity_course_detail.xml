@@ -38,8 +38,7 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="16dp"
                     android:background="@drawable/bg_circle_translucent"
-                    android:src="@android:drawable/ic_menu_revert"
-                    android:tint="@color/white"
+                    android:src="@drawable/ic_arrow_back"
                     android:elevation="4dp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />

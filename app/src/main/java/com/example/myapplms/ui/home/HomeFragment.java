@@ -44,7 +44,8 @@ public class HomeFragment extends Fragment {
     private ProgressBar pbLoading;
     private ImageView ivAvatar;
     private TextView tvUserName;
-    private ImageButton btnNotification, btnSearch;
+    private ImageButton btnNotification;
+    private View layoutSearchBar;
     private RecyclerView rvContinueLearning, rvFeatured, rvRecommended;
     private View layoutContinueEmpty;
     private Button btnBannerCta;
@@ -88,7 +89,7 @@ public class HomeFragment extends Fragment {
         ivAvatar          = view.findViewById(R.id.ivAvatar);
         tvUserName        = view.findViewById(R.id.tvUserName);
         btnNotification   = view.findViewById(R.id.btnNotification);
-        btnSearch         = view.findViewById(R.id.btnSearch);
+        layoutSearchBar   = view.findViewById(R.id.layoutSearchBar);
         rvContinueLearning = view.findViewById(R.id.rvContinueLearning);
         rvFeatured        = view.findViewById(R.id.rvFeatured);
         rvRecommended     = view.findViewById(R.id.rvRecommended);
@@ -103,7 +104,7 @@ public class HomeFragment extends Fragment {
         TextView tvExploreAll   = view.findViewById(R.id.tvExploreAll);
 
         btnNotification.setOnClickListener(v -> navigateTo(new NotificationsFragment()));
-        btnSearch.setOnClickListener(v -> navigateTo(new ExploreListCourseFragment()));
+        layoutSearchBar.setOnClickListener(v -> navigateTo(new ExploreListCourseFragment()));
         tvMyCourses.setOnClickListener(v -> navigateTo(new ExploreListCourseFragment()));
         tvSeeAllFeatured.setOnClickListener(v -> navigateTo(new ExploreListCourseFragment()));
         tvExploreAll.setOnClickListener(v -> navigateTo(new ExploreListCourseFragment()));
@@ -232,10 +233,11 @@ public class HomeFragment extends Fragment {
                     });
                 }
 
-                // 3. Recommended: tất cả khóa học
+                // 3. Recommended: chỉ hiển thị top 5 khóa học
                 List<Course> recommendedList = new ArrayList<>();
-                for (CourseResponse cr : allCourses) {
-                    recommendedList.add(Course.fromResponse(cr));
+                int recommendedLimit = Math.min(allCourses.size(), 5);
+                for (int i = 0; i < recommendedLimit; i++) {
+                    recommendedList.add(Course.fromResponse(allCourses.get(i)));
                 }
                 requireActivity().runOnUiThread(() -> {
                     if (!isAdded()) return;

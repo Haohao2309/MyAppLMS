@@ -62,6 +62,24 @@ public class CommunityFragment extends Fragment {
                                 break;
                             }
                         }
+                    } else if (data != null && data.hasExtra("likedPostId")) {
+                        boolean postEditedOrPinned = data.getBooleanExtra("postEditedOrPinned", false);
+                        if (postEditedOrPinned) {
+                            viewModel.refreshPosts();
+                        } else {
+                            String likedPostId = data.getStringExtra("likedPostId");
+                            int likesCount = data.getIntExtra("likesCount", 0);
+                            boolean likedByMe = data.getBooleanExtra("likedByMe", false);
+                            
+                            for (int i = 0; i < postList.size(); i++) {
+                                if (postList.get(i).id.equals(likedPostId)) {
+                                    postList.get(i).likes = likesCount;
+                                    postList.get(i).likedByMe = likedByMe;
+                                    adapter.notifyItemChanged(i);
+                                    break;
+                                }
+                            }
+                        }
                     } else if (data != null && data.hasExtra("searchTag")) {
                         String tag = data.getStringExtra("searchTag");
                         onTagClickFromDetail(tag);

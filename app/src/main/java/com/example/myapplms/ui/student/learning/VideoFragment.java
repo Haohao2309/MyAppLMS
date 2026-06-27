@@ -126,8 +126,14 @@ public class VideoFragment extends Fragment {
                     LearningActivity parentActivity = (LearningActivity) getActivity();
                     if (parentActivity != null && totalSeconds > 0) {
                         SyncVideoRequest request = new SyncVideoRequest((int) totalSeconds, (int) totalSeconds);
-                        parentActivity.getViewModel().syncVideoProgress(courseId, lessonId, request);
-                        new Handler(Looper.getMainLooper()).postDelayed(() -> parentActivity.loadProgress(), 500);
+                        if (!parentActivity.isPreviewMode()) {
+                            parentActivity.getViewModel().syncVideoProgress(courseId, lessonId, request)
+                                .observe(getViewLifecycleOwner(), resource -> {
+                                    if (resource.status == com.example.myapplms.utils.Resource.Status.SUCCESS) {
+                                        parentActivity.loadProgress();
+                                    }
+                                });
+                        }
                     }
                 }
             }
@@ -195,8 +201,14 @@ public class VideoFragment extends Fragment {
                     LearningActivity parentActivity = (LearningActivity) getActivity();
                     if (parentActivity != null) {
                         SyncVideoRequest request = new SyncVideoRequest((int) currentSeconds, (int) totalSeconds);
-                        parentActivity.getViewModel().syncVideoProgress(courseId, lessonId, request);
-                        new Handler(Looper.getMainLooper()).postDelayed(() -> parentActivity.loadProgress(), 500);
+                        if (!parentActivity.isPreviewMode()) {
+                            parentActivity.getViewModel().syncVideoProgress(courseId, lessonId, request)
+                                .observe(getViewLifecycleOwner(), resource -> {
+                                    if (resource.status == com.example.myapplms.utils.Resource.Status.SUCCESS) {
+                                        parentActivity.loadProgress();
+                                    }
+                                });
+                        }
                     }
                 }
                 syncHandler.postDelayed(this, 10000);

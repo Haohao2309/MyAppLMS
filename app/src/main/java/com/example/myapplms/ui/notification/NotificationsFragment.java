@@ -72,7 +72,6 @@ public class NotificationsFragment extends BaseFragment<FragmentNotificationsBin
     @Override
     protected void setupListeners() {
         getBinding().btnMarkAllRead.setOnClickListener(v -> viewModel.markAllAsRead());
-        getBinding().btnSettings.setOnClickListener(v -> showToast("Settings Clicked"));
     }
 
     @Override
@@ -107,6 +106,17 @@ public class NotificationsFragment extends BaseFragment<FragmentNotificationsBin
                 (notification, position) -> {
                     // Bấm vào → markAsRead → Room cập nhật → LiveData emit → UI tự refresh
                     viewModel.markAsRead(notification.getId());
+                    
+                    if (notification.getLink() != null && notification.getLink().startsWith("course://")) {
+                        try {
+                            int courseId = Integer.parseInt(notification.getLink().replace("course://", ""));
+                            android.content.Intent intent = new android.content.Intent(requireContext(), com.example.myapplms.ui.student.course_detail.CourseDetailActivity.class);
+                            intent.putExtra("COURSE_ID", courseId);
+                            startActivity(intent);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
                 });
         getBinding().rvNotifications.setLayoutManager(new LinearLayoutManager(requireContext()));
         getBinding().rvNotifications.setAdapter(adapter);

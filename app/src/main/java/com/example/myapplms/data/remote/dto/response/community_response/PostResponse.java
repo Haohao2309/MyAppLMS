@@ -21,6 +21,8 @@ public class PostResponse {
     // 🌟 SỬA DÒNG NÀY: Đồng bộ thành "pinned" để khớp 100% với Spring Boot của sếp
     @SerializedName("pinned")
     public boolean pinned;
+    
+    public boolean likedByMe;
 
     public List<String> tags;
 }

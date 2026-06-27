@@ -43,7 +43,9 @@ public class LearningActivity extends AppCompatActivity {
     private int courseId;
 
     private ModuleAdapter menuAdapter;
-    private String currentLessonId;
+    private String currentLessonId = null;
+    private java.util.List<com.example.myapplms.model.course_content.CourseModule> currentModules;
+    private boolean isPreviewMode = false;
     private ExtendedFloatingActionButton fabDiscussion;
     private ImageView ivMenuToggle;
 
@@ -53,6 +55,7 @@ public class LearningActivity extends AppCompatActivity {
         setContentView(R.layout.activity_learning);
 
         courseId = getIntent().getIntExtra("COURSE_ID", -1);
+        isPreviewMode = getIntent().getBooleanExtra("IS_PREVIEW_MODE", false);
         View dl = findViewById(R.id.drawer_layout);
         if (dl instanceof DrawerLayout) {
             drawerLayout = (DrawerLayout) dl;
@@ -72,6 +75,8 @@ public class LearningActivity extends AppCompatActivity {
         LearningRepository learningRepo = new LearningRepository(apiService);
         LearningViewModelFactory learningFactory = new LearningViewModelFactory(learningRepo);
         viewModel = new ViewModelProvider(this, learningFactory).get(LearningViewModel.class);
+        
+        setupProgressObserver();
 
         // 2. Khởi tạo CourseDetailViewModel (Để tải danh sách Sidebar Menu giống hệt CurriculumFragment)
         CourseDetailRepository detailRepo = new CourseDetailRepository(apiService);
@@ -98,13 +103,20 @@ public class LearningActivity extends AppCompatActivity {
 
                 // Đổ dữ liệu vào Adapter
                 menuAdapter = new ModuleAdapter(resource.data.modules, lesson -> {
+                    if (isPreviewMode && !lesson.isPreview) {
+                        Toast.makeText(this, "Vui lòng mua khóa học để xem bài giảng này!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     String contentStr = lesson.content != null ? new Gson().toJson(lesson.content) : "{}";
                     openLessonFragment(lesson.lessonId, lesson.type, contentStr, lesson.title, lesson.duration);
                 });
                 rvMenu.setAdapter(menuAdapter);
 
-                // Load tiến độ tích xanh NGAY SAU KHI Sidebar đã có danh sách
-                loadProgress();
+                currentModules = resource.data.modules;
+                // Load tiến độ tích xanh NGAY SAU KHI Sidebar đã có danh sách (chỉ gọi nếu không ở chế độ xem thử)
+                if (!isPreviewMode) {
+                    loadProgress();
+                }
             }
         });
 
@@ -128,13 +140,60 @@ public class LearningActivity extends AppCompatActivity {
             openLessonFragment(initialLessonId, initialType, initialContent, initialTitle, initialDuration);
         }
     }
+    
+    public boolean isPreviewMode() {
+        return isPreviewMode;
+    }
 
     public void loadProgress() {
-        viewModel.getProgress(courseId).observe(this, resource -> {
+        viewModel.fetchProgress(courseId);
+    }
+
+    private void setupProgressObserver() {
+        viewModel.getProgressLiveData().observe(this, resource -> {
             if (resource.status == Resource.Status.SUCCESS && resource.data != null) {
                 // Cập nhật dấu tích xanh cho danh sách bên Sidebar Menu
                 if (menuAdapter != null) {
                     menuAdapter.setCompletedLessons(resource.data.completedLessons);
+                }
+                
+                // Cập nhật phần trăm tiến độ lên UI
+                if (resource.data.overallProgress != null) {
+                    int progressPercent = (int) Math.round(resource.data.overallProgress);
+                    androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar_learning);
+                    if (toolbar != null) {
+                        toolbar.setTitle("Tiến độ: " + progressPercent + "%");
+                    }
+                    android.widget.ProgressBar pb = findViewById(R.id.pb_learning_progress);
+                    if (pb != null) {
+                        pb.setProgress(progressPercent);
+                    }
+                }
+                
+                // Tự động mở bài học hiện tại nếu chưa có bài học nào được mở
+                if (this.currentLessonId == null && currentModules != null) {
+                    boolean found = false;
+                    if (resource.data.currentLesson != null) {
+                        for (com.example.myapplms.model.course_content.CourseModule module : currentModules) {
+                            if (module.lessons != null) {
+                                for (com.example.myapplms.model.course_content.CourseLesson lesson : module.lessons) {
+                                    if (lesson.lessonId.equals(resource.data.currentLesson)) {
+                                        String contentStr = lesson.content != null ? new com.google.gson.Gson().toJson(lesson.content) : "{}";
+                                        openLessonFragment(lesson.lessonId, lesson.type, contentStr, lesson.title, lesson.duration);
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (found) break;
+                        }
+                    }
+                    // Nếu không có tiến độ nào hoặc không tìm thấy bài đang học, mở bài học đầu tiên
+                    if (!found && currentModules.size() > 0 && currentModules.get(0).lessons != null && currentModules.get(0).lessons.size() > 0) {
+                        com.example.myapplms.model.course_content.CourseLesson lesson = currentModules.get(0).lessons.get(0);
+                        String contentStr = lesson.content != null ? new com.google.gson.Gson().toJson(lesson.content) : "{}";
+                        openLessonFragment(lesson.lessonId, lesson.type, contentStr, lesson.title, lesson.duration);
+                    }
                 }
             }
         });
