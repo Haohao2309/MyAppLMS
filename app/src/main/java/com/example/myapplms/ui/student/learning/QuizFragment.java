@@ -104,7 +104,7 @@ public class QuizFragment extends Fragment {
         // 🟢 BƯỚC KIỂM TRA ĐẦU VÀO: Truy vấn dữ liệu tiến độ thực tế từ Sổ điểm (Gradebook)
         LearningActivity parentActivity = (LearningActivity) getActivity();
         if (parentActivity != null) {
-            parentActivity.getViewModel().getProgress(courseId).observe(getViewLifecycleOwner(), resource -> {
+            parentActivity.getViewModel().getProgressLiveData().observe(getViewLifecycleOwner(), resource -> {
                 if (resource.status == Resource.Status.SUCCESS && resource.data != null) {
                     ProgressResponse progress = resource.data;
 
@@ -274,6 +274,10 @@ public class QuizFragment extends Fragment {
 
         LearningActivity parentActivity = (LearningActivity) getActivity();
         if (parentActivity != null) {
+            if (parentActivity.isPreviewMode()) {
+                Toast.makeText(getContext(), "Tính năng nộp bài không hỗ trợ khi xem thử!", Toast.LENGTH_SHORT).show();
+                return;
+            }
             parentActivity.getViewModel().submitQuiz(courseId, lessonId, request).observe(getViewLifecycleOwner(), resource -> {
                 switch (resource.status) {
                     case LOADING:

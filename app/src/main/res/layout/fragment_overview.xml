@@ -202,27 +202,18 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Spacer để đẩy nút xuống dưới cùng nếu màn hình dài -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
-        <com.google.android.material.button.MaterialButton
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_buy_course"
             android:layout_width="match_parent"
             android:layout_height="60dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp"
             android:text="Mua khóa học ngay"
             android:textColor="@color/white"
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:textStyle="bold"
-            app:cornerRadius="30dp"
-            app:backgroundTint="@color/indigo_600"
-            app:icon="@android:drawable/ic_menu_add"
-            app:iconGravity="textStart"
-            app:iconPadding="8dp"
-            app:elevation="4dp"
-            app:rippleColor="@color/primary_light" />
+            android:background="@drawable/bg_gradient_buy_button"
+            android:textAllCaps="false" />
 
     </LinearLayout>
 

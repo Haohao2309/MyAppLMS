@@ -146,7 +146,8 @@ public class CommunityViewModel extends ViewModel {
                     if (currentList != null) {
                         for (PostResponse post : currentList) {
                             if (post.id.equals(postId)) {
-                                post.likes = response.body().likesCount; // Đã đồng bộ trường dữ liệu số lượt thích
+                                post.likes = response.body().likesCount; 
+                                post.likedByMe = response.body().liked;
                                 break;
                             }
                         }

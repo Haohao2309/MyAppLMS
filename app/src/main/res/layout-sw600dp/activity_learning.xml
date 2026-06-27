@@ -26,12 +26,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="@color/indigo_600"
-                app:title="Đang học"
+                app:title="Tiến độ: 0%"
                 app:titleTextColor="@color/white">
                 
                 <!-- Bỏ iv_menu_toggle đi vì giao diện Tablet luôn hiện sẵn menu bên phải, không cần nút bật/tắt nữa -->
                 
             </androidx.appcompat.widget.Toolbar>
+
+            <ProgressBar
+                android:id="@+id/pb_learning_progress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="4dp"
+                android:maxHeight="4dp"
+                android:progressTint="@color/success_green"
+                android:progressBackgroundTint="@color/indigo_200"
+                android:max="100"
+                android:progress="0" />
         </com.google.android.material.appbar.AppBarLayout>
 
         <FrameLayout

@@ -115,11 +115,16 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             holder.tvRoleChip.setVisibility(View.GONE);
         }
 
-        // 4. Định danh "Tác giả" bài viết
-        if (currentUserId != null && currentUserId.equals(post.userId)) {
+        // 4. Định danh "Tác giả" bài viết & Ẩn hiện nút sửa xóa
+        boolean isAuthor = currentUserId != null && currentUserId.equals(post.userId);
+        if (isAuthor) {
             holder.tvAuthorIdentity.setVisibility(View.VISIBLE);
         } else {
             holder.tvAuthorIdentity.setVisibility(View.GONE);
+        }
+        
+        if (holder.btnMore != null) {
+            holder.btnMore.setVisibility(isAuthor ? View.VISIBLE : View.GONE);
         }
 
         // 5. Hot Badge Logic
@@ -137,6 +142,16 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             holder.layoutPinnedBadge.setVisibility(View.GONE);
             holder.cardPost.setCardBackgroundColor(Color.WHITE);
             holder.cardPost.setStrokeColor(Color.parseColor("#E5E7EB")); // Mặc định gray-200
+        }
+
+        // BỔ SUNG: Xử lý màu sắc nút Like
+        if (holder.ivLike != null) {
+            holder.ivLike.setImageResource(R.drawable.ic_heart);
+            if (post.likedByMe) {
+                holder.ivLike.setColorFilter(Color.parseColor("#F59E0B")); // Accent color
+            } else {
+                holder.ivLike.setColorFilter(Color.parseColor("#6B7280")); // text_secondary
+            }
         }
 
         // 6. Gán sự kiện Click xử lý tập trung

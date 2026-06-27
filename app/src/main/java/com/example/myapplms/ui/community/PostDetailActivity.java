@@ -42,6 +42,7 @@ public class PostDetailActivity extends AppCompatActivity {
     private com.google.android.material.card.MaterialCardView cardPostDetail;
     private android.widget.LinearLayout layoutDetailTagsContainer, layoutHotBadge;
     private String selectedParentCommentId = null;
+    private boolean postEditedOrPinned = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,7 +123,10 @@ public class PostDetailActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
-        btnBack.setOnClickListener(v -> finish());
+        btnBack.setOnClickListener(v -> {
+            passBackLikeData();
+            finish();
+        });
         ivLike.setOnClickListener(v -> viewModel.toggleLike(postId));
         btnSendComment.setOnClickListener(v -> {
             String content = etComment.getText().toString().trim();
@@ -174,6 +178,24 @@ public class PostDetailActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onBackPressed() {
+        passBackLikeData();
+        super.onBackPressed();
+    }
+
+    private void passBackLikeData() {
+        PostDetailResponse current = viewModel.postDetail.getValue();
+        if (current != null) {
+            Intent data = new Intent();
+            data.putExtra("likedPostId", postId);
+            data.putExtra("likesCount", current.likes);
+            data.putExtra("likedByMe", current.likedByMe);
+            data.putExtra("postEditedOrPinned", postEditedOrPinned);
+            setResult(RESULT_OK, data);
+        }
+    }
+
     private void renderPost(PostDetailResponse detail) {
         if (detail == null) return;
 
@@ -199,13 +221,23 @@ public class PostDetailActivity extends AppCompatActivity {
             tvRoleChip.setVisibility(View.GONE);
         }
 
-        // Author identity logic
+        // Author identity & Permissions logic
         SessionManager sessionManager = new SessionManager(this);
         String currentUserId = sessionManager.getUserId();
-        if (currentUserId != null && currentUserId.equals(detail.userId)) {
+        String userRole = sessionManager.getRole();
+        boolean isAuthor = currentUserId != null && currentUserId.equals(detail.userId);
+        boolean isPrivileged = "ADMIN".equalsIgnoreCase(userRole) || "TEACHER".equalsIgnoreCase(userRole);
+
+        if (isAuthor) {
             tvAuthorIdentity.setVisibility(View.VISIBLE);
         } else {
             tvAuthorIdentity.setVisibility(View.GONE);
+        }
+
+        if (isAuthor || isPrivileged) {
+            btnMore.setVisibility(View.VISIBLE);
+        } else {
+            btnMore.setVisibility(View.GONE);
         }
 
         ivLike.setImageResource(R.drawable.ic_heart);
@@ -321,8 +353,8 @@ public class PostDetailActivity extends AppCompatActivity {
             public void onResponse(retrofit2.Call<PostResponse> call, retrofit2.Response<PostResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     Toast.makeText(PostDetailActivity.this, "Đã cập nhật trạng thái ghim", Toast.LENGTH_SHORT).show();
+                    postEditedOrPinned = true;
                     viewModel.loadDetail(postId); // Refresh detail
-                    setResult(RESULT_OK); // Notify list to refresh
                 }
             }
 
@@ -397,8 +429,8 @@ public class PostDetailActivity extends AppCompatActivity {
                     if (response.isSuccessful()) {
                         Toast.makeText(PostDetailActivity.this, "Cập nhật thành công!", Toast.LENGTH_SHORT).show();
                         dialog.dismiss();
+                        postEditedOrPinned = true;
                         viewModel.loadDetail(currentPost.id);
-                        setResult(RESULT_OK);
                     } else {
                         Toast.makeText(PostDetailActivity.this, "Lỗi phản hồi: " + response.code(), Toast.LENGTH_SHORT).show();
                     }

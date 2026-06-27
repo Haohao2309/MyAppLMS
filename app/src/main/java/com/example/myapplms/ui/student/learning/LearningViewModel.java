@@ -23,13 +23,17 @@ public class LearningViewModel extends ViewModel {
     }
 
     // 1. Lấy tiến độ
-    public LiveData<Resource<ProgressResponse>> getProgress(int courseId) {
-        return repository.getProgress(courseId);
+    public LiveData<Resource<ProgressResponse>> getProgressLiveData() {
+        return repository.getProgressLiveData();
+    }
+
+    public void fetchProgress(int courseId) {
+        repository.fetchProgress(courseId);
     }
 
     // 2. Đồng bộ Video ngầm
-    public void syncVideoProgress(int courseId, String lessonId, SyncVideoRequest request) {
-        repository.syncVideoProgress(courseId, lessonId, request);
+    public LiveData<Resource<Void>> syncVideoProgress(int courseId, String lessonId, SyncVideoRequest request) {
+        return repository.syncVideoProgress(courseId, lessonId, request);
     }
 
     // 3. Nộp Quiz

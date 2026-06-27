@@ -56,7 +56,7 @@ public class AssignmentFragment extends Fragment {
 
         LearningActivity parentActivity = (LearningActivity) getActivity();
         if (parentActivity != null) {
-            parentActivity.getViewModel().getProgress(courseId).observe(getViewLifecycleOwner(), resource -> {
+            parentActivity.getViewModel().getProgressLiveData().observe(getViewLifecycleOwner(), resource -> {
                 if (resource != null && resource.data != null) {
                     com.example.myapplms.data.remote.dto.response.ProgressResponse progress = resource.data;
                     int attempts = 0;
@@ -97,6 +97,10 @@ public class AssignmentFragment extends Fragment {
 
             // GỌI API NỘP BÀI TẬP:
             if (parentActivity != null) {
+                if (parentActivity.isPreviewMode()) {
+                    Toast.makeText(getContext(), "Tính năng nộp bài không hỗ trợ khi xem thử!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 parentActivity.getViewModel().submitAssignment(courseId, lessonId, request).observe(getViewLifecycleOwner(), resource -> {
                     switch (resource.status) {
                         case LOADING:
