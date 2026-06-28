@@ -116,6 +116,15 @@ public class NotificationsFragment extends BaseFragment<FragmentNotificationsBin
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
+                    } else if (notification.getLink() != null && notification.getLink().startsWith("community/")) {
+                        try {
+                            String postId = notification.getLink().replace("community/", "");
+                            android.content.Intent intent = new android.content.Intent(requireContext(), com.example.myapplms.ui.community.PostDetailActivity.class);
+                            intent.putExtra("POST_ID", postId);
+                            startActivity(intent);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 });
         getBinding().rvNotifications.setLayoutManager(new LinearLayoutManager(requireContext()));

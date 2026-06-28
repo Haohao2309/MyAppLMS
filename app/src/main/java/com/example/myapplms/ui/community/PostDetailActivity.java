@@ -191,6 +191,7 @@ public class PostDetailActivity extends AppCompatActivity {
             data.putExtra("likedPostId", postId);
             data.putExtra("likesCount", current.likes);
             data.putExtra("likedByMe", current.likedByMe);
+            data.putExtra("viewsCount", current.views);
             data.putExtra("postEditedOrPinned", postEditedOrPinned);
             setResult(RESULT_OK, data);
         }
@@ -226,7 +227,7 @@ public class PostDetailActivity extends AppCompatActivity {
         String currentUserId = sessionManager.getUserId();
         String userRole = sessionManager.getRole();
         boolean isAuthor = currentUserId != null && currentUserId.equals(detail.userId);
-        boolean isPrivileged = "ADMIN".equalsIgnoreCase(userRole) || "TEACHER".equalsIgnoreCase(userRole);
+        boolean isPrivileged = "ADMIN".equalsIgnoreCase(userRole);
 
         if (isAuthor) {
             tvAuthorIdentity.setVisibility(View.VISIBLE);
@@ -241,18 +242,11 @@ public class PostDetailActivity extends AppCompatActivity {
         }
 
         ivLike.setImageResource(R.drawable.ic_heart);
-        ivLike.setColorFilter(detail.likedByMe ? getResources().getColor(R.color.accent) : getResources().getColor(R.color.text_secondary));
+        ivLike.setColorFilter(detail.likedByMe ? getResources().getColor(R.color.error) : getResources().getColor(R.color.text_secondary));
 
-        // BỔ SUNG: Xử lý Ghim trong Detail
-        if (detail.pinned) {
-            layoutPinnedBadgeDetail.setVisibility(View.VISIBLE);
-            cardPostDetail.setCardBackgroundColor(android.graphics.Color.parseColor("#FFFBEB"));
-            cardPostDetail.setStrokeColor(android.graphics.Color.parseColor("#FDE68A"));
-        } else {
-            layoutPinnedBadgeDetail.setVisibility(View.GONE);
-            cardPostDetail.setCardBackgroundColor(android.graphics.Color.WHITE);
-            cardPostDetail.setStrokeColor(getResources().getColor(R.color.indigo_100));
-        }
+        layoutPinnedBadgeDetail.setVisibility(View.GONE);
+        cardPostDetail.setCardBackgroundColor(android.graphics.Color.WHITE);
+        cardPostDetail.setStrokeColor(getResources().getColor(R.color.indigo_100));
 
         // Hot Badge Logic
         boolean isHot = detail.views > 30 || detail.likes > 5 || detail.commentsCount > 3;
@@ -321,15 +315,22 @@ public class PostDetailActivity extends AppCompatActivity {
 
         SessionManager sessionManager = new SessionManager(this);
         String userRole = sessionManager.getRole();
+        String currentUserId = sessionManager.getUserId();
 
         List<String> options = new ArrayList<>();
-        options.add("Sửa bài viết");
-        options.add("Xóa bài viết");
+        
+        boolean isAuthor = currentUserId != null && currentUserId.equals(currentPost.userId);
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(userRole);
 
-        boolean canPin = "ADMIN".equalsIgnoreCase(userRole) || "TEACHER".equalsIgnoreCase(userRole);
-        if (canPin) {
-            options.add(currentPost.pinned ? "Bỏ ghim bài viết" : "Ghim bài viết");
+        if (isAuthor) {
+            options.add("Sửa bài viết");
         }
+        
+        if (isAuthor || isAdmin) {
+            options.add("Xóa bài viết");
+        }
+
+        if (options.isEmpty()) return;
 
         new AlertDialog.Builder(this)
                 .setItems(options.toArray(new String[0]), (dialog, which) -> {
@@ -338,31 +339,9 @@ public class PostDetailActivity extends AppCompatActivity {
                         showEditPostDialog(currentPost);
                     } else if (selected.equals("Xóa bài viết")) {
                         showDeletePostDialog();
-                    } else if (selected.contains("ghim")) {
-                        togglePinDetail();
                     }
                 })
                 .show();
-    }
-
-    private void togglePinDetail() {
-        LMSApplication app = (LMSApplication) getApplication();
-        CommunityRepository repository = new CommunityRepository(app.getRetrofitClient().getApiService());
-        repository.togglePin(postId).enqueue(new retrofit2.Callback<PostResponse>() {
-            @Override
-            public void onResponse(retrofit2.Call<PostResponse> call, retrofit2.Response<PostResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    Toast.makeText(PostDetailActivity.this, "Đã cập nhật trạng thái ghim", Toast.LENGTH_SHORT).show();
-                    postEditedOrPinned = true;
-                    viewModel.loadDetail(postId); // Refresh detail
-                }
-            }
-
-            @Override
-            public void onFailure(retrofit2.Call<PostResponse> call, Throwable t) {
-                Toast.makeText(PostDetailActivity.this, "Lỗi kết nối", Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     // 2. VIẾT MỚI HÀM TÁI SỬ DỤNG DIALOG ĐĂNG BÀI ĐỂ LÀM GIAO DIỆN SỬA BÀI VIẾT
