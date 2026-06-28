@@ -33,4 +33,7 @@ public class CourseResponse {
 
     @SerializedName("averageRating")
     public Double averageRating;
+
+    @SerializedName("purchased")
+    public Boolean purchased;
 }

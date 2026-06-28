@@ -222,7 +222,7 @@ public class LearningActivity extends AppCompatActivity {
                 break;
 
             case "assignment":
-                fragment = AssignmentFragment.newInstance(courseId, lessonId);
+                fragment = AssignmentFragment.newInstance(courseId, lessonId, contentJson);
                 break;
         }
 

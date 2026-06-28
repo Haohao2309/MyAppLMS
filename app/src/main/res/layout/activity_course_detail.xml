@@ -40,6 +40,7 @@
                     android:background="@drawable/bg_circle_translucent"
                     android:src="@drawable/ic_arrow_back"
                     android:elevation="4dp"
+                    app:tint="@color/white"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 

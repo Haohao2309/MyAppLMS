@@ -118,7 +118,8 @@ public class QuizFragment extends Fragment {
                             if (lessonId.equals(detail.lessonId)) {
                                 if (detail.attemptCount != null) attempts = detail.attemptCount;
                                 if (detail.maxAttempts != null) maxAttempts = detail.maxAttempts;
-                                if (detail.score != null && "completed".equals(detail.status)) {
+                                // HIỂN THỊ ĐIỂM NẾU ĐÃ LÀM BÀI (CÓ LƯỢT LÀM > 0 VÀ CÓ ĐIỂM)
+                                if (detail.score != null && attempts > 0) {
                                     finalScoreValue = detail.score;
                                     identityFound = true;
                                 }
@@ -135,7 +136,7 @@ public class QuizFragment extends Fragment {
                     }
                     
                     // LUÔN CẬP NHẬT GIAO DIỆN SỐ LƯỢT LÀM BÀI ĐỂ KHI BẤM 'LÀM LẠI' NÓ KHÔNG BỊ HIỆN 0/5
-                    tvQuizAttempts.setText("🔄 Lượt: " + attempts + " / " + maxAttempts);
+                    tvQuizAttempts.setText("Lượt: " + attempts + " / " + maxAttempts);
                     if (attempts >= maxAttempts) {
                         Toast.makeText(getContext(), "Bạn đã hết lượt làm bài!", Toast.LENGTH_LONG).show();
                         btnSubmit.setEnabled(false);
@@ -161,7 +162,7 @@ public class QuizFragment extends Fragment {
 
     private void startTimer() {
         if (durationSeconds <= 0) {
-            tvQuizTimer.setText("⏱ Không giới hạn");
+            tvQuizTimer.setText("Không giới hạn");
             return;
         }
 
@@ -171,7 +172,7 @@ public class QuizFragment extends Fragment {
                 long totalSecs = millisUntilFinished / 1000;
                 long minutes = totalSecs / 60;
                 long seconds = totalSecs % 60;
-                tvQuizTimer.setText(String.format("⏱ %02d:%02d", minutes, seconds));
+                tvQuizTimer.setText(String.format("%02d:%02d", minutes, seconds));
                 
                 // Cảnh báo khi còn dưới 1 phút
                 if (totalSecs <= 60 && isAdded()) {
@@ -180,7 +181,7 @@ public class QuizFragment extends Fragment {
             }
 
             public void onFinish() {
-                tvQuizTimer.setText("⏱ 00:00");
+                tvQuizTimer.setText("00:00");
                 Toast.makeText(getContext(), "Hết giờ làm bài! Hệ thống tự động nộp bài.", Toast.LENGTH_LONG).show();
                 submitQuiz();
             }
@@ -281,10 +282,10 @@ public class QuizFragment extends Fragment {
             parentActivity.getViewModel().submitQuiz(courseId, lessonId, request).observe(getViewLifecycleOwner(), resource -> {
                 switch (resource.status) {
                     case LOADING:
-                        Toast.makeText(getContext(), "Đang gửi bài và chấm điểm...", Toast.LENGTH_SHORT).show();
+                        // Toast.makeText(getContext(), "Đang gửi bài và chấm điểm...", Toast.LENGTH_SHORT).show();
                         break;
                     case SUCCESS:
-                        Toast.makeText(getContext(), "Nộp bài thành công!", Toast.LENGTH_SHORT).show();
+                        // Toast.makeText(getContext(), "Nộp bài thành công!", Toast.LENGTH_SHORT).show();
 
                         // 1. Cập nhật lại thanh tiến độ và dấu tích xanh ở thanh Menu bên ngoài
                         parentActivity.loadProgress();
@@ -306,7 +307,7 @@ public class QuizFragment extends Fragment {
                         }
                         break;
                     case ERROR:
-                        Toast.makeText(getContext(), "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
+                        // Toast.makeText(getContext(), "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
                         break;
                 }
             });
