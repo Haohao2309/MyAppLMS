@@ -151,10 +151,10 @@ public class CourseRepository {
      * Lấy phân trang khóa học explore cho student (8 bản ghi/trang).
      * Trả về Resource đồng bộ để dùng trong ExecutorService.
      */
-    public com.example.myapplms.utils.Resource<PagedResponse<CourseResponse>> getExploreCoursesPagedStudent(int page, int size) {
+    public com.example.myapplms.utils.Resource<PagedResponse<CourseResponse>> getExploreCoursesPagedStudent(int page, int size, String search, String category, String price, String rating) {
         try {
             retrofit2.Response<PagedResponse<CourseResponse>> response =
-                    apiService.getExploreCoursesPagedStudent(page, size).execute();
+                    apiService.getExploreCoursesPagedStudent(page, size, search, category, price, rating).execute();
             if (response.isSuccessful() && response.body() != null) {
                 return com.example.myapplms.utils.Resource.success(response.body());
             }
@@ -167,10 +167,10 @@ public class CourseRepository {
     /**
      * Lấy phân trang khóa học explore cho teacher (8 bản ghi/trang).
      */
-    public com.example.myapplms.utils.Resource<PagedResponse<CourseResponse>> getExploreCoursesPagedTeacher(int page, int size) {
+    public com.example.myapplms.utils.Resource<PagedResponse<CourseResponse>> getExploreCoursesPagedTeacher(int page, int size, String search, String category, String price, String rating) {
         try {
             retrofit2.Response<PagedResponse<CourseResponse>> response =
-                    apiService.getExploreCoursesPagedTeacher(page, size).execute();
+                    apiService.getExploreCoursesPagedTeacher(page, size, search, category, price, rating).execute();
             if (response.isSuccessful() && response.body() != null) {
                 return com.example.myapplms.utils.Resource.success(response.body());
             }

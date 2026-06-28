@@ -272,7 +272,7 @@ public class HomeFragment extends Fragment {
     // ── Recommended Courses (Paged) ───────────────────────────
     private void loadRecommendedCourses(int page) {
         isLoadingRecommended = true;
-        apiService.getExploreCoursesPagedStudent(page, 8).enqueue(new Callback<PagedResponse<CourseResponse>>() {
+        apiService.getExploreCoursesPagedStudent(page, 8, null, null, null, null).enqueue(new Callback<PagedResponse<CourseResponse>>() {
             @Override
             public void onResponse(Call<PagedResponse<CourseResponse>> call, Response<PagedResponse<CourseResponse>> response) {
                 if (!isAdded()) return;

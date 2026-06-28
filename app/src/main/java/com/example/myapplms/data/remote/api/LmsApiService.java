@@ -185,14 +185,22 @@ public interface LmsApiService {
     @GET("v1/courses/explore/paged")
     Call<PagedResponse<CourseResponse>> getExploreCoursesPagedStudent(
             @Query("page") int page,
-            @Query("size") int size
+            @Query("size") int size,
+            @Query("search") String search,
+            @Query("category") String category,
+            @Query("price") String price,
+            @Query("rating") String rating
     );
 
     /** Phân trang khóa học explore (teacher — dùng JWT để lấy teacherId) */
     @GET("v1/courses/explore/me/paged")
     Call<PagedResponse<CourseResponse>> getExploreCoursesPagedTeacher(
             @Query("page") int page,
-            @Query("size") int size
+            @Query("size") int size,
+            @Query("search") String search,
+            @Query("category") String category,
+            @Query("price") String price,
+            @Query("rating") String rating
     );
 
     @GET("v1/courses/{id}/content")

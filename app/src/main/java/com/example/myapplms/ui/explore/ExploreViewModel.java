@@ -37,6 +37,12 @@ public class ExploreViewModel extends ViewModel {
     private int _totalPages  = 1;
     private boolean _isTeacher = false;
 
+    // State cho Filters
+    private String _currentSearch = null;
+    private String _currentCategory = "All";
+    private String _currentPrice = "All";
+    private String _currentRating = "Any";
+
     public ExploreViewModel(CourseRepository courseRepository) {
         this.courseRepository = courseRepository;
     }
@@ -55,7 +61,23 @@ public class ExploreViewModel extends ViewModel {
         return _courses;
     }
 
-    // ── Phân trang (server-side) ──────────────────────────────────
+    // ── Phân trang & Lọc (server-side) ──────────────────────────────────
+
+    public void applySearch(String search) {
+        this._currentSearch = search;
+        loadFirstPage(_isTeacher);
+    }
+
+    public void applyCategory(String category) {
+        this._currentCategory = category;
+        loadFirstPage(_isTeacher);
+    }
+
+    public void applyFilters(String price, String rating) {
+        this._currentPrice = price;
+        this._currentRating = rating;
+        loadFirstPage(_isTeacher);
+    }
 
     /**
      * Load trang đầu tiên khi vào màn Explore.
@@ -84,9 +106,9 @@ public class ExploreViewModel extends ViewModel {
         executor.execute(() -> {
             Resource<PagedResponse<CourseResponse>> result;
             if (_isTeacher) {
-                result = courseRepository.getExploreCoursesPagedTeacher(page, PAGE_SIZE);
+                result = courseRepository.getExploreCoursesPagedTeacher(page, PAGE_SIZE, _currentSearch, _currentCategory, _currentPrice, _currentRating);
             } else {
-                result = courseRepository.getExploreCoursesPagedStudent(page, PAGE_SIZE);
+                result = courseRepository.getExploreCoursesPagedStudent(page, PAGE_SIZE, _currentSearch, _currentCategory, _currentPrice, _currentRating);
             }
             if (result.data != null) {
                 _currentPage = result.data.page;

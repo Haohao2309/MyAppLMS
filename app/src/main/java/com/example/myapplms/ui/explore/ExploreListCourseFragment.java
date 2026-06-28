@@ -225,11 +225,8 @@ public class ExploreListCourseFragment extends BaseFragment<FragmentExploreListC
             setCategoryChipState(tv, true);
             currentSelectedCategoryTv = tv;
 
-            // Gọi hàm lọc Course trong Adapter
-            if (adapter != null) {
-                adapter.filterByCategory(categoryName);
-                updateCourseCountText();
-            }
+            // Lọc theo Category qua Server
+            viewModel.applyCategory(categoryName);
         });
 
         return tv;
@@ -263,21 +260,19 @@ public class ExploreListCourseFragment extends BaseFragment<FragmentExploreListC
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                adapter.filter(s.toString());
-                updateCourseCountText();
+                // Remove debounce to keep it simple, just apply search when typed
             }
 
             @Override
-            public void afterTextChanged(android.text.Editable s) {}
+            public void afterTextChanged(android.text.Editable s) {
+                viewModel.applySearch(s.toString());
+            }
         });
         getBinding().btnFilter.setOnClickListener(v -> {
             FilterBottomSheetFragment filterSheet = new FilterBottomSheetFragment();
 
             filterSheet.setFilterListener((level, price, rating) -> {
-                if (adapter != null) {
-                    adapter.advancedFilter(level, price, rating);
-                    updateCourseCountText();
-                }
+                viewModel.applyFilters(price, rating);
             });
 
             filterSheet.show(getParentFragmentManager(), "FilterBottomSheet");
