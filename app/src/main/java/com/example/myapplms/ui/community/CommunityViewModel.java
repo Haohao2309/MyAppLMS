@@ -45,44 +45,45 @@ public class CommunityViewModel extends ViewModel {
     public CommunityViewModel(CommunityRepository repository) {
         this.repository = repository;
     }
-
+    // 1. Lấy danh sách bài viết 
     public void fetchPosts(String category, String query, String sortBy, boolean isLoadMore) {
-        if (Boolean.TRUE.equals(_isLoading.getValue())) return;
+        if (Boolean.TRUE.equals(_isLoading.getValue())) return; 
         if (isLoadMore && isLastPage) return;
 
-        if (!isLoadMore) {
-            currentPage = 1;
+        if (!isLoadMore) {  
+            currentPage = 1;   // Nếu là làm mới (kéo xuống refresh hoặc đổi filter), reset về trang 1
             isLastPage = false;
             fetchStats();
         } else {
-            currentPage++;
+            currentPage++;  // Nếu là cuộn xuống đáy (load more), tăng trang lên
         }
 
-        currentCategory = category;
+        currentCategory = category; 
         currentQuery = query;
         currentSortBy = sortBy;
-        _isLoading.setValue(true);
+        _isLoading.setValue(true); // Hiển thị vòng xoay tải dữ liệu
 
+        // gọi api từ repository để lấy danh sách bài viết 
         repository.getPosts(category, query, sortBy, currentPage, pageSize).enqueue(new Callback<List<PostResponse>>() {
             @Override
             public void onResponse(Call<List<PostResponse>> call, Response<List<PostResponse>> response) {
-                _isLoading.setValue(false);
+                _isLoading.setValue(false); //  Tắt loading 
                 if (response.isSuccessful() && response.body() != null) {
                     List<PostResponse> newPosts = response.body();
                     if (newPosts.size() < pageSize) {
-                        isLastPage = true;
+                        isLastPage = true; // Nếu API trả về ít hơn số lượng trong 1 trang (10 bài), nghĩa là đã hết sạch data
                     }
 
                     if (isLoadMore) {
                         List<PostResponse> currentList = new ArrayList<>(_posts.getValue() != null ? _posts.getValue() : new ArrayList<>());
-                        currentList.addAll(newPosts);
+                        currentList.addAll(newPosts); // Thêm bài mới vào cuối danh sách cũ
                         _posts.setValue(currentList);
                     } else {
                         _posts.setValue(newPosts);
                     }
-                } else {
+                } else { // Lấy thất bại (ví dụ: lỗi mạng, lỗi server 500,...) 
                     _errorMessage.setValue("Lỗi lấy dữ liệu: " + response.code());
-                    if (isLoadMore) currentPage--;
+                    if (isLoadMore) currentPage--; // Đặt lại số trang về trước 
                 }
             }
 
@@ -144,14 +145,15 @@ public class CommunityViewModel extends ViewModel {
                 if (response.isSuccessful() && response.body() != null) {
                     List<PostResponse> currentList = _posts.getValue();
                     if (currentList != null) {
-                        for (PostResponse post : currentList) {
+                        List<PostResponse> newList = new ArrayList<>(currentList);
+                        for (PostResponse post : newList) {
                             if (post.id.equals(postId)) {
                                 post.likes = response.body().likesCount; 
                                 post.likedByMe = response.body().liked;
                                 break;
                             }
                         }
-                        _posts.setValue(currentList);
+                        _posts.setValue(newList);
                     }
                 }
             }
@@ -163,42 +165,7 @@ public class CommunityViewModel extends ViewModel {
         });
     }
 
-    // 🌟 DÁN ĐÈ HÀM NÀY VÀO CommunityViewModel.java CỦA FRAGMENT
-    public void togglePin(String postId) {
-        repository.togglePin(postId).enqueue(new Callback<PostResponse>() {
-            @Override
-            public void onResponse(Call<PostResponse> call, Response<PostResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<PostResponse> currentList = _posts.getValue();
-                    if (currentList != null) {
-                        List<PostResponse> updatedList = new ArrayList<>(currentList);
-                        for (int i = 0; i < updatedList.size(); i++) {
-                            if (updatedList.get(i).id.equals(postId)) {
-                                updatedList.set(i, response.body());
-                                break;
-                            }
-                        }
 
-                        updatedList.sort((p1, p2) -> {
-                            if (p1.pinned != p2.pinned) {
-                                return Boolean.compare(p2.pinned, p1.pinned);
-                            }
-                            return p2.id.compareTo(p1.id);
-                        });
-
-                        _posts.setValue(updatedList);
-                    }
-                } else {
-                    _errorMessage.setValue("Lỗi thao tác ghim: Mã lỗi " + response.code());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<PostResponse> call, Throwable t) {
-                _errorMessage.setValue("Lỗi kết nối: " + t.getMessage());
-            }
-        });
-    }
 
     public void removePostLocally(String postId) {
         List<PostResponse> currentList = _posts.getValue();
@@ -215,6 +182,24 @@ public class CommunityViewModel extends ViewModel {
             if (removed) {
                 _posts.setValue(newList);
             }
+        }
+    }
+
+    public void updatePostLikeLocally(String postId, int likesCount, boolean likedByMe, int viewsCount) {
+        List<PostResponse> currentList = _posts.getValue();
+        if (currentList != null) {
+            List<PostResponse> newList = new ArrayList<>(currentList);
+            for (PostResponse post : newList) {
+                if (post.id.equals(postId)) {
+                    post.likes = likesCount;
+                    post.likedByMe = likedByMe;
+                    if (viewsCount >= 0) {
+                        post.views = viewsCount;
+                    }
+                    break;
+                }
+            }
+            _posts.setValue(newList);
         }
     }
 

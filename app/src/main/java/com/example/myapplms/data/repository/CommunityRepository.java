@@ -59,8 +59,4 @@ public class CommunityRepository {
     public Call<CommunityStatsResponse> getCommunityStats() {
         return apiService.getCommunityStats();
     }
-
-    public Call<PostResponse> togglePin(String postId) {
-        return apiService.togglePin(postId);
-    }
 }

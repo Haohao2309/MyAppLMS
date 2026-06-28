@@ -23,19 +23,20 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     private final List<PostResponse> postList;
     private final OnPostClickListener listener;
     private final String currentUserId;
+    private final String userRole;
 
     public interface OnPostClickListener {
         void onPostClick(PostResponse post);
         void onLikeClick(PostResponse post);
         void onDeleteClick(PostResponse post);
         void onTagClick(String tag);
-        void onPinClick(PostResponse post);
     }
 
-    public PostAdapter(List<PostResponse> postList, OnPostClickListener listener, String currentUserId) {
+    public PostAdapter(List<PostResponse> postList, OnPostClickListener listener, String currentUserId, String userRole) {
         this.postList = postList;
         this.listener = listener;
         this.currentUserId = currentUserId;
+        this.userRole = userRole;
     }
 
     @NonNull
@@ -124,7 +125,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         }
         
         if (holder.btnMore != null) {
-            holder.btnMore.setVisibility(isAuthor ? View.VISIBLE : View.GONE);
+            boolean isAdmin = "ADMIN".equalsIgnoreCase(userRole);
+            holder.btnMore.setVisibility((isAuthor || isAdmin) ? View.VISIBLE : View.GONE);
         }
 
         // 5. Hot Badge Logic
@@ -133,22 +135,15 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             holder.layoutHotBadge.setVisibility(isHot ? View.VISIBLE : View.GONE);
         }
 
-        // 🌟 BỔ SUNG: Xử lý Ghim (Pinned Post)
-        if (post.pinned) {
-            holder.layoutPinnedBadge.setVisibility(View.VISIBLE);
-            holder.cardPost.setCardBackgroundColor(Color.parseColor("#FFFBEB")); // Vàng nhạt (Amber 50)
-            holder.cardPost.setStrokeColor(Color.parseColor("#FDE68A")); // Vàng đậm hơn (Amber 200)
-        } else {
-            holder.layoutPinnedBadge.setVisibility(View.GONE);
-            holder.cardPost.setCardBackgroundColor(Color.WHITE);
-            holder.cardPost.setStrokeColor(Color.parseColor("#E5E7EB")); // Mặc định gray-200
-        }
+        holder.cardPost.setCardBackgroundColor(Color.WHITE);
+        holder.cardPost.setStrokeColor(Color.parseColor("#E5E7EB")); // Mặc định gray-200
+        holder.layoutPinnedBadge.setVisibility(View.GONE);
 
         // BỔ SUNG: Xử lý màu sắc nút Like
         if (holder.ivLike != null) {
             holder.ivLike.setImageResource(R.drawable.ic_heart);
             if (post.likedByMe) {
-                holder.ivLike.setColorFilter(Color.parseColor("#F59E0B")); // Accent color
+                holder.ivLike.setColorFilter(Color.parseColor("#EF4444")); // Red color for Like
             } else {
                 holder.ivLike.setColorFilter(Color.parseColor("#6B7280")); // text_secondary
             }
