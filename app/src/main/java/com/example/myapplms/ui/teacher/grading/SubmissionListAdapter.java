@@ -1,5 +1,7 @@
 package com.example.myapplms.ui.teacher.grading;
 
+import static com.example.myapplms.utils.TimeUtils.formatToRelativeTime;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,7 +72,7 @@ public class SubmissionListAdapter extends RecyclerView.Adapter<SubmissionListAd
 
             // Thời gian nộp
             tvTime.setText(item.getSubmittedAt() != null
-                    ? formatRelativeTime(item.getSubmittedAt()) : "Chưa nộp");
+                    ? formatToRelativeTime(item.getSubmittedAt()) : "Chưa nộp");
 
             // Trạng thái
             if (item.isGraded()) {

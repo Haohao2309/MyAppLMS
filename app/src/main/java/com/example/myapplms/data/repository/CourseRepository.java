@@ -72,7 +72,7 @@ public class CourseRepository {
         // Báo LOADING ngay lập tức
         result.postValue(Resource.loading());
 
-        apiService.getCoursesByTeacherId(teacherId).enqueue(new Callback<List<CourseResponse>>() {
+        apiService.getExploreCoursesTea().enqueue(new Callback<List<CourseResponse>>() {
             @Override
             public void onResponse(Call<List<CourseResponse>> call,
                                    Response<List<CourseResponse>> response) {

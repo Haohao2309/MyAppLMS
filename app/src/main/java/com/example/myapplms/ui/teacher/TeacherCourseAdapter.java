@@ -4,11 +4,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.example.myapplms.R;
 import com.example.myapplms.model.Course;
 
@@ -47,6 +51,13 @@ public class TeacherCourseAdapter extends RecyclerView.Adapter<TeacherCourseAdap
         holder.tvLessons.setText(course.lessons != null ? course.lessons : "");
         holder.tvDuration.setText(course.duration != null ? course.duration : "");
         holder.tvStatus.setText("Published");
+        if (course.imageUrl != null && !course.imageUrl.isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(course.imageUrl)
+                    .placeholder(R.drawable.ic_person)
+                    .transform(new CenterCrop(), new RoundedCorners(24))
+                    .into(holder.ivThumbnail);
+        }
 
         // Truyền toàn bộ Course object để CourseFormActivity có đủ data điền vào form
         holder.btnEdit.setOnClickListener(v -> {
@@ -62,6 +73,8 @@ public class TeacherCourseAdapter extends RecyclerView.Adapter<TeacherCourseAdap
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvTitle, tvCategory, tvPrice, tvStudents, tvLessons, tvDuration, tvStatus;
         ImageButton btnEdit;
+        ImageView ivThumbnail;
+
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -73,6 +86,7 @@ public class TeacherCourseAdapter extends RecyclerView.Adapter<TeacherCourseAdap
             tvDuration = itemView.findViewById(R.id.tvDuration);
             tvStatus   = itemView.findViewById(R.id.tvStatus);
             btnEdit    = itemView.findViewById(R.id.btnEdit);
+            ivThumbnail = itemView.findViewById(R.id.ivThumbnail);
         }
     }
 }
