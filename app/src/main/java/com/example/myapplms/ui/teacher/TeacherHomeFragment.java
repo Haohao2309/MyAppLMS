@@ -111,6 +111,7 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
             intent.putExtra(CourseFormActivity.EXTRA_COURSE_DESCRIPTION, course.description);
             intent.putExtra(CourseFormActivity.EXTRA_COURSE_PRICE,       course.priceText);
             intent.putExtra(CourseFormActivity.EXTRA_COURSE_IMAGE_URL,   course.imageUrl != null ? course.imageUrl : "");
+            intent.putExtra(CourseFormActivity.EXTRA_COURSE_CATEGORY,    course.category != null ? course.category : "");
             courseFormLauncher.launch(intent);
         });
 

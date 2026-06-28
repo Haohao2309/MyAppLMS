@@ -21,6 +21,9 @@ import com.example.myapplms.utils.SessionManager;
 import com.example.myapplms.utils.UriToFileUtil;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import com.example.myapplms.data.remote.dto.response.CategoryResponse;
 
 public class CourseFormActivity extends AppCompatActivity {
 
@@ -29,6 +32,7 @@ public class CourseFormActivity extends AppCompatActivity {
     public static final String EXTRA_COURSE_DESCRIPTION = "extra_course_description";
     public static final String EXTRA_COURSE_PRICE       = "extra_course_price";
     public static final String EXTRA_COURSE_IMAGE_URL   = "extra_course_image_url";
+    public static final String EXTRA_COURSE_CATEGORY    = "extra_course_category";
 
     private ActivityCourseFormBinding binding;
     private TeacherCourseViewModel viewModel;
@@ -38,6 +42,8 @@ public class CourseFormActivity extends AppCompatActivity {
     private int teacherId = -1;
     private int categoryId = 1;
     private String selectedLevel = "Beginner";
+    
+    private List<CategoryResponse> loadedCategories = new ArrayList<>();
 
     private String uploadedImageUrl = "";
 
@@ -75,6 +81,8 @@ public class CourseFormActivity extends AppCompatActivity {
         setupListeners();
         observeResults();
         observeUpload();
+        
+        viewModel.loadCategories();
     }
 
     private int getTeacherId() {
@@ -99,12 +107,17 @@ public class CourseFormActivity extends AppCompatActivity {
     }
 
     private void setupSpinners() {
-        // Category
-        String[] categories = {"Development", "Design", "Data Science", "Marketing", "Business"};
-        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, categories);
-        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        binding.spinnerCategory.setAdapter(categoryAdapter);
+        // Cập nhật categoryId khi chọn
+        binding.spinnerCategory.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                if (loadedCategories != null && position < loadedCategories.size()) {
+                    categoryId = loadedCategories.get(position).getId();
+                }
+            }
+            @Override
+            public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+        });
 
         // Language
         String[] languages = {"English", "Vietnamese", "French", "Spanish"};
@@ -169,13 +182,21 @@ public class CourseFormActivity extends AppCompatActivity {
             String description = getIntent().getStringExtra(EXTRA_COURSE_DESCRIPTION);
             String imageUrl = getIntent().getStringExtra(EXTRA_COURSE_IMAGE_URL);
             String priceText = getIntent().getStringExtra(EXTRA_COURSE_PRICE);
+            String category = getIntent().getStringExtra(EXTRA_COURSE_CATEGORY);
 
             if (title != null) binding.etTitle.setText(title);
             if (description != null) binding.etDescription.setText(description);
-//            if (imageUrl != null) binding.etImageUrl.setText(imageUrl);
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                uploadedImageUrl = imageUrl;
+                Glide.with(this).load(imageUrl).into(binding.ivThumbnailPreview);
+                binding.ivThumbnailPreview.setVisibility(View.VISIBLE);
+                binding.layoutUploadPlaceholder.setVisibility(View.GONE);
+                binding.btnChangeThumbnail.setVisibility(View.VISIBLE);
+            }
             if (priceText != null && !priceText.equals("FREE")) {
                 binding.etPrice.setText(priceText.replace("$", "").trim());
             }
+            // Category sẽ được chọn trong observeResults() sau khi call API thành công
         } else {
             // ── Chế độ TẠO MỚI ───────────────────────────────
             binding.tvFormTitle.setText("Create New Course");
@@ -301,6 +322,48 @@ public class CourseFormActivity extends AppCompatActivity {
                     binding.progressBar.setVisibility(View.GONE);
                     binding.btnSubmit.setEnabled(true);
                     Toast.makeText(this, result.message, Toast.LENGTH_LONG).show();
+                    break;
+            }
+        });
+
+        viewModel.categories.observe(this, result -> {
+            if (result == null) return;
+            switch (result.status) {
+                case SUCCESS:
+                    if (result.data != null) {
+                        loadedCategories.clear();
+                        loadedCategories.addAll(result.data);
+
+                        List<String> categoryNames = new ArrayList<>();
+                        for (CategoryResponse cat : loadedCategories) {
+                            categoryNames.add(cat.getName());
+                        }
+
+                        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(this,
+                                android.R.layout.simple_spinner_item, categoryNames);
+                        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        binding.spinnerCategory.setAdapter(categoryAdapter);
+
+                        // Chọn category nếu đang ở chế độ sửa
+                        if (isEditMode()) {
+                            String category = getIntent().getStringExtra(EXTRA_COURSE_CATEGORY);
+                            if (category != null) {
+                                for (int i = 0; i < loadedCategories.size(); i++) {
+                                    if (loadedCategories.get(i).getName().equalsIgnoreCase(category)) {
+                                        binding.spinnerCategory.setSelection(i);
+                                        categoryId = loadedCategories.get(i).getId();
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case ERROR:
+                    Toast.makeText(this, "Không thể tải danh sách thể loại", Toast.LENGTH_SHORT).show();
+                    break;
+                case LOADING:
+                    // Có thể show loading nhẹ ở spinner
                     break;
             }
         });
