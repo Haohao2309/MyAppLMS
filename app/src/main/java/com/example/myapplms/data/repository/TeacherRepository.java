@@ -6,10 +6,12 @@ import com.example.myapplms.data.remote.dto.request.TeacherRequest;
 import com.example.myapplms.data.remote.dto.response.TeacherResponse;
 import com.example.myapplms.data.remote.dto.response.TeacherStatsResponse;
 import com.example.myapplms.data.remote.dto.response.DashboardOverviewResponse;
+import com.example.myapplms.data.remote.dto.response.PagedResponse;
 import com.example.myapplms.data.remote.dto.response.RecentActivityResponse;
 import com.example.myapplms.data.remote.dto.response.WeeklyActivityResponse;
 import com.example.myapplms.data.remote.dto.response.TaskItemResponse;
 import com.example.myapplms.data.remote.dto.response.TeacherTaskResponse;
+import com.example.myapplms.data.remote.dto.response.CourseResponse;
 import com.example.myapplms.model.Teacher;
 import com.example.myapplms.utils.Resource;
 
@@ -123,6 +125,40 @@ public class TeacherRepository {
                 return Resource.success(response.body());
             }
             return Resource.error("Lỗi tasks: " + response.code(), null);
+        } catch (IOException e) {
+            return Resource.error("Không có kết nối mạng", null);
+        }
+    }
+
+    // ── Phân trang (server-side) ──────────────────────────────────────────────
+
+    /**
+     * Lấy phân trang hoạt động gần đây (8 bản ghi/trang).
+     */
+    public Resource<PagedResponse<RecentActivityResponse>> getRecentActivitiesPaged(int page, int size) {
+        try {
+            Response<PagedResponse<RecentActivityResponse>> response =
+                    lmsApi.getRecentActivitiesPaged(page, size).execute();
+            if (response.isSuccessful() && response.body() != null) {
+                return Resource.success(response.body());
+            }
+            return Resource.error("Lỗi activities paged: " + response.code(), null);
+        } catch (IOException e) {
+            return Resource.error("Không có kết nối mạng", null);
+        }
+    }
+
+    /**
+     * Lấy phân trang khoá học của teacher (8 bản ghi/trang).
+     */
+    public Resource<PagedResponse<CourseResponse>> getMyCoursesPagedTeacher(int page, int size) {
+        try {
+            Response<PagedResponse<CourseResponse>> response =
+                    lmsApi.getMyCoursesPagedTeacher(page, size).execute();
+            if (response.isSuccessful() && response.body() != null) {
+                return Resource.success(response.body());
+            }
+            return Resource.error("Lỗi courses paged: " + response.code(), null);
         } catch (IOException e) {
             return Resource.error("Không có kết nối mạng", null);
         }

@@ -7,6 +7,7 @@ import com.example.myapplms.data.remote.api.LmsApiService;
 import com.example.myapplms.data.remote.dto.request.CourseRequest;
 import com.example.myapplms.data.remote.dto.response.CategoryResponse;
 import com.example.myapplms.data.remote.dto.response.CourseResponse;
+import com.example.myapplms.data.remote.dto.response.PagedResponse;
 import com.example.myapplms.model.Course;
 import com.example.myapplms.utils.Resource;
 
@@ -144,4 +145,38 @@ public class CourseRepository {
         return result;
     }
 
+    // ── Phân trang (server-side) ─────────────────────────────────────────────
+
+    /**
+     * Lấy phân trang khóa học explore cho student (8 bản ghi/trang).
+     * Trả về Resource đồng bộ để dùng trong ExecutorService.
+     */
+    public com.example.myapplms.utils.Resource<PagedResponse<CourseResponse>> getExploreCoursesPagedStudent(int page, int size) {
+        try {
+            retrofit2.Response<PagedResponse<CourseResponse>> response =
+                    apiService.getExploreCoursesPagedStudent(page, size).execute();
+            if (response.isSuccessful() && response.body() != null) {
+                return com.example.myapplms.utils.Resource.success(response.body());
+            }
+            return com.example.myapplms.utils.Resource.error("Lỗi: " + response.code(), null);
+        } catch (java.io.IOException e) {
+            return com.example.myapplms.utils.Resource.error("Không có kết nối mạng", null);
+        }
+    }
+
+    /**
+     * Lấy phân trang khóa học explore cho teacher (8 bản ghi/trang).
+     */
+    public com.example.myapplms.utils.Resource<PagedResponse<CourseResponse>> getExploreCoursesPagedTeacher(int page, int size) {
+        try {
+            retrofit2.Response<PagedResponse<CourseResponse>> response =
+                    apiService.getExploreCoursesPagedTeacher(page, size).execute();
+            if (response.isSuccessful() && response.body() != null) {
+                return com.example.myapplms.utils.Resource.success(response.body());
+            }
+            return com.example.myapplms.utils.Resource.error("Lỗi: " + response.code(), null);
+        } catch (java.io.IOException e) {
+            return com.example.myapplms.utils.Resource.error("Không có kết nối mạng", null);
+        }
+    }
 }

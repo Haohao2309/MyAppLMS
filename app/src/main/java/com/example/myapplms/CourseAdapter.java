@@ -30,9 +30,11 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.ViewHolder
         this.listener = listener;
     }
     public void updateData(List<Course> newCourses) {
-        this.courseList.clear();
-        this.courseList.addAll(newCourses);
-        this.courseListFull = new ArrayList<>(newCourses); // Sao lưu data gốc
+        if (this.courseList != newCourses) {
+            this.courseList.clear();
+            this.courseList.addAll(newCourses);
+        }
+        this.courseListFull = new ArrayList<>(this.courseList); // Sao lưu data gốc
         notifyDataSetChanged();
     }
     public void filter(String text) {
