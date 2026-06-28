@@ -32,6 +32,7 @@ public class VideoFragment extends Fragment {
     private SeekBar seekbarVideo;
     private TextView tvLessonTitle;
     private YouTubePlayer mYouTubePlayer;
+    private android.widget.LinearLayout layoutControls;
 
     private int courseId;
     private String lessonId;
@@ -41,6 +42,8 @@ public class VideoFragment extends Fragment {
     private float currentSeconds = 0f;
     private float totalSeconds = 0f;
     private boolean isPlaying = false;
+    private boolean isControlsVisible = true;
+    private Runnable hideControlsRunnable;
 
     private Handler syncHandler = new Handler(Looper.getMainLooper());
     private Runnable syncRunnable;
@@ -84,6 +87,7 @@ public class VideoFragment extends Fragment {
         tvTotalTime = view.findViewById(R.id.tv_total_time);
         seekbarVideo = view.findViewById(R.id.seekbar_video);
         tvLessonTitle = view.findViewById(R.id.tv_lesson_title);
+        layoutControls = view.findViewById(R.id.layout_controls);
 
         if (lessonTitle != null && tvLessonTitle != null) {
             tvLessonTitle.setText(lessonTitle);
@@ -155,13 +159,41 @@ public class VideoFragment extends Fragment {
     }
 
     private void setupCustomUi() {
+        hideControlsRunnable = () -> {
+            if (layoutControls != null) {
+                layoutControls.setVisibility(View.GONE);
+                isControlsVisible = false;
+            }
+        };
+
+        // Auto-hide controls sau 3 giây
+        syncHandler.postDelayed(hideControlsRunnable, 3000);
+
+        View.OnClickListener toggleControls = v -> {
+            if (isControlsVisible) {
+                if (layoutControls != null) layoutControls.setVisibility(View.GONE);
+                isControlsVisible = false;
+                syncHandler.removeCallbacks(hideControlsRunnable);
+            } else {
+                if (layoutControls != null) layoutControls.setVisibility(View.VISIBLE);
+                isControlsVisible = true;
+                syncHandler.removeCallbacks(hideControlsRunnable);
+                syncHandler.postDelayed(hideControlsRunnable, 3000);
+            }
+        };
+
+        if(viewCenterClick != null) viewCenterClick.setOnClickListener(toggleControls);
+
         View.OnClickListener togglePlay = v -> {
             if (mYouTubePlayer != null) {
                 if (isPlaying) mYouTubePlayer.pause();
                 else mYouTubePlayer.play();
             }
+            if (isControlsVisible) {
+                syncHandler.removeCallbacks(hideControlsRunnable);
+                syncHandler.postDelayed(hideControlsRunnable, 3000);
+            }
         };
-        if(viewCenterClick != null) viewCenterClick.setOnClickListener(togglePlay);
         if(btnPlayPause != null) btnPlayPause.setOnClickListener(togglePlay);
 
         ImageView btnFullscreen = getView() != null ? getView().findViewById(R.id.btn_fullscreen) : null;
@@ -188,9 +220,14 @@ public class VideoFragment extends Fragment {
     }
 
     private String formatTime(float timeInSeconds) {
-        int minutes = (int) (timeInSeconds / 60);
+        int hours = (int) (timeInSeconds / 3600);
+        int minutes = (int) ((timeInSeconds % 3600) / 60);
         int seconds = (int) (timeInSeconds % 60);
-        return String.format("%d:%02d", minutes, seconds);
+        if (hours > 0) {
+            return String.format(java.util.Locale.getDefault(), "%d:%02d:%02d", hours, minutes, seconds);
+        } else {
+            return String.format(java.util.Locale.getDefault(), "%d:%02d", minutes, seconds);
+        }
     }
 
     private void setupSyncTimer() {
@@ -227,6 +264,9 @@ public class VideoFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         syncHandler.removeCallbacks(syncRunnable);
+        if (hideControlsRunnable != null) {
+            syncHandler.removeCallbacks(hideControlsRunnable);
+        }
         if (youTubePlayerView != null) {
             youTubePlayerView.release();
         }

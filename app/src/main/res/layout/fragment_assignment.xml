@@ -37,9 +37,20 @@
                     style="@style/TextBody1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="🔄 Lượt: 0 / 1"
+                    android:text="Lượt: 0 / 1"
+                    app:drawableStartCompat="@drawable/ic_refresh"
+                    android:drawablePadding="8dp"
+                    app:drawableTint="@color/primary_dark"
                     android:textColor="@color/primary_dark"
                     android:textStyle="bold"
+                    android:layout_marginBottom="@dimen/spacing_large"/>
+
+                <TextView
+                    android:id="@+id/tv_assignment_instructions"
+                    style="@style/TextBody1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Đề bài sẽ hiển thị ở đây..."
                     android:layout_marginBottom="@dimen/spacing_large"/>
 
                 <TextView
