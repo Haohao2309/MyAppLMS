@@ -174,6 +174,9 @@ public interface LmsApiService {
     @GET("v1/courses/{id}")
     Call<CourseResponse> getCourseById(@Path("id") int id);
 
+    @GET("v1/courses/explore/me")
+    Call<List<CourseResponse>> getExploreCoursesTea();
+
     @GET("v1/courses/{id}/content")
     Call<CourseContentResponse> getCourseContent(@Path("id") int id);
 

@@ -15,10 +15,13 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.myapplms.R;
 import com.example.myapplms.data.remote.dto.response.PaymentCheckoutResponse;
+import com.example.myapplms.ui.teacher.TeacherViewModel;
+import com.example.myapplms.utils.SessionManager;
 
 public class OverviewFragment extends Fragment {
 
     private CourseDetailViewModel sharedViewModel;
+    private TeacherViewModel teacherViewModel;
     private TextView tvDescription, tvInstructor, tvCategory, tvPrice;
     private Button btnBuyCourse;
     private androidx.lifecycle.LiveData<com.example.myapplms.utils.Resource<com.example.myapplms.data.remote.dto.response.EnrollmentStatusResponse>> enrollmentLiveData;
@@ -51,7 +54,17 @@ public class OverviewFragment extends Fragment {
         btnBuyCourse = view.findViewById(R.id.btn_buy_course);
 
         // 2. GẮN SỰ KIỆN CLICK VÀO NÚT
-        btnBuyCourse.setOnClickListener(v -> handleCheckout());
+        SessionManager sessionManager = new com.example.myapplms.utils.SessionManager(requireContext());
+        boolean isTeacher = "TEACHER".equalsIgnoreCase(sessionManager.getRole());
+
+        if (isTeacher) {
+            btnBuyCourse.setVisibility(View.GONE);
+        } else {
+            btnBuyCourse.setVisibility(View.VISIBLE);
+            btnBuyCourse.setOnClickListener(v -> handleCheckout());
+        }
+
+
         // Lấy Shared ViewModel từ Activity
         sharedViewModel = new ViewModelProvider(requireActivity()).get(CourseDetailViewModel.class);
 

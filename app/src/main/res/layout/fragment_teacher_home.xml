@@ -32,7 +32,7 @@
                 android:gravity="center_vertical">
 
                 <!-- Avatar circle -->
-                <TextView
+                <ImageView
                     android:id="@+id/tvTeacherInitials"
                     android:layout_width="44dp"
                     android:layout_height="44dp"
@@ -41,7 +41,7 @@
                     android:textColor="@color/white"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    android:background="@drawable/bg_white_alpha_20"/>
+                    android:background="@drawable/bg_circle_purple_light"/>
 
                 <!-- Greeting text -->
                 <LinearLayout
@@ -322,18 +322,18 @@
             android:paddingHorizontal="16dp"
             android:paddingTop="16dp"
             android:paddingBottom="4dp"
+            android:fillViewport="true"
             android:scrollbars="none">
-
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_icon_container"
                 android:orientation="horizontal"
                 android:padding="4dp">
-
                 <TextView
                     android:id="@+id/tabOverview"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="38dp"
                     android:background="@drawable/bg_tab_selected"
                     android:gravity="center"
@@ -342,26 +342,45 @@
                     android:textColor="#6C63FF"
                     android:textSize="13sp"
                     android:textStyle="bold" />
-
                 <TextView
                     android:id="@+id/tabMyCourses"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="38dp"
                     android:gravity="center"
                     android:paddingHorizontal="16dp"
                     android:text="Khoá học"
                     android:textColor="#888888"
                     android:textSize="13sp" />
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="38dp">
 
-                <TextView
-                    android:id="@+id/tabStudents"
-                    android:layout_width="wrap_content"
-                    android:layout_height="38dp"
-                    android:gravity="center"
-                    android:paddingHorizontal="16dp"
-                    android:text="Nhiệm vụ"
-                    android:textColor="#888888"
-                    android:textSize="13sp" />
+                    <TextView
+                        android:id="@+id/tabStudents"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:paddingHorizontal="16dp"
+                        android:text="Nhiệm vụ"
+                        android:textColor="#888888"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/tvTaskCount"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="top|end"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/bg_badge_red"
+                        android:gravity="center"
+                        android:text="3"
+                        android:textColor="@color/white"
+                        android:textSize="9sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" /> </FrameLayout>
             </LinearLayout>
         </HorizontalScrollView>
 
@@ -373,41 +392,6 @@
             android:paddingBottom="4dp"
             android:background="#F5F5FA">
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/tabGrading"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:gravity="center"
-                    android:paddingHorizontal="14dp"
-                    android:text="Chấm bài"
-                    android:textSize="13sp"
-                    android:textColor="#888888"/>
-
-                <TextView
-                    android:id="@+id/tabCreate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:gravity="center"
-                    android:paddingHorizontal="14dp"
-                    android:text="Tạo bài tập"
-                    android:textSize="13sp"
-                    android:textColor="#888888"/>
-
-                <TextView
-                    android:id="@+id/tabStats"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:gravity="center"
-                    android:paddingHorizontal="14dp"
-                    android:text="Thống kê"
-                    android:textSize="13sp"
-                    android:textColor="#6C63FF"/>
-            </LinearLayout>
         </HorizontalScrollView>
 
         <!-- ════════════════════════════════════════════
@@ -645,16 +629,16 @@
                         android:textColor="#1A1A2E"/>
 
                     <!-- Badge số lượng (đỏ) -->
-                    <TextView
-                        android:id="@+id/tvTaskCount"
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:gravity="center"
-                        android:text="3"
-                        android:textColor="@color/white"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
-                        android:background="@drawable/bg_badge_red"/>
+<!--                    <TextView-->
+<!--                        android:id="@+id/tvTaskCount"-->
+<!--                        android:layout_width="28dp"-->
+<!--                        android:layout_height="28dp"-->
+<!--                        android:gravity="center"-->
+<!--                        android:text="3"-->
+<!--                        android:textColor="@color/white"-->
+<!--                        android:textSize="13sp"-->
+<!--                        android:textStyle="bold"-->
+<!--                        android:background="@drawable/bg_badge_red"/>-->
                 </LinearLayout>
 
                 <!-- RecyclerView tasks -->

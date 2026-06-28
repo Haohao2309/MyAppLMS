@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.myapplms.LMSApplication;
 import com.example.myapplms.R;
 import com.example.myapplms.data.remote.dto.response.RecentActivityResponse;
@@ -209,13 +210,20 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
                 getBinding().tvStatAvgScore.setText(
                         String.format(Locale.US, "%.1f", result.data.avgScore));
                 if (result.data.teacherName != null) {
-                    getBinding().tvTeacherName.setText("Thầy " + result.data.teacherName);
+                    getBinding().tvTeacherName.setText("Giảng viên " + result.data.teacherName);
                     // Lấy 2 chữ cái đầu làm initials
                     String[] parts = result.data.teacherName.trim().split("\\s+");
                     String initials = parts.length >= 2
                             ? String.valueOf(parts[0].charAt(0)) + String.valueOf(parts[parts.length - 1].charAt(0))
                             : result.data.teacherName.substring(0, Math.min(2, result.data.teacherName.length()));
-                    getBinding().tvTeacherInitials.setText(initials.toUpperCase(Locale.ROOT));
+                    String imageUrl = new SessionManager(requireContext()).getImageUrl();
+                    if (imageUrl != null && !imageUrl.isEmpty()) {
+                        Glide.with(this)
+                                .load(imageUrl)
+                                .placeholder(R.drawable.ic_person)
+                                .circleCrop()
+                                .into(getBinding().tvTeacherInitials);
+                    }
                 }
             }
             if (result.message != null && !result.message.isEmpty()) {
@@ -245,7 +253,12 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
                 taskList.addAll(result.data.tasks);
             }
             taskAdapter.notifyDataSetChanged();
+
+            // Code cũ của bạn: Cập nhật text
             getBinding().tvTaskCount.setText(String.valueOf(result.data.pendingCount));
+
+            // THÊM DÒNG NÀY: Ẩn badge nếu không có task nào, hiện nếu task > 0
+            getBinding().tvTaskCount.setVisibility(result.data.pendingCount > 0 ? View.VISIBLE : View.GONE);
         });
     }
 
@@ -272,7 +285,7 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
         for (int i = 0; i < data.dailySubmissions.size(); i++) {
             long val = data.dailySubmissions.get(i).count;
 
-            // Wrapper column
+            // 1. Wrapper column (Cột bao ngoài)
             LinearLayout col = new LinearLayout(requireContext());
             col.setOrientation(LinearLayout.VERTICAL);
             col.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL);
@@ -282,20 +295,48 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
             colParams.setMarginEnd(4);
             col.setLayoutParams(colParams);
 
-            // Cột bar
+            // 2. Tạo TextView để hiện con số trên đỉnh cột
+            TextView tvValue = new TextView(requireContext());
+            tvValue.setText(String.valueOf(val));
+            tvValue.setTextSize(10f); // Chữ nhỏ vừa phải
+            tvValue.setGravity(Gravity.CENTER);
+
+
+            // Nếu là ngày cao nhất (maxIdx) thì tô chữ màu tím đậm, còn lại màu xám
+            if (i == maxIdx && val > 0) {
+                tvValue.setTextColor(0xFF6C63FF);
+                tvValue.setTypeface(null, Typeface.BOLD);
+            } else {
+                tvValue.setTextColor(0xFFAAAAAA);
+            }
+
+            // (Tùy chọn) Ẩn số 0 cho đồ thị đỡ rối mắt, nếu thích hiện thì bỏ dòng if này đi
+            if (val == 0) {
+                tvValue.setVisibility(View.INVISIBLE);
+            }
+
+            // 3. Tạo Cột bar (Thanh màu)
             View bar = new View(requireContext());
-            int barHeightPx = maxVal == 0 ? 4 : (int) ((float) val / maxVal * (chartHeightPx - 8));
+            int barHeightPx = maxVal == 0 ? 4 : (int) ((float) val / maxVal * (chartHeightPx - 32)); // Trừ hao thêm 25px để nhường chỗ cho text bên trên
             barHeightPx = Math.max(barHeightPx, 8); // min height
+
             LinearLayout.LayoutParams barParams = new LinearLayout.LayoutParams(
                     (int)(20 * getResources().getDisplayMetrics().density), barHeightPx);
+
+            // Cách số một chút cho đẹp
+            barParams.topMargin = 4;
             bar.setLayoutParams(barParams);
 
-            // Màu: highlight ngày cao nhất bằng tím đậm, còn lại tím nhạt
+            // Màu: highlight ngày cao nhất bằng tím đậm, còn lại màu nhạt
             bar.setBackgroundResource(i == maxIdx
-                    ? R.drawable.bg_chart_bar
-                    : R.drawable.bg_step_inactive);
+                    ? R.drawable.bg_chart_bar_2
+                    : R.drawable.bg_step_inactive_2);
 
+            // 4. Nhét Text và Bar vào Cột bao ngoài (Thứ tự rất quan trọng: Text trước, Bar sau)
+            col.addView(tvValue);
             col.addView(bar);
+
+            // 5. Nhét toàn bộ vào Khung đồ thị
             chartContainer.addView(col);
         }
 
