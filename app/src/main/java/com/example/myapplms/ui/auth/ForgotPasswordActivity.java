@@ -208,10 +208,13 @@ public class ForgotPasswordActivity extends AppCompatActivity {
             String confirmPwd = etConfirmNewPassword.getText().toString().trim();
 
             if (newPwd.length() < 6) {
-                etNewPassword.setError("Password must be at least 6 characters"); return;
+                etNewPassword.setError("Mật khẩu tối thiểu 6 ký tự"); return;
+            }
+            if (!newPwd.matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]+$")) {
+                etNewPassword.setError("Mật khẩu phải chứa ít nhất một chữ cái và một chữ số"); return;
             }
             if (!newPwd.equals(confirmPwd)) {
-                etConfirmNewPassword.setError("Passwords do not match"); return;
+                etConfirmNewPassword.setError("Mật khẩu không khớp"); return;
             }
 
             // TODO: call backend to save new password

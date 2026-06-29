@@ -224,13 +224,17 @@ public class CourseFormActivity extends AppCompatActivity {
         String description = binding.etDescription.getText().toString().trim();
         String priceStr    = binding.etPrice.getText().toString().trim();
 
-        if (title.isEmpty()) {
-            binding.etTitle.setError("Tiêu đề không được để trống");
+        if (title.isEmpty() || title.length() < 5 || title.length() > 100) {
+            binding.etTitle.setError("Tiêu đề phải từ 5 đến 100 ký tự");
             binding.etTitle.requestFocus(); return;
         }
-        if (description.isEmpty()) {
-            binding.etDescription.setError("Mô tả không được để trống");
+        if (description.isEmpty() || description.length() < 20) {
+            binding.etDescription.setError("Mô tả khóa học tối thiểu 20 ký tự");
             binding.etDescription.requestFocus(); return;
+        }
+        if (categoryId == -1) {
+            Toast.makeText(this, "Vui lòng đợi tải và chọn danh mục", Toast.LENGTH_SHORT).show();
+            return;
         }
         if (uploadedImageUrl.isEmpty()) {
             Toast.makeText(this, "Vui lòng chọn ảnh thumbnail", Toast.LENGTH_SHORT).show();
@@ -243,7 +247,12 @@ public class CourseFormActivity extends AppCompatActivity {
 
         double price = 0.0;
         if (!priceStr.isEmpty()) {
-            try { price = Double.parseDouble(priceStr); }
+            try { 
+                price = Double.parseDouble(priceStr); 
+                if (price < 0) {
+                    binding.etPrice.setError("Giá không được nhỏ hơn 0"); return;
+                }
+            }
             catch (NumberFormatException e) {
                 binding.etPrice.setError("Giá không hợp lệ"); return;
             }

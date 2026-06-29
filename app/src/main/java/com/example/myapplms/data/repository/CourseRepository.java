@@ -9,6 +9,7 @@ import com.example.myapplms.data.remote.dto.response.CategoryResponse;
 import com.example.myapplms.data.remote.dto.response.CourseResponse;
 import com.example.myapplms.data.remote.dto.response.PagedResponse;
 import com.example.myapplms.model.Course;
+import com.example.myapplms.utils.ErrorUtil;
 import com.example.myapplms.utils.Resource;
 
 import java.io.IOException;
@@ -43,7 +44,7 @@ public class CourseRepository {
                     }
                     result.postValue(Resource.success(domainList));
                 } else {
-                    result.postValue(Resource.error("Lỗi server: " + response.code(), null));
+                    result.postValue(Resource.error(ErrorUtil.parseError(response), null));
                 }
             }
 
@@ -62,7 +63,7 @@ public class CourseRepository {
             if (response.isSuccessful() && response.body() != null) {
                 return Resource.success(response.body());
             }
-            return Resource.error("Lỗi: " + response.code(), null);
+            return Resource.error(ErrorUtil.parseError(response), null);
 
         } catch (IOException e) {
             return Resource.error("Không có kết nối mạng", null);

@@ -150,17 +150,25 @@ public class RegisterActivity extends AppCompatActivity {
         String confirm  = etConfirmPassword.getText().toString().trim();
 
         // Validation
-        if (name.isEmpty()) {
-            etFullName.setError("Vui lòng nhập họ tên"); return;
+        if (name.isEmpty() || name.length() < 3) {
+            etFullName.setError("Tên người dùng phải từ 3 ký tự trở lên");
+            return;
         }
         if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            etEmail.setError("Email không hợp lệ"); return;
+            etEmail.setError("Email không hợp lệ");
+            return;
         }
         if (password.length() < 6) {
-            etPassword.setError("Mật khẩu tối thiểu 6 ký tự"); return;
+            etPassword.setError("Mật khẩu tối thiểu 6 ký tự");
+            return;
+        }
+        if (!password.matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]+$")) {
+            etPassword.setError("Mật khẩu phải chứa ít nhất một chữ cái và một chữ số");
+            return;
         }
         if (!password.equals(confirm)) {
-            etConfirmPassword.setError("Mật khẩu không khớp"+name+"  "+ email+" "+selectedRole); return;
+            etConfirmPassword.setError("Mật khẩu không khớp");
+            return;
         }
 
 
