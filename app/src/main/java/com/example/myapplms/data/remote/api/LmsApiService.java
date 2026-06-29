@@ -133,11 +133,7 @@ public interface LmsApiService {
     @GET("community/posts/stats")
     Call<CommunityStatsResponse> getCommunityStats();
 
-    // 🌟 Tìm đến hàm togglePin trong file LmsApiService.java và sửa lại thành:
-    @POST("api/community/posts/{postId}/pin")
-    Call<PostResponse> togglePin(
-            @Path("postId") String postId
-    );
+
     @GET("teachers")
     Call<List<TeacherResponse>> getTeachers();
     @GET("teachers/{id}")

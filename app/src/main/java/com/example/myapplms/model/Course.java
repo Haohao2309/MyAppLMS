@@ -17,10 +17,11 @@ public class Course {
     public String category;
     public String level;
     public String imageUrl;
+    public boolean purchased;
 
     public Course(int id, String title, String description, String instructor, String rating,
                   String students, String lessons, String duration, String priceText,
-                  String category, String level, String imageUrl) {
+                  String category, String level, String imageUrl, boolean purchased) {
         this.id          = id;
         this.title       = title;
         this.description = description;
@@ -33,6 +34,7 @@ public class Course {
         this.category    = category;
         this.level       = level;
         this.imageUrl    = imageUrl;
+        this.purchased   = purchased;
     }
 
     public static Course fromResponse(CourseResponse res) {
@@ -64,7 +66,8 @@ public class Course {
                 displayPrice,
                 res.categoryName != null ? res.categoryName : "General",
                 "Beginner",              // Tạm thời mock level
-                res.imageUrl != null ? res.imageUrl : ""
+                res.imageUrl != null ? res.imageUrl : "",
+                res.purchased != null ? res.purchased : false
         );
     }
 }

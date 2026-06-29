@@ -20,12 +20,14 @@ public class AssignmentFragment extends Fragment {
 
     private int courseId;
     private String lessonId;
+    private String contentJson;
 
-    public static AssignmentFragment newInstance(int courseId, String lessonId) {
+    public static AssignmentFragment newInstance(int courseId, String lessonId, String contentJson) {
         AssignmentFragment fragment = new AssignmentFragment();
         Bundle args = new Bundle();
         args.putInt("COURSE_ID", courseId);
         args.putString("LESSON_ID", lessonId);
+        args.putString("CONTENT_JSON", contentJson);
         fragment.setArguments(args);
         return fragment;
     }
@@ -36,6 +38,7 @@ public class AssignmentFragment extends Fragment {
         if (getArguments() != null) {
             courseId = getArguments().getInt("COURSE_ID");
             lessonId = getArguments().getString("LESSON_ID");
+            contentJson = getArguments().getString("CONTENT_JSON");
         }
     }
 
@@ -53,6 +56,18 @@ public class AssignmentFragment extends Fragment {
         EditText etNotes = view.findViewById(R.id.et_student_notes);
         Button btnSubmit = view.findViewById(R.id.btn_submit_assignment);
         TextView tvAttempts = view.findViewById(R.id.tv_assignment_attempts);
+        TextView tvInstructions = view.findViewById(R.id.tv_assignment_instructions);
+
+        if (tvInstructions != null && contentJson != null) {
+            try {
+                org.json.JSONObject obj = new org.json.JSONObject(contentJson);
+                if (obj.has("instructions")) {
+                    tvInstructions.setText(obj.getString("instructions"));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         LearningActivity parentActivity = (LearningActivity) getActivity();
         if (parentActivity != null) {
@@ -72,7 +87,7 @@ public class AssignmentFragment extends Fragment {
                         }
                     }
 
-                    tvAttempts.setText("🔄 Lượt: " + attempts + " / " + maxAttempts);
+                    tvAttempts.setText("Lượt: " + attempts + " / " + maxAttempts);
                     if (attempts >= maxAttempts) {
                         btnSubmit.setEnabled(false);
                         btnSubmit.setText("Hết lượt");
@@ -104,15 +119,15 @@ public class AssignmentFragment extends Fragment {
                 parentActivity.getViewModel().submitAssignment(courseId, lessonId, request).observe(getViewLifecycleOwner(), resource -> {
                     switch (resource.status) {
                         case LOADING:
-                            Toast.makeText(getContext(), "Đang gửi bài...", Toast.LENGTH_SHORT).show();
+                            // Toast.makeText(getContext(), "Đang gửi bài...", Toast.LENGTH_SHORT).show();
                             break;
                         case SUCCESS:
-                            Toast.makeText(getContext(), "Đã nộp! Chờ giảng viên chấm.", Toast.LENGTH_LONG).show();
+                            // Toast.makeText(getContext(), "Đã nộp! Chờ giảng viên chấm.", Toast.LENGTH_LONG).show();
                             // BÁO ACTIVITY CHA TẢI LẠI TIẾN ĐỘ ĐỂ HIỆN %
                             parentActivity.loadProgress();
                             break;
                         case ERROR:
-                            Toast.makeText(getContext(), "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
+                            // Toast.makeText(getContext(), "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
                             break;
                     }
                 });

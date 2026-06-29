@@ -63,12 +63,21 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.ViewHolder
                 .centerCrop()
                 .into(holder.ivThumbnail);
 
+        if (course.purchased) {
+            holder.btnEnroll.setText("Continue");
+        } else {
+            holder.btnEnroll.setText("Enroll Free");
+        }
+
         // 4. BẮT SỰ KIỆN KHI NGƯỜI DÙNG BẤM VÀO ITEM KHÓA HỌC
-        holder.itemView.setOnClickListener(v -> {
+        View.OnClickListener clickListener = v -> {
             if (listener != null) {
                 listener.onCourseClick(course);
             }
-        });
+        };
+
+        holder.itemView.setOnClickListener(clickListener);
+        holder.btnEnroll.setOnClickListener(clickListener);
     }
 
     @Override
@@ -82,6 +91,7 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.ViewHolder
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView ivThumbnail;
         TextView tvCourseName, tvInstructor, tvRating, tvStudents, tvLessons, tvDuration, tvPrice, tvCategory, tvLevel;
+        android.widget.Button btnEnroll;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -95,6 +105,7 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.ViewHolder
             tvPrice = itemView.findViewById(R.id.tvPrice);
             tvCategory = itemView.findViewById(R.id.tvCategory);
             tvLevel = itemView.findViewById(R.id.tvLevel);
+            btnEnroll = itemView.findViewById(R.id.btnEnroll);
         }
     }
 }
