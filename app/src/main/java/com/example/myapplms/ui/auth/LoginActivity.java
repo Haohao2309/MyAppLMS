@@ -152,9 +152,18 @@ public class LoginActivity extends AppCompatActivity {
         String email    = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
 
-
-        if (email.isEmpty())    { etEmail.setError("Nhập tài khoản");       return; }
-        if (password.isEmpty()) { etPassword.setError("Nhập mật khẩu"); return; }
+        if (email.isEmpty()) {
+            etEmail.setError("Nhập tài khoản");
+            return;
+        }
+//        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+//            etEmail.setError("Email không đúng định dạng");
+//            return;
+//        }
+        if (password.isEmpty()) {
+            etPassword.setError("Nhập mật khẩu");
+            return;
+        }
 
         viewModel.login(email, password);
     }

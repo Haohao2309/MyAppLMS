@@ -23,6 +23,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.myapplms.LMSApplication;
 import com.example.myapplms.R;
+import com.example.myapplms.data.remote.dto.response.CourseResponse;
+import com.example.myapplms.data.remote.dto.response.PagedResponse;
 import com.example.myapplms.data.remote.dto.response.RecentActivityResponse;
 import com.example.myapplms.data.remote.dto.response.TaskItemResponse;
 import com.example.myapplms.data.remote.dto.response.WeeklyActivityResponse;
@@ -55,6 +57,10 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
 
     private boolean coursesLoaded = false;
     private Integer teacherId;
+
+    private boolean isActivitiesLoading = false;
+    private boolean isCoursesLoading = false;
+    private int currentTab = 0;
 
     @NonNull
     @Override
@@ -105,6 +111,7 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
             intent.putExtra(CourseFormActivity.EXTRA_COURSE_DESCRIPTION, course.description);
             intent.putExtra(CourseFormActivity.EXTRA_COURSE_PRICE,       course.priceText);
             intent.putExtra(CourseFormActivity.EXTRA_COURSE_IMAGE_URL,   course.imageUrl != null ? course.imageUrl : "");
+            intent.putExtra(CourseFormActivity.EXTRA_COURSE_CATEGORY,    course.category != null ? course.category : "");
             courseFormLauncher.launch(intent);
         });
 
@@ -129,6 +136,8 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
         // ── Observe & Load ────────────────────────────────────────
         observeMyCourses();
         observeDashboardData();
+        observeActivitiesPaged();
+        observeCoursesPaged();
 
         if (teacherId != null) {
             dashboardViewModel.loadAllDashboard();
@@ -140,13 +149,33 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
         getBinding().tabOverview.setOnClickListener(v -> showTab(0));
         getBinding().tabMyCourses.setOnClickListener(v -> {
             showTab(1);
-            if (!coursesLoaded) loadMyCourses();
+            // Load trang đầu tiên khoá học khi vào tab này
+            if (!coursesLoaded) {
+                coursesLoaded = true;
+                dashboardViewModel.loadCoursesPage(0);
+            }
         });
         getBinding().tabStudents.setOnClickListener(v -> showTab(2));
 
         getBinding().btnCreateCourseHome.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), CourseFormActivity.class);
             courseFormLauncher.launch(intent);
+        });
+
+        // ── Cuộn vô tận (Infinite Scrolling) ─────────────────────
+        getBinding().scrollView.setOnScrollChangeListener((androidx.core.widget.NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+            if (scrollY > 0 && scrollY == v.getChildAt(0).getMeasuredHeight() - v.getMeasuredHeight()) {
+                // Kéo đến cuối
+                if (currentTab == 0) { // Tab Tổng quan (Hoạt động gần đây)
+                    if (!isActivitiesLoading && dashboardViewModel.getActivitiesPage() < dashboardViewModel.getActivitiesTotalPages() - 1) {
+                        dashboardViewModel.nextActivitiesPage();
+                    }
+                } else if (currentTab == 1) { // Tab Khoá học
+                    if (!isCoursesLoading && dashboardViewModel.getCoursesPage() < dashboardViewModel.getCoursesTotalPages() - 1) {
+                        dashboardViewModel.nextCoursesPage();
+                    }
+                }
+            }
         });
     }
 
@@ -172,6 +201,8 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
         getBinding().tabOverview.setTypeface(null, Typeface.NORMAL);
         getBinding().tabMyCourses.setTypeface(null, Typeface.NORMAL);
         getBinding().tabStudents.setTypeface(null, Typeface.NORMAL);
+
+        currentTab = index;
 
         switch (index) {
             case 0:
@@ -352,6 +383,68 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
             getBinding().tvWeeklyPercent.setTextColor(0xFF2ECC71);
             getBinding().cardWeeklyPercent.setCardBackgroundColor(0xFFF0FFF8);
         }
+    }
+
+    // ════════════════════════════════════════════════════════════
+    //  Pagination Observers
+    // ════════════════════════════════════════════════════════════
+
+    /** Lắng nghe phân trang hoạt động gần đây */
+    private void observeActivitiesPaged() {
+        dashboardViewModel.activitiesPaged.observe(getViewLifecycleOwner(), result -> {
+            if (result == null) return;
+            switch (result.status) {
+                case LOADING:
+                    isActivitiesLoading = true;
+                    break;
+                case SUCCESS:
+                    isActivitiesLoading = false;
+                    if (result.data != null) {
+                        PagedResponse<RecentActivityResponse> paged = result.data;
+                        if (paged.page == 0) {
+                            activityList.clear();
+                        }
+                        if (paged.content != null) {
+                            activityList.addAll(paged.content);
+                        }
+                        activityAdapter.notifyDataSetChanged();
+                    }
+                    break;
+                case ERROR:
+                    isActivitiesLoading = false;
+                    break;
+            }
+        });
+    }
+
+    /** Lắng nghe phân trang khoá học */
+    private void observeCoursesPaged() {
+        dashboardViewModel.coursesPaged.observe(getViewLifecycleOwner(), result -> {
+            if (result == null) return;
+            switch (result.status) {
+                case LOADING:
+                    isCoursesLoading = true;
+                    break;
+                case SUCCESS:
+                    isCoursesLoading = false;
+                    if (result.data != null) {
+                        PagedResponse<CourseResponse> paged = result.data;
+                        if (paged.page == 0) {
+                            myCourseList.clear();
+                        }
+                        if (paged.content != null) {
+                            for (CourseResponse dto : paged.content) {
+                                myCourseList.add(Course.fromResponse(dto));
+                            }
+                        }
+                        courseAdapter.notifyDataSetChanged();
+                    }
+                    break;
+                case ERROR:
+                    isCoursesLoading = false;
+                    break;
+            }
+        });
     }
 
     private void observeMyCourses() {

@@ -8,6 +8,7 @@ import com.example.myapplms.data.remote.dto.response.ApiResponse;
 import com.example.myapplms.data.remote.dto.response.AuthResponse;
 import com.example.myapplms.utils.Resource;
 import com.example.myapplms.utils.SessionManager;
+import com.example.myapplms.utils.ErrorUtil;
 
 import java.io.IOException;
 
@@ -49,12 +50,8 @@ public class AuthRepository {
                     );
                     return Resource.success(body);
                 }
-
             }
-            if (response.code() == 409) {
-                return Resource.error("Email đã được sử dụng", null);
-            }
-            return Resource.error("Lỗi server: " + response.code(), null);
+            return Resource.error(ErrorUtil.parseError(response), null);
 
         } catch (IOException e) {
             return Resource.error("Không có kết nối mạng", null);
@@ -85,13 +82,8 @@ public class AuthRepository {
                     );
                     return Resource.success(body);
                 }
-
             }
-
-            if (response.code() == 401) {
-                return Resource.error("Email hoặc mật khẩu không đúng 123", null);
-            }
-            return Resource.error("Lỗi server: " + response.code(), null);
+            return Resource.error(ErrorUtil.parseError(response), null);
 
         } catch (IOException e) {
             return Resource.error("Không có kết nối mạng", null);

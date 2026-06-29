@@ -29,6 +29,7 @@ import com.example.myapplms.data.remote.dto.response.PaymentWebhookResponse;
 import com.example.myapplms.data.remote.dto.response.SubmissionResponse;
 import com.example.myapplms.data.remote.dto.response.TeacherStatsResponse;
 import com.example.myapplms.data.remote.dto.response.DashboardOverviewResponse;
+import com.example.myapplms.data.remote.dto.response.PagedResponse;
 import com.example.myapplms.data.remote.dto.response.RecentActivityResponse;
 import com.example.myapplms.data.remote.dto.response.WeeklyActivityResponse;
 import com.example.myapplms.data.remote.dto.response.TaskItemResponse;
@@ -164,6 +165,7 @@ public interface LmsApiService {
 
     @GET("v1/courses/explore")
     Call<List<CourseResponse>> getCourses();
+
     @GET("v1/courses/teacher/{id}")
     Call<List<CourseResponse>> getCoursesByTeacherId(@Path("id") Integer id);
 
@@ -172,6 +174,30 @@ public interface LmsApiService {
 
     @GET("v1/courses/explore/me")
     Call<List<CourseResponse>> getExploreCoursesTea();
+
+    // ── Endpoints phân trang (server-side) ─────────────────────────────────
+
+    /** Phân trang khóa học explore (student) */
+    @GET("v1/courses/explore/paged")
+    Call<PagedResponse<CourseResponse>> getExploreCoursesPagedStudent(
+            @Query("page") int page,
+            @Query("size") int size,
+            @Query("search") String search,
+            @Query("category") String category,
+            @Query("price") String price,
+            @Query("rating") String rating
+    );
+
+    /** Phân trang khóa học explore (teacher — dùng JWT để lấy teacherId) */
+    @GET("v1/courses/explore/me/paged")
+    Call<PagedResponse<CourseResponse>> getExploreCoursesPagedTeacher(
+            @Query("page") int page,
+            @Query("size") int size,
+            @Query("search") String search,
+            @Query("category") String category,
+            @Query("price") String price,
+            @Query("rating") String rating
+    );
 
     @GET("v1/courses/{id}/content")
     Call<CourseContentResponse> getCourseContent(@Path("id") int id);
@@ -232,6 +258,20 @@ public interface LmsApiService {
 
     @GET("teacher-dashboard/recent-activities")
     Call<List<RecentActivityResponse>> getRecentActivities();
+
+    /** Phân trang hoạt động gần đây (server-side) */
+    @GET("teacher-dashboard/recent-activities/paged")
+    Call<PagedResponse<RecentActivityResponse>> getRecentActivitiesPaged(
+            @Query("page") int page,
+            @Query("size") int size
+    );
+
+    /** Phân trang khoá học của teacher (server-side) */
+    @GET("teacher-dashboard/my-courses/paged")
+    Call<PagedResponse<CourseResponse>> getMyCoursesPagedTeacher(
+            @Query("page") int page,
+            @Query("size") int size
+    );
 
     @GET("teacher-dashboard/weekly-activity")
     Call<WeeklyActivityResponse> getWeeklyActivity();

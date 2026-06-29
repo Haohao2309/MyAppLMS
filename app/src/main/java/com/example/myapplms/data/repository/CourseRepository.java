@@ -7,7 +7,9 @@ import com.example.myapplms.data.remote.api.LmsApiService;
 import com.example.myapplms.data.remote.dto.request.CourseRequest;
 import com.example.myapplms.data.remote.dto.response.CategoryResponse;
 import com.example.myapplms.data.remote.dto.response.CourseResponse;
+import com.example.myapplms.data.remote.dto.response.PagedResponse;
 import com.example.myapplms.model.Course;
+import com.example.myapplms.utils.ErrorUtil;
 import com.example.myapplms.utils.Resource;
 
 import java.io.IOException;
@@ -42,7 +44,7 @@ public class CourseRepository {
                     }
                     result.postValue(Resource.success(domainList));
                 } else {
-                    result.postValue(Resource.error("Lỗi server: " + response.code(), null));
+                    result.postValue(Resource.error(ErrorUtil.parseError(response), null));
                 }
             }
 
@@ -61,7 +63,7 @@ public class CourseRepository {
             if (response.isSuccessful() && response.body() != null) {
                 return Resource.success(response.body());
             }
-            return Resource.error("Lỗi: " + response.code(), null);
+            return Resource.error(ErrorUtil.parseError(response), null);
 
         } catch (IOException e) {
             return Resource.error("Không có kết nối mạng", null);
@@ -144,4 +146,38 @@ public class CourseRepository {
         return result;
     }
 
+    // ── Phân trang (server-side) ─────────────────────────────────────────────
+
+    /**
+     * Lấy phân trang khóa học explore cho student (8 bản ghi/trang).
+     * Trả về Resource đồng bộ để dùng trong ExecutorService.
+     */
+    public com.example.myapplms.utils.Resource<PagedResponse<CourseResponse>> getExploreCoursesPagedStudent(int page, int size, String search, String category, String price, String rating) {
+        try {
+            retrofit2.Response<PagedResponse<CourseResponse>> response =
+                    apiService.getExploreCoursesPagedStudent(page, size, search, category, price, rating).execute();
+            if (response.isSuccessful() && response.body() != null) {
+                return com.example.myapplms.utils.Resource.success(response.body());
+            }
+            return com.example.myapplms.utils.Resource.error("Lỗi: " + response.code(), null);
+        } catch (java.io.IOException e) {
+            return com.example.myapplms.utils.Resource.error("Không có kết nối mạng", null);
+        }
+    }
+
+    /**
+     * Lấy phân trang khóa học explore cho teacher (8 bản ghi/trang).
+     */
+    public com.example.myapplms.utils.Resource<PagedResponse<CourseResponse>> getExploreCoursesPagedTeacher(int page, int size, String search, String category, String price, String rating) {
+        try {
+            retrofit2.Response<PagedResponse<CourseResponse>> response =
+                    apiService.getExploreCoursesPagedTeacher(page, size, search, category, price, rating).execute();
+            if (response.isSuccessful() && response.body() != null) {
+                return com.example.myapplms.utils.Resource.success(response.body());
+            }
+            return com.example.myapplms.utils.Resource.error("Lỗi: " + response.code(), null);
+        } catch (java.io.IOException e) {
+            return com.example.myapplms.utils.Resource.error("Không có kết nối mạng", null);
+        }
+    }
 }

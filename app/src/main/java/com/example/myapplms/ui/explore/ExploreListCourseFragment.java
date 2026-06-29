@@ -18,6 +18,8 @@ import com.example.myapplms.CourseAdapter;
 import com.example.myapplms.LMSApplication;
 import com.example.myapplms.R;
 import com.example.myapplms.data.remote.dto.response.CategoryResponse;
+import com.example.myapplms.data.remote.dto.response.CourseResponse;
+import com.example.myapplms.data.remote.dto.response.PagedResponse;
 import com.example.myapplms.data.repository.CategoryRepository;
 import com.example.myapplms.data.repository.CourseRepository;
 import com.example.myapplms.databinding.FragmentExploreListCourseBinding;
@@ -44,6 +46,8 @@ public class ExploreListCourseFragment extends BaseFragment<FragmentExploreListC
 
     // Biến lưu trữ TextView danh mục đang được chọn
     private TextView currentSelectedCategoryTv = null;
+
+    private boolean isLoading = false;
 
     @NonNull
     @Override
@@ -88,11 +92,13 @@ public class ExploreListCourseFragment extends BaseFragment<FragmentExploreListC
 
         // 4. Load Data từ API
         categoryViewModel.loadCategories(); // Tải danh mục từ API
-        if (teacherId != null) {
-            viewModel.loadCourses(teacherId);
-        } else {
-            viewModel.loadCourses();
-        }
+
+        // Load trang đầu tiên (phân trang server-side)
+        boolean isTeacher = (teacherId != null);
+        viewModel.loadFirstPage(isTeacher);
+
+        // Observe phân trang
+        observeCoursePaged();
     }
 
     private void observeCourses() {
@@ -107,6 +113,44 @@ public class ExploreListCourseFragment extends BaseFragment<FragmentExploreListC
                     }
                     break;
                 case ERROR:
+                    Toast.makeText(getContext(), result.message, Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        });
+    }
+
+    /** Observer mới: phân trang server-side */
+    private void observeCoursePaged() {
+        viewModel.coursesPaged.observe(getViewLifecycleOwner(), result -> {
+            if (result == null) return;
+            switch (result.status) {
+                case LOADING:
+                    isLoading = true;
+                    break;
+                case SUCCESS:
+                    isLoading = false;
+                    if (result.data != null) {
+                        PagedResponse<CourseResponse> paged = result.data;
+
+                        // Nếu là trang đầu tiên (page == 0), xoá danh sách cũ
+                        if (paged.page == 0) {
+                            courseList.clear();
+                        }
+
+                        // Parse data và thêm vào cuối danh sách
+                        if (paged.content != null) {
+                            for (CourseResponse dto : paged.content) {
+                                courseList.add(com.example.myapplms.model.Course.fromResponse(dto));
+                            }
+                        }
+
+                        // Cập nhật Adapter
+                        adapter.updateData(courseList);
+                        updateCourseCountText();
+                    }
+                    break;
+                case ERROR:
+                    isLoading = false;
                     Toast.makeText(getContext(), result.message, Toast.LENGTH_SHORT).show();
                     break;
             }
@@ -181,11 +225,8 @@ public class ExploreListCourseFragment extends BaseFragment<FragmentExploreListC
             setCategoryChipState(tv, true);
             currentSelectedCategoryTv = tv;
 
-            // Gọi hàm lọc Course trong Adapter
-            if (adapter != null) {
-                adapter.filterByCategory(categoryName);
-                updateCourseCountText();
-            }
+            // Lọc theo Category qua Server
+            viewModel.applyCategory(categoryName);
         });
 
         return tv;
@@ -219,28 +260,37 @@ public class ExploreListCourseFragment extends BaseFragment<FragmentExploreListC
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                adapter.filter(s.toString());
-                updateCourseCountText();
+                // Remove debounce to keep it simple, just apply search when typed
             }
 
             @Override
-            public void afterTextChanged(android.text.Editable s) {}
+            public void afterTextChanged(android.text.Editable s) {
+                viewModel.applySearch(s.toString());
+            }
         });
         getBinding().btnFilter.setOnClickListener(v -> {
             FilterBottomSheetFragment filterSheet = new FilterBottomSheetFragment();
 
             filterSheet.setFilterListener((level, price, rating) -> {
-                // ĐÃ SỬA Ở ĐÂY: Gọi hàm advancedFilter thay vì chỉ Toast ra màn hình
-                if (adapter != null) {
-                    adapter.advancedFilter(level, price, rating);
-
-                    // Cập nhật lại câu "X courses found"
-                    updateCourseCountText();
-                }
+                viewModel.applyFilters(price, rating);
             });
 
             filterSheet.show(getParentFragmentManager(), "FilterBottomSheet");
         });
 
+        // ── Cuộn vô tận (Infinite Scrolling) ─────────────────────
+        getBinding().rvCourses.addOnScrollListener(new androidx.recyclerview.widget.RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull androidx.recyclerview.widget.RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy > 0) { // Đang cuộn xuống
+                    if (!recyclerView.canScrollVertically(1)) { // Kéo đến cuối cùng của danh sách
+                        if (!isLoading && viewModel.getCurrentPage() < viewModel.getTotalPages() - 1) {
+                            viewModel.nextPage();
+                        }
+                    }
+                }
+            }
+        });
     }
 }

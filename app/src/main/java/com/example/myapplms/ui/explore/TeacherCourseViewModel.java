@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.myapplms.data.remote.dto.request.CourseRequest;
+import com.example.myapplms.data.remote.dto.response.CategoryResponse;
 import com.example.myapplms.data.repository.CourseRepository;
 import com.example.myapplms.data.repository.MediaRepository;
 import com.example.myapplms.model.Course;
@@ -19,6 +20,9 @@ public class TeacherCourseViewModel extends ViewModel {
 
     private final MutableLiveData<Resource<List<Course>>> _myCourses = new MutableLiveData<>();
     public final LiveData<Resource<List<Course>>> myCourses = _myCourses;
+
+    private final MutableLiveData<Resource<List<CategoryResponse>>> _categories = new MutableLiveData<>();
+    public final LiveData<Resource<List<CategoryResponse>>> categories = _categories;
 
     private final MutableLiveData<Resource<Course>> _createResult = new MutableLiveData<>();
     public final LiveData<Resource<Course>> createResult = _createResult;
@@ -40,6 +44,14 @@ public class TeacherCourseViewModel extends ViewModel {
     public void loadMyCourses(Integer teacherId) {
         courseRepository.getCoursesByTeacherId(teacherId)
                 .observeForever(result -> _myCourses.setValue(result));
+    }
+
+    public void loadCategories() {
+        _categories.postValue(Resource.loading());
+        new Thread(() -> {
+            Resource<List<CategoryResponse>> res = courseRepository.getCategories();
+            _categories.postValue(res);
+        }).start();
     }
 
     // ── Tạo khóa học mới ─────────────────────────────────────
