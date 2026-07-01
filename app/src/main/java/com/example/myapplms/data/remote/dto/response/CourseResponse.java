@@ -36,4 +36,10 @@ public class CourseResponse {
 
     @SerializedName("purchased")
     public Boolean purchased;
+
+    @SerializedName("isDeleted")
+    public Boolean isDeleted;
+
+    @SerializedName("archiveStatus")
+    public String archiveStatus;
 }

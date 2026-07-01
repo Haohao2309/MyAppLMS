@@ -72,8 +72,34 @@ public class TeacherCourseViewModel extends ViewModel {
                 .observeForever(result -> _updateResult.setValue(result));
     }
 
+    private final MutableLiveData<Resource<String>> _deleteResult = new MutableLiveData<>();
+    public final LiveData<Resource<String>> deleteResult = _deleteResult;
+
+    private final MutableLiveData<Resource<String>> _restoreResult = new MutableLiveData<>();
+    public final LiveData<Resource<String>> restoreResult = _restoreResult;
+
     public void uploadCourseImage(File imageFile) {
         mediaRepository.uploadCourseImage(imageFile)
                 .observeForever(result -> _uploadResult.setValue(result));
+    }
+
+    // ── Xóa mềm khóa học ─────────────────────────────────────
+    public void deleteCourse(Integer courseId, String deletedBy, String reason) {
+        courseRepository.deleteCourse(courseId, deletedBy, reason)
+                .observeForever(result -> _deleteResult.setValue(result));
+    }
+
+    // ── Khôi phục khóa học ───────────────────────────────────
+    public void restoreCourse(Integer courseId, String restoredBy) {
+        courseRepository.restoreCourse(courseId, restoredBy)
+                .observeForever(result -> _restoreResult.setValue(result));
+    }
+
+    public void clearDeleteResult() {
+        _deleteResult.postValue(null);
+    }
+
+    public void clearRestoreResult() {
+        _restoreResult.postValue(null);
     }
 }

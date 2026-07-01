@@ -71,10 +71,11 @@ public class CourseRepository {
     }
     public LiveData<Resource<List<Course>>> getCoursesByTeacherId(Integer teacherId) {
         MutableLiveData<Resource<List<Course>>> result = new MutableLiveData<>();
-        // Báo LOADING ngay lập tức
         result.postValue(Resource.loading());
 
-        apiService.getExploreCoursesTea().enqueue(new Callback<List<CourseResponse>>() {
+        // Dùng endpoint teacher/{id} — trả về TẤT CẢ khóa học (kể cả đã xóa mềm)
+        // để giảng viên thấy được nút Restore trên item bị xóa
+        apiService.getCoursesByTeacherId(teacherId).enqueue(new Callback<List<CourseResponse>>() {
             @Override
             public void onResponse(Call<List<CourseResponse>> call,
                                    Response<List<CourseResponse>> response) {
@@ -89,12 +90,11 @@ public class CourseRepository {
                 }
             }
 
-            // ĐÃ THÊM: onFailure bị thiếu
             @Override
             public void onFailure(Call<List<CourseResponse>> call, Throwable t) {
                 result.postValue(Resource.error("Không có kết nối mạng: " + t.getMessage(), null));
             }
-        }); // ĐÃ THÊM: Đóng hàm enqueue đúng chỗ
+        });
 
         return result;
     }
@@ -179,5 +179,53 @@ public class CourseRepository {
         } catch (java.io.IOException e) {
             return com.example.myapplms.utils.Resource.error("Không có kết nối mạng", null);
         }
+    }
+
+    // ── Xóa mềm khóa học ─────────────────────────────────────
+    public LiveData<Resource<String>> deleteCourse(Integer courseId, String deletedBy, String reason) {
+        MutableLiveData<Resource<String>> result = new MutableLiveData<>();
+        result.postValue(Resource.loading());
+
+        apiService.deleteCourse(courseId, deletedBy, reason).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    result.postValue(Resource.success("Xóa mềm khóa học thành công!"));
+                } else {
+                    result.postValue(Resource.error(ErrorUtil.parseError(response), null));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                result.postValue(Resource.error("Không có kết nối mạng: " + t.getMessage(), null));
+            }
+        });
+
+        return result;
+    }
+
+    // ── Khôi phục khóa học ───────────────────────────────────
+    public LiveData<Resource<String>> restoreCourse(Integer courseId, String restoredBy) {
+        MutableLiveData<Resource<String>> result = new MutableLiveData<>();
+        result.postValue(Resource.loading());
+
+        apiService.restoreCourse(courseId, restoredBy).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    result.postValue(Resource.success("Khôi phục khóa học thành công!"));
+                } else {
+                    result.postValue(Resource.error(ErrorUtil.parseError(response), null));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                result.postValue(Resource.error("Không có kết nối mạng: " + t.getMessage(), null));
+            }
+        });
+
+        return result;
     }
 }

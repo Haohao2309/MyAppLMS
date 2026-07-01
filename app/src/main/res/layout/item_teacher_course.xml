@@ -11,124 +11,188 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="12dp">
+        android:orientation="vertical">
 
-        <!-- Thumbnail -->
-        <ImageView
-            android:id="@+id/ivThumbnail"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_launcher_background"
-            android:contentDescription="@null"/>
+        <!-- Stripe báo hiệu đã bị xóa (mặc định GONE, chỉ hiện khi isDeleted=true) -->
+        <View
+            android:id="@+id/viewDeletedStripe"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:background="#F44336"
+            android:visibility="gone"/>
 
-        <!-- Info -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="12dp"
-            android:orientation="vertical">
+            android:orientation="horizontal"
+            android:padding="12dp">
 
-            <TextView
-                android:id="@+id/tvTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                android:maxLines="2"
-                android:ellipsize="end"/>
+            <!-- Thumbnail -->
+            <FrameLayout
+                android:layout_width="80dp"
+                android:layout_height="80dp">
 
+                <ImageView
+                    android:id="@+id/ivThumbnail"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_launcher_background"
+                    android:contentDescription="@null"/>
+
+                <!-- Overlay mờ khi bị xóa -->
+                <View
+                    android:id="@+id/viewDeletedOverlay"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#99000000"
+                    android:visibility="gone"/>
+
+            </FrameLayout>
+
+            <!-- Info -->
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="4dp">
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/tvStudents"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/tvTitle"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="12sp"
-                    android:textColor="#888888"/>
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:maxLines="2"
+                    android:ellipsize="end"/>
 
-                <TextView
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text=" • "
-                    android:textColor="#888888"
-                    android:textSize="12sp"/>
+                    android:orientation="horizontal"
+                    android:layout_marginTop="4dp">
 
-                <TextView
-                    android:id="@+id/tvPrice"
+                    <TextView
+                        android:id="@+id/tvStudents"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:textColor="#888888"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=" • "
+                        android:textColor="#888888"
+                        android:textSize="12sp"/>
+
+                    <TextView
+                        android:id="@+id/tvPrice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:textColor="#2E7D32"
+                        android:textStyle="bold"/>
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="12sp"
-                    android:textColor="#2E7D32"
-                    android:textStyle="bold"/>
+                    android:orientation="horizontal"
+                    android:layout_marginTop="6dp">
+
+                    <!-- Badge trạng thái (Published / Deleted) -->
+                    <TextView
+                        android:id="@+id/tvStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="#E8F5E9"
+                        android:paddingHorizontal="8dp"
+                        android:paddingVertical="2dp"
+                        android:text="Published"
+                        android:textColor="#4CAF50"
+                        android:textSize="11sp"/>
+
+                    <TextView
+                        android:id="@+id/tvLessons"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:background="#FFF3E0"
+                        android:paddingHorizontal="8dp"
+                        android:paddingVertical="2dp"
+                        android:textColor="#FF9800"
+                        android:textSize="11sp"/>
+
+                    <TextView
+                        android:id="@+id/tvDuration"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:background="#E3F2FD"
+                        android:paddingHorizontal="8dp"
+                        android:paddingVertical="2dp"
+                        android:textColor="#1976D2"
+                        android:textSize="11sp"/>
+
+                </LinearLayout>
+
+                <!-- Ẩn tvCategory, dùng nội bộ -->
+                <TextView
+                    android:id="@+id/tvCategory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"/>
 
             </LinearLayout>
 
+            <!-- Nhóm nút hành động -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="6dp">
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_gravity="center_vertical">
 
-                <TextView
-                    android:id="@+id/tvStatus"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="#E8F5E9"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="2dp"
-                    android:text="Published"
-                    android:textColor="#4CAF50"
-                    android:textSize="11sp"/>
+                <!-- Nút Edit (luôn hiện) -->
+                <ImageButton
+                    android:id="@+id/btnEdit"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_chip_unselected"
+                    android:src="@drawable/ic_edit"
+                    android:tint="#6C63FF"
+                    android:contentDescription="Edit"/>
 
-                <TextView
-                    android:id="@+id/tvLessons"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:background="#FFF3E0"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="2dp"
-                    android:textColor="#FF9800"
-                    android:textSize="11sp"/>
+                <!-- Nút Xóa mềm (chỉ hiện khi isDeleted = false) -->
+                <ImageButton
+                    android:id="@+id/btnDelete"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/bg_chip_unselected"
+                    android:src="@drawable/ic_delete"
+                    android:tint="#F44336"
+                    android:contentDescription="Xóa mềm"
+                    android:visibility="visible"/>
 
-                <TextView
-                    android:id="@+id/tvDuration"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:background="#E3F2FD"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="2dp"
-                    android:textColor="#1976D2"
-                    android:textSize="11sp"/>
+                <!-- Nút Khôi phục (chỉ hiện khi isDeleted = true) -->
+                <ImageButton
+                    android:id="@+id/btnRestore"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/bg_chip_unselected"
+                    android:src="@drawable/ic_restore"
+                    android:tint="#4CAF50"
+                    android:contentDescription="Khôi phục"
+                    android:visibility="gone"/>
 
             </LinearLayout>
-
-            <!-- Ẩn tvCategory, dùng nội bộ -->
-            <TextView
-                android:id="@+id/tvCategory"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="gone"/>
 
         </LinearLayout>
-
-        <!-- Nút Edit -->
-        <ImageButton
-            android:id="@+id/btnEdit"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="@drawable/bg_chip_unselected"
-            android:src="@drawable/ic_edit"
-            android:tint="#6C63FF"
-            android:contentDescription="Edit"/>
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

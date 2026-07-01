@@ -226,9 +226,14 @@ public interface LmsApiService {
     Call<CourseResponse> updateCourse(@Path("id") Integer id, @Body CourseRequest request);
 
     @DELETE("v1/courses/{id}")
-    Call<String> deleteCourse(@Path("id") Integer id,
+    Call<Void> deleteCourse(@Path("id") Integer id,
                               @Query("deletedBy") String deletedBy,
                               @Query("reason") String reason);
+
+    @PATCH("v1/courses/{id}/restore")
+    Call<Void> restoreCourse(@Path("id") Integer id,
+                               @Query("restoredBy") String restoredBy);
+
     // data/remote/LmsApiService.java
     @GET("v1/categories")
     Call<List<CategoryResponse>> getCategories();

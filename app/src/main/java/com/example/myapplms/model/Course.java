@@ -18,10 +18,11 @@ public class Course {
     public String level;
     public String imageUrl;
     public boolean purchased;
+    public boolean isDeleted;
 
     public Course(int id, String title, String description, String instructor, String rating,
                   String students, String lessons, String duration, String priceText,
-                  String category, String level, String imageUrl, boolean purchased) {
+                  String category, String level, String imageUrl, boolean purchased, boolean isDeleted) {
         this.id          = id;
         this.title       = title;
         this.description = description;
@@ -35,6 +36,7 @@ public class Course {
         this.level       = level;
         this.imageUrl    = imageUrl;
         this.purchased   = purchased;
+        this.isDeleted   = isDeleted;
     }
 
     public static Course fromResponse(CourseResponse res) {
@@ -59,15 +61,16 @@ public class Course {
                 res.title,
                 res.description,
                 instructorName,
-                res.averageRating != null ? String.valueOf(res.averageRating) : "0.0",             // Tạm thời mock rating vì BE chưa có
-                studentsDisplay,         // <-- Lấy từ dữ liệu thật
-                lessonsDisplay,          // <-- Lấy từ dữ liệu thật
-                "2h 00m",                // Tạm thời mock thời lượng
+                res.averageRating != null ? String.valueOf(res.averageRating) : "0.0",
+                studentsDisplay,
+                lessonsDisplay,
+                "2h 00m",
                 displayPrice,
                 res.categoryName != null ? res.categoryName : "General",
-                "Beginner",              // Tạm thời mock level
+                "Beginner",
                 res.imageUrl != null ? res.imageUrl : "",
-                res.purchased != null ? res.purchased : false
+                res.purchased != null ? res.purchased : false,
+                res.isDeleted != null ? res.isDeleted : false
         );
     }
 }

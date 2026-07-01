@@ -4,10 +4,13 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,6 +19,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -104,16 +108,21 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
         teacherId = new SessionManager(requireContext()).getTeacherId();
 
         // ── Adapters ──────────────────────────────────────────────
-        courseAdapter = new TeacherCourseAdapter(myCourseList, course -> {
-            Intent intent = new Intent(getContext(), CourseFormActivity.class);
-            intent.putExtra(CourseFormActivity.EXTRA_COURSE_ID,          course.id);
-            intent.putExtra(CourseFormActivity.EXTRA_COURSE_TITLE,       course.title);
-            intent.putExtra(CourseFormActivity.EXTRA_COURSE_DESCRIPTION, course.description);
-            intent.putExtra(CourseFormActivity.EXTRA_COURSE_PRICE,       course.priceText);
-            intent.putExtra(CourseFormActivity.EXTRA_COURSE_IMAGE_URL,   course.imageUrl != null ? course.imageUrl : "");
-            intent.putExtra(CourseFormActivity.EXTRA_COURSE_CATEGORY,    course.category != null ? course.category : "");
-            courseFormLauncher.launch(intent);
-        });
+        courseAdapter = new TeacherCourseAdapter(
+                myCourseList,
+                course -> {
+                    Intent intent = new Intent(getContext(), CourseFormActivity.class);
+                    intent.putExtra(CourseFormActivity.EXTRA_COURSE_ID,          course.id);
+                    intent.putExtra(CourseFormActivity.EXTRA_COURSE_TITLE,       course.title);
+                    intent.putExtra(CourseFormActivity.EXTRA_COURSE_DESCRIPTION, course.description);
+                    intent.putExtra(CourseFormActivity.EXTRA_COURSE_PRICE,       course.priceText);
+                    intent.putExtra(CourseFormActivity.EXTRA_COURSE_IMAGE_URL,   course.imageUrl != null ? course.imageUrl : "");
+                    intent.putExtra(CourseFormActivity.EXTRA_COURSE_CATEGORY,    course.category != null ? course.category : "");
+                    courseFormLauncher.launch(intent);
+                },
+                course -> showDeleteDialog(course),
+                course -> showRestoreDialog(course)
+        );
 
         // RecyclerView courses
         RecyclerView rvCourses = new RecyclerView(requireContext());
@@ -138,6 +147,8 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
         observeDashboardData();
         observeActivitiesPaged();
         observeCoursesPaged();
+        observeDeleteResult();
+        observeRestoreResult();
 
         if (teacherId != null) {
             dashboardViewModel.loadAllDashboard();
@@ -463,6 +474,97 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
                     break;
             }
         });
+    }
+
+    // ── Observe kết quả xóa mềm ──────────────────────────────
+    private void observeDeleteResult() {
+        courseViewModel.deleteResult.observe(getViewLifecycleOwner(), result -> {
+            if (result == null) return;
+            switch (result.status) {
+                case LOADING:
+                    break;
+                case SUCCESS:
+                    showToast("Xóa thành công! Sinh viên đã nhận thông báo.");
+                    dashboardViewModel.loadCoursesPage(0); // Load lại trang 1
+                    loadMyCourses(); // Reload data immediately cho courseViewModel
+                    // Đặt lại state để không bị trigger lại khi xoay màn hình
+                    courseViewModel.clearDeleteResult();
+                    break;
+                case ERROR:
+                    showToast("Lỗi: " + result.message);
+                    break;
+            }
+        });
+    }
+
+    // ── Observe kết quả khôi phục ────────────────────────────
+    private void observeRestoreResult() {
+        courseViewModel.restoreResult.observe(getViewLifecycleOwner(), result -> {
+            if (result == null) return;
+            switch (result.status) {
+                case LOADING:
+                    break;
+                case SUCCESS:
+                    showToast("Khôi phục thành công! Sinh viên đã nhận thông báo.");
+                    dashboardViewModel.loadCoursesPage(0); // Load lại trang 1
+                    loadMyCourses(); // Reload data immediately cho courseViewModel
+                    // Đặt lại state
+                    courseViewModel.clearRestoreResult();
+                    break;
+                case ERROR:
+                    showToast("Lỗi: " + result.message);
+                    break;
+            }
+        });
+    }
+
+    // ── Dialog xác nhận xóa mềm ──────────────────────────────
+    private void showDeleteDialog(com.example.myapplms.model.Course course) {
+        if (getContext() == null) return;
+
+        EditText etReason = new EditText(getContext());
+        etReason.setHint("Nhập lý do xóa khóa học...");
+        etReason.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        etReason.setMaxLines(3);
+
+        FrameLayout container = new FrameLayout(getContext());
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(48, 16, 48, 0);
+        etReason.setLayoutParams(params);
+        container.addView(etReason);
+
+        new AlertDialog.Builder(getContext())
+                .setTitle("Xóa mềm khóa học")
+                .setMessage("Bạn muốn xóa \"" + course.title + "\"?\n\nSinh viên đã mua sẽ nhận thông báo.")
+                .setView(container)
+                .setPositiveButton("Xóa", (dialog, which) -> {
+                    String reason = etReason.getText().toString().trim();
+                    if (reason.isEmpty()) reason = "Không dùng nữa";
+                    SessionManager session = new SessionManager(requireContext());
+                    String deletedBy = "Teacher_" + (session.getTeacherId() != null ? session.getTeacherId() : "Unknown");
+                    courseViewModel.deleteCourse(course.id, deletedBy, reason);
+                })
+                .setNegativeButton("Hủy", null)
+                .show();
+    }
+
+    // ── Dialog xác nhận khôi phục ────────────────────────────
+    private void showRestoreDialog(com.example.myapplms.model.Course course) {
+        if (getContext() == null) return;
+
+        new AlertDialog.Builder(getContext())
+                .setTitle("Khôi phục khóa học")
+                .setMessage("Bạn muốn khôi phục \"" + course.title + "\"?\n\nSinh viên đã mua sẽ nhận thông báo.")
+                .setPositiveButton("Khôi phục", (dialog, which) -> {
+                    SessionManager session = new SessionManager(requireContext());
+                    String restoredBy = "Teacher_" + (session.getTeacherId() != null ? session.getTeacherId() : "Unknown");
+                    courseViewModel.restoreCourse(course.id, restoredBy);
+                })
+                .setNegativeButton("Hủy", null)
+                .show();
     }
 
     private void loadMyCourses() {
