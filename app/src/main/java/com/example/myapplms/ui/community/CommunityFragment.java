@@ -62,6 +62,18 @@ public class CommunityFragment extends Fragment {
                                 break;
                             }
                         }
+                    } else if (data != null && data.hasExtra("likedPostId")) {
+                        boolean postEditedOrPinned = data.getBooleanExtra("postEditedOrPinned", false);
+                        if (postEditedOrPinned) {
+                            viewModel.refreshPosts();
+                        } else {
+                            String likedPostId = data.getStringExtra("likedPostId");
+                            int likesCount = data.getIntExtra("likesCount", 0);
+                            boolean likedByMe = data.getBooleanExtra("likedByMe", false);
+                            int viewsCount = data.getIntExtra("viewsCount", -1);
+                            
+                            viewModel.updatePostLikeLocally(likedPostId, likesCount, likedByMe, viewsCount);
+                        }
                     } else if (data != null && data.hasExtra("searchTag")) {
                         String tag = data.getStringExtra("searchTag");
                         onTagClickFromDetail(tag);
@@ -238,6 +250,7 @@ public class CommunityFragment extends Fragment {
         RecyclerView rvPosts = view.findViewById(R.id.rvPosts);
         SessionManager sessionManager = new SessionManager(requireContext());
         String currentUserId = sessionManager.getUserId();
+        String userRole = sessionManager.getRole();
         
         adapter = new PostAdapter(postList, new PostAdapter.OnPostClickListener() {
             @Override
@@ -268,12 +281,7 @@ public class CommunityFragment extends Fragment {
                 }
                 viewModel.searchPosts(tag);
             }
-
-            @Override
-            public void onPinClick(PostResponse post) {
-                viewModel.togglePin(post.id);
-            }
-        }, currentUserId);
+        }, currentUserId, userRole);
         rvPosts.setLayoutManager(new LinearLayoutManager(requireContext()));
         rvPosts.setAdapter(adapter);
 
@@ -332,16 +340,21 @@ public class CommunityFragment extends Fragment {
     private void showDeletePostDialog(PostResponse post) {
         SessionManager sessionManager = new SessionManager(requireContext());
         String userRole = sessionManager.getRole();
+        String currentUserId = sessionManager.getUserId();
         
         List<String> options = new ArrayList<>();
-        options.add("Sửa bài viết");
-        options.add("Xóa bài viết");
         
-        // Chỉ hiện tùy chọn ghim cho ADMIN/TEACHER
-        boolean canPin = "ADMIN".equalsIgnoreCase(userRole) || "TEACHER".equalsIgnoreCase(userRole);
-        if (canPin) {
-            options.add(post.pinned ? "Bỏ ghim bài viết" : "Ghim bài viết");
+        boolean isAuthor = currentUserId != null && currentUserId.equals(post.userId);
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(userRole);
+        if (isAuthor) {
+            options.add("Sửa bài viết");
         }
+        
+        if (isAuthor || isAdmin) {
+            options.add("Xóa bài viết");
+        }
+
+        if (options.isEmpty()) return;
 
         new AlertDialog.Builder(requireContext())
                 .setTitle("Lựa chọn")
@@ -351,8 +364,6 @@ public class CommunityFragment extends Fragment {
                         showEditPostDialog(post);
                     } else if (selected.equals("Xóa bài viết")) {
                         confirmDeletePost(post.id);
-                    } else if (selected.contains("ghim")) {
-                        viewModel.togglePin(post.id);
                     }
                 })
                 .show();

@@ -24,7 +24,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="@color/indigo_600"
-                app:title="Đang học"
+                app:title="Tiến độ: 0%"
                 app:titleTextColor="@color/white">
 
                 <!-- Thay vì dùng ImageView thô sơ, ta có thể dùng menu icon chuẩn của Toolbar hoặc thêm trực tiếp -->
@@ -39,6 +39,18 @@
                     android:src="@android:drawable/ic_menu_sort_by_size"
                     app:tint="@color/white" />
             </androidx.appcompat.widget.Toolbar>
+
+            <ProgressBar
+                android:id="@+id/pb_learning_progress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="4dp"
+                android:maxHeight="4dp"
+                android:progressTint="@color/success_green"
+                android:progressBackgroundTint="@color/indigo_200"
+                android:max="100"
+                android:progress="0" />
         </com.google.android.material.appbar.AppBarLayout>
 
         <FrameLayout

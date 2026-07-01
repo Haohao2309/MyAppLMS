@@ -85,15 +85,32 @@
                         android:contentDescription="@null"
                         android:scaleType="centerInside" />
 
-                    <ImageButton
-                        android:id="@+id/btnSearch"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:layout_marginStart="8dp"
-                        android:background="@drawable/bg_white_alpha_20"
+                </LinearLayout>
+
+                <!-- Search Bar -->
+                <LinearLayout
+                    android:id="@+id/layoutSearchBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/bg_white_alpha_20"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
                         android:src="@drawable/ic_search"
-                        android:contentDescription="@null"
-                        android:scaleType="centerInside" />
+                        app:tint="@color/white" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:text="Bạn muốn học gì hôm nay?"
+                        android:textColor="#CCCFFF"
+                        android:textSize="14sp" />
                 </LinearLayout>
 
             </LinearLayout>

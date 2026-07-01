@@ -23,6 +23,7 @@ import com.example.myapplms.R;
 import com.example.myapplms.data.remote.api.LmsApiService;
 import com.example.myapplms.data.remote.dto.response.CourseResponse;
 import com.example.myapplms.data.remote.dto.response.EnrollmentStatusResponse;
+import com.example.myapplms.data.remote.dto.response.PagedResponse;
 import com.example.myapplms.data.remote.dto.response.ProgressResponse;
 import com.example.myapplms.model.Course;
 import com.example.myapplms.ui.explore.ExploreListCourseFragment;
@@ -44,7 +45,8 @@ public class HomeFragment extends Fragment {
     private ProgressBar pbLoading;
     private ImageView ivAvatar;
     private TextView tvUserName;
-    private ImageButton btnNotification, btnSearch;
+    private ImageButton btnNotification;
+    private View layoutSearchBar;
     private RecyclerView rvContinueLearning, rvFeatured, rvRecommended;
     private View layoutContinueEmpty;
     private Button btnBannerCta;
@@ -60,6 +62,12 @@ public class HomeFragment extends Fragment {
 
     // Lưu banner course để xử lý click
     private Course bannerCourse;
+
+    // State phân trang Recommended
+    private int recommendedPage = 0;
+    private int recommendedTotalPages = 1;
+    private boolean isLoadingRecommended = false;
+    private final List<Course> recommendedList = new ArrayList<>();
 
     @Nullable
     @Override
@@ -81,6 +89,9 @@ public class HomeFragment extends Fragment {
         setupRecyclerViews();
         loadUserInfo();
         loadAllCourseData();
+
+        // Load trang đầu tiên Recommended Courses
+        loadRecommendedCourses(0);
     }
 
     private void initViews(View view) {
@@ -88,7 +99,7 @@ public class HomeFragment extends Fragment {
         ivAvatar          = view.findViewById(R.id.ivAvatar);
         tvUserName        = view.findViewById(R.id.tvUserName);
         btnNotification   = view.findViewById(R.id.btnNotification);
-        btnSearch         = view.findViewById(R.id.btnSearch);
+        layoutSearchBar   = view.findViewById(R.id.layoutSearchBar);
         rvContinueLearning = view.findViewById(R.id.rvContinueLearning);
         rvFeatured        = view.findViewById(R.id.rvFeatured);
         rvRecommended     = view.findViewById(R.id.rvRecommended);
@@ -103,12 +114,23 @@ public class HomeFragment extends Fragment {
         TextView tvExploreAll   = view.findViewById(R.id.tvExploreAll);
 
         btnNotification.setOnClickListener(v -> navigateTo(new NotificationsFragment()));
-        btnSearch.setOnClickListener(v -> navigateTo(new ExploreListCourseFragment()));
+        layoutSearchBar.setOnClickListener(v -> navigateTo(new ExploreListCourseFragment()));
         tvMyCourses.setOnClickListener(v -> navigateTo(new ExploreListCourseFragment()));
         tvSeeAllFeatured.setOnClickListener(v -> navigateTo(new ExploreListCourseFragment()));
         tvExploreAll.setOnClickListener(v -> navigateTo(new ExploreListCourseFragment()));
         btnBannerCta.setOnClickListener(v -> {
             if (bannerCourse != null) openCourseDetail(bannerCourse.id);
+        });
+
+        // ── Cuộn vô tận (Infinite Scrolling) ─────────────────────
+        androidx.core.widget.NestedScrollView scrollView = view.findViewById(R.id.scrollView);
+        scrollView.setOnScrollChangeListener((androidx.core.widget.NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+            if (scrollY > 0 && scrollY == v.getChildAt(0).getMeasuredHeight() - v.getMeasuredHeight()) {
+                // Kéo đến cuối
+                if (!isLoadingRecommended && recommendedPage < recommendedTotalPages - 1) {
+                    loadRecommendedCourses(recommendedPage + 1);
+                }
+            }
         });
     }
 
@@ -232,16 +254,7 @@ public class HomeFragment extends Fragment {
                     });
                 }
 
-                // 3. Recommended: tất cả khóa học
-                List<Course> recommendedList = new ArrayList<>();
-                for (CourseResponse cr : allCourses) {
-                    recommendedList.add(Course.fromResponse(cr));
-                }
-                requireActivity().runOnUiThread(() -> {
-                    if (!isAdded()) return;
-                    rvRecommended.setVisibility(View.VISIBLE);
-                    recommendedAdapter.setCourses(recommendedList);
-                });
+                // 3. (Đã tách Recommended ra hàm loadRecommendedCourses)
 
                 // 4. Continue Learning: kiểm tra enrollment + progress
                 checkEnrollmentsAndProgress(allCourses);
@@ -252,6 +265,46 @@ public class HomeFragment extends Fragment {
                 if (!isAdded()) return;
                 pbLoading.setVisibility(View.GONE);
                 showContinueEmpty();
+            }
+        });
+    }
+
+    // ── Recommended Courses (Paged) ───────────────────────────
+    private void loadRecommendedCourses(int page) {
+        isLoadingRecommended = true;
+        apiService.getExploreCoursesPagedStudent(page, 8, null, null, null, null).enqueue(new Callback<PagedResponse<CourseResponse>>() {
+            @Override
+            public void onResponse(Call<PagedResponse<CourseResponse>> call, Response<PagedResponse<CourseResponse>> response) {
+                if (!isAdded()) return;
+                isLoadingRecommended = false;
+                if (response.isSuccessful() && response.body() != null) {
+                    PagedResponse<CourseResponse> paged = response.body();
+                    recommendedPage = paged.page;
+                    recommendedTotalPages = paged.totalPages;
+
+                    if (recommendedPage == 0) {
+                        recommendedList.clear();
+                    }
+
+                    if (paged.content != null) {
+                        for (CourseResponse dto : paged.content) {
+                            recommendedList.add(Course.fromResponse(dto));
+                        }
+                    }
+
+                    requireActivity().runOnUiThread(() -> {
+                        if (!isAdded()) return;
+                        rvRecommended.setVisibility(View.VISIBLE);
+                        recommendedAdapter.setCourses(recommendedList);
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PagedResponse<CourseResponse>> call, Throwable t) {
+                if (!isAdded()) return;
+                isLoadingRecommended = false;
+                // Log/Toast
             }
         });
     }

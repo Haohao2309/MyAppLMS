@@ -15,11 +15,17 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.myapplms.R;
 import com.example.myapplms.data.remote.dto.response.PaymentCheckoutResponse;
+import com.example.myapplms.ui.teacher.TeacherViewModel;
+import com.example.myapplms.utils.SessionManager;
 
 public class OverviewFragment extends Fragment {
 
     private CourseDetailViewModel sharedViewModel;
+    private TeacherViewModel teacherViewModel;
     private TextView tvDescription, tvInstructor, tvCategory, tvPrice;
+    private Button btnBuyCourse;
+    private androidx.lifecycle.LiveData<com.example.myapplms.utils.Resource<com.example.myapplms.data.remote.dto.response.EnrollmentStatusResponse>> enrollmentLiveData;
+    private int courseId = -1;
 
 
     public static OverviewFragment newInstance(int courseId) {
@@ -45,14 +51,24 @@ public class OverviewFragment extends Fragment {
         tvCategory    = view.findViewById(R.id.tv_category);
         tvPrice       = view.findViewById(R.id.tv_price);
         // 1. ÁNH XẠ NÚT MUA KHÓA HỌC
-        Button btnBuyCourse = view.findViewById(R.id.btn_buy_course);
+        btnBuyCourse = view.findViewById(R.id.btn_buy_course);
 
         // 2. GẮN SỰ KIỆN CLICK VÀO NÚT
-        btnBuyCourse.setOnClickListener(v -> handleCheckout());
+        SessionManager sessionManager = new com.example.myapplms.utils.SessionManager(requireContext());
+        boolean isTeacher = "TEACHER".equalsIgnoreCase(sessionManager.getRole());
+
+        if (isTeacher) {
+            btnBuyCourse.setVisibility(View.GONE);
+        } else {
+            btnBuyCourse.setVisibility(View.VISIBLE);
+            btnBuyCourse.setOnClickListener(v -> handleCheckout());
+        }
+
+
         // Lấy Shared ViewModel từ Activity
         sharedViewModel = new ViewModelProvider(requireActivity()).get(CourseDetailViewModel.class);
 
-        int courseId = getArguments() != null ? getArguments().getInt("COURSE_ID", -1) : -1;
+        courseId = getArguments() != null ? getArguments().getInt("COURSE_ID", -1) : -1;
 
         // Lắng nghe dữ liệu PostgreSQL từ Shared ViewModel
         if (courseId != -1) {
@@ -93,6 +109,30 @@ public class OverviewFragment extends Fragment {
             });
         }
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (courseId != -1 && sharedViewModel != null) {
+            if (enrollmentLiveData != null) {
+                enrollmentLiveData.removeObservers(getViewLifecycleOwner());
+            }
+            enrollmentLiveData = sharedViewModel.getEnrollmentStatus(courseId);
+            enrollmentLiveData.observe(getViewLifecycleOwner(), resource -> {
+                if (resource != null && resource.status == com.example.myapplms.utils.Resource.Status.SUCCESS && resource.data != null) {
+                    if (resource.data.enrolled) {
+                        btnBuyCourse.setText("Học tiếp");
+                        btnBuyCourse.setOnClickListener(v -> {
+                            android.content.Intent intent = new android.content.Intent(getContext(), com.example.myapplms.ui.student.learning.LearningActivity.class);
+                            intent.putExtra("COURSE_ID", courseId);
+                            startActivity(intent);
+                        });
+                    }
+                }
+            });
+        }
+    }
+
     // Giả sử bạn có nút này trong layout fragment_overview.xml
     // getBinding().btnBuyCourse.setOnClickListener(v -> handleCheckout());
 
@@ -123,6 +163,7 @@ public class OverviewFragment extends Fragment {
                                         PaymentWebViewActivity.class
                                 );
                                 webViewIntent.putExtra("PAYMENT_URL", data.checkoutUrl);
+                                webViewIntent.putExtra("COURSE_ID", courseId);
                                 startActivity(webViewIntent);
                             } else {
                                 Toast.makeText(getContext(), "Lỗi: Backend chưa trả về checkoutUrl", Toast.LENGTH_LONG).show();

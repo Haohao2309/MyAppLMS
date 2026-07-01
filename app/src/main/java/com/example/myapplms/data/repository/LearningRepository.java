@@ -24,42 +24,54 @@ public class LearningRepository {
         this.apiService = apiService;
     }
 
-    // 1. Lấy tiến độ học tập
-    public LiveData<Resource<ProgressResponse>> getProgress(int courseId) {
-        MutableLiveData<Resource<ProgressResponse>> result = new MutableLiveData<>();
-        result.setValue(Resource.loading());
+    private final MutableLiveData<Resource<ProgressResponse>> progressLiveData = new MutableLiveData<>();
+
+    public LiveData<Resource<ProgressResponse>> getProgressLiveData() {
+        return progressLiveData;
+    }
+
+    // 1. Lấy tiến độ học tập (Gọi hàm này sẽ tự động cập nhật progressLiveData)
+    public void fetchProgress(int courseId) {
+        progressLiveData.setValue(Resource.loading());
 
         apiService.getProgress(courseId).enqueue(new Callback<ProgressResponse>() {
             @Override
             public void onResponse(Call<ProgressResponse> call, Response<ProgressResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    result.postValue(Resource.success(response.body()));
+                    progressLiveData.postValue(Resource.success(response.body()));
                 } else {
-                    result.postValue(Resource.error("Lỗi tải tiến độ: " + response.code(), null));
+                    progressLiveData.postValue(Resource.error("Lỗi tải tiến độ: " + response.code(), null));
                 }
             }
 
             @Override
             public void onFailure(Call<ProgressResponse> call, Throwable t) {
-                result.postValue(Resource.error("Lỗi mạng: " + t.getMessage(), null));
+                progressLiveData.postValue(Resource.error("Lỗi mạng: " + t.getMessage(), null));
             }
         });
-        return result;
     }
 
-    // 2. Đồng bộ tiến độ Video (Chạy ngầm không cần LiveData trả về UI)
-    public void syncVideoProgress(int courseId, String lessonId, SyncVideoRequest request) {
+    // 2. Đồng bộ tiến độ Video
+    public LiveData<Resource<Void>> syncVideoProgress(int courseId, String lessonId, SyncVideoRequest request) {
+        MutableLiveData<Resource<Void>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading());
+        
         apiService.syncVideoProgress(courseId, lessonId, request).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
-                // Thành công thì im lặng chạy tiếp, nếu cần có thể in log
+                if (response.isSuccessful()) {
+                    result.postValue(Resource.success(null));
+                } else {
+                    result.postValue(Resource.error("Lỗi đồng bộ", null));
+                }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                // Log lỗi mạng nếu cần
+                result.postValue(Resource.error("Lỗi mạng: " + t.getMessage(), null));
             }
         });
+        return result;
     }
 
     // 3. Nộp bài Quiz

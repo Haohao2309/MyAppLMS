@@ -20,8 +20,11 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.myapplms.LMSApplication;
 import com.example.myapplms.R;
+import com.example.myapplms.data.remote.dto.response.CourseResponse;
+import com.example.myapplms.data.remote.dto.response.PagedResponse;
 import com.example.myapplms.data.remote.dto.response.RecentActivityResponse;
 import com.example.myapplms.data.remote.dto.response.TaskItemResponse;
 import com.example.myapplms.data.remote.dto.response.WeeklyActivityResponse;
@@ -54,6 +57,10 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
 
     private boolean coursesLoaded = false;
     private Integer teacherId;
+
+    private boolean isActivitiesLoading = false;
+    private boolean isCoursesLoading = false;
+    private int currentTab = 0;
 
     @NonNull
     @Override
@@ -104,6 +111,7 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
             intent.putExtra(CourseFormActivity.EXTRA_COURSE_DESCRIPTION, course.description);
             intent.putExtra(CourseFormActivity.EXTRA_COURSE_PRICE,       course.priceText);
             intent.putExtra(CourseFormActivity.EXTRA_COURSE_IMAGE_URL,   course.imageUrl != null ? course.imageUrl : "");
+            intent.putExtra(CourseFormActivity.EXTRA_COURSE_CATEGORY,    course.category != null ? course.category : "");
             courseFormLauncher.launch(intent);
         });
 
@@ -128,6 +136,8 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
         // ── Observe & Load ────────────────────────────────────────
         observeMyCourses();
         observeDashboardData();
+        observeActivitiesPaged();
+        observeCoursesPaged();
 
         if (teacherId != null) {
             dashboardViewModel.loadAllDashboard();
@@ -139,13 +149,33 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
         getBinding().tabOverview.setOnClickListener(v -> showTab(0));
         getBinding().tabMyCourses.setOnClickListener(v -> {
             showTab(1);
-            if (!coursesLoaded) loadMyCourses();
+            // Load trang đầu tiên khoá học khi vào tab này
+            if (!coursesLoaded) {
+                coursesLoaded = true;
+                dashboardViewModel.loadCoursesPage(0);
+            }
         });
         getBinding().tabStudents.setOnClickListener(v -> showTab(2));
 
         getBinding().btnCreateCourseHome.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), CourseFormActivity.class);
             courseFormLauncher.launch(intent);
+        });
+
+        // ── Cuộn vô tận (Infinite Scrolling) ─────────────────────
+        getBinding().scrollView.setOnScrollChangeListener((androidx.core.widget.NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+            if (scrollY > 0 && scrollY == v.getChildAt(0).getMeasuredHeight() - v.getMeasuredHeight()) {
+                // Kéo đến cuối
+                if (currentTab == 0) { // Tab Tổng quan (Hoạt động gần đây)
+                    if (!isActivitiesLoading && dashboardViewModel.getActivitiesPage() < dashboardViewModel.getActivitiesTotalPages() - 1) {
+                        dashboardViewModel.nextActivitiesPage();
+                    }
+                } else if (currentTab == 1) { // Tab Khoá học
+                    if (!isCoursesLoading && dashboardViewModel.getCoursesPage() < dashboardViewModel.getCoursesTotalPages() - 1) {
+                        dashboardViewModel.nextCoursesPage();
+                    }
+                }
+            }
         });
     }
 
@@ -171,6 +201,8 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
         getBinding().tabOverview.setTypeface(null, Typeface.NORMAL);
         getBinding().tabMyCourses.setTypeface(null, Typeface.NORMAL);
         getBinding().tabStudents.setTypeface(null, Typeface.NORMAL);
+
+        currentTab = index;
 
         switch (index) {
             case 0:
@@ -209,13 +241,20 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
                 getBinding().tvStatAvgScore.setText(
                         String.format(Locale.US, "%.1f", result.data.avgScore));
                 if (result.data.teacherName != null) {
-                    getBinding().tvTeacherName.setText("Thầy " + result.data.teacherName);
+                    getBinding().tvTeacherName.setText("Giảng viên " + result.data.teacherName);
                     // Lấy 2 chữ cái đầu làm initials
                     String[] parts = result.data.teacherName.trim().split("\\s+");
                     String initials = parts.length >= 2
                             ? String.valueOf(parts[0].charAt(0)) + String.valueOf(parts[parts.length - 1].charAt(0))
                             : result.data.teacherName.substring(0, Math.min(2, result.data.teacherName.length()));
-                    getBinding().tvTeacherInitials.setText(initials.toUpperCase(Locale.ROOT));
+                    String imageUrl = new SessionManager(requireContext()).getImageUrl();
+                    if (imageUrl != null && !imageUrl.isEmpty()) {
+                        Glide.with(this)
+                                .load(imageUrl)
+                                .placeholder(R.drawable.ic_person)
+                                .circleCrop()
+                                .into(getBinding().tvTeacherInitials);
+                    }
                 }
             }
             if (result.message != null && !result.message.isEmpty()) {
@@ -245,7 +284,12 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
                 taskList.addAll(result.data.tasks);
             }
             taskAdapter.notifyDataSetChanged();
+
+            // Code cũ của bạn: Cập nhật text
             getBinding().tvTaskCount.setText(String.valueOf(result.data.pendingCount));
+
+            // THÊM DÒNG NÀY: Ẩn badge nếu không có task nào, hiện nếu task > 0
+            getBinding().tvTaskCount.setVisibility(result.data.pendingCount > 0 ? View.VISIBLE : View.GONE);
         });
     }
 
@@ -272,7 +316,7 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
         for (int i = 0; i < data.dailySubmissions.size(); i++) {
             long val = data.dailySubmissions.get(i).count;
 
-            // Wrapper column
+            // 1. Wrapper column (Cột bao ngoài)
             LinearLayout col = new LinearLayout(requireContext());
             col.setOrientation(LinearLayout.VERTICAL);
             col.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL);
@@ -282,20 +326,48 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
             colParams.setMarginEnd(4);
             col.setLayoutParams(colParams);
 
-            // Cột bar
+            // 2. Tạo TextView để hiện con số trên đỉnh cột
+            TextView tvValue = new TextView(requireContext());
+            tvValue.setText(String.valueOf(val));
+            tvValue.setTextSize(10f); // Chữ nhỏ vừa phải
+            tvValue.setGravity(Gravity.CENTER);
+
+
+            // Nếu là ngày cao nhất (maxIdx) thì tô chữ màu tím đậm, còn lại màu xám
+            if (i == maxIdx && val > 0) {
+                tvValue.setTextColor(0xFF6C63FF);
+                tvValue.setTypeface(null, Typeface.BOLD);
+            } else {
+                tvValue.setTextColor(0xFFAAAAAA);
+            }
+
+            // (Tùy chọn) Ẩn số 0 cho đồ thị đỡ rối mắt, nếu thích hiện thì bỏ dòng if này đi
+            if (val == 0) {
+                tvValue.setVisibility(View.INVISIBLE);
+            }
+
+            // 3. Tạo Cột bar (Thanh màu)
             View bar = new View(requireContext());
-            int barHeightPx = maxVal == 0 ? 4 : (int) ((float) val / maxVal * (chartHeightPx - 8));
+            int barHeightPx = maxVal == 0 ? 4 : (int) ((float) val / maxVal * (chartHeightPx - 32)); // Trừ hao thêm 25px để nhường chỗ cho text bên trên
             barHeightPx = Math.max(barHeightPx, 8); // min height
+
             LinearLayout.LayoutParams barParams = new LinearLayout.LayoutParams(
                     (int)(20 * getResources().getDisplayMetrics().density), barHeightPx);
+
+            // Cách số một chút cho đẹp
+            barParams.topMargin = 4;
             bar.setLayoutParams(barParams);
 
-            // Màu: highlight ngày cao nhất bằng tím đậm, còn lại tím nhạt
+            // Màu: highlight ngày cao nhất bằng tím đậm, còn lại màu nhạt
             bar.setBackgroundResource(i == maxIdx
-                    ? R.drawable.bg_chart_bar
-                    : R.drawable.bg_step_inactive);
+                    ? R.drawable.bg_chart_bar_2
+                    : R.drawable.bg_step_inactive_2);
 
+            // 4. Nhét Text và Bar vào Cột bao ngoài (Thứ tự rất quan trọng: Text trước, Bar sau)
+            col.addView(tvValue);
             col.addView(bar);
+
+            // 5. Nhét toàn bộ vào Khung đồ thị
             chartContainer.addView(col);
         }
 
@@ -311,6 +383,68 @@ public class TeacherHomeFragment extends BaseFragment<FragmentTeacherHomeBinding
             getBinding().tvWeeklyPercent.setTextColor(0xFF2ECC71);
             getBinding().cardWeeklyPercent.setCardBackgroundColor(0xFFF0FFF8);
         }
+    }
+
+    // ════════════════════════════════════════════════════════════
+    //  Pagination Observers
+    // ════════════════════════════════════════════════════════════
+
+    /** Lắng nghe phân trang hoạt động gần đây */
+    private void observeActivitiesPaged() {
+        dashboardViewModel.activitiesPaged.observe(getViewLifecycleOwner(), result -> {
+            if (result == null) return;
+            switch (result.status) {
+                case LOADING:
+                    isActivitiesLoading = true;
+                    break;
+                case SUCCESS:
+                    isActivitiesLoading = false;
+                    if (result.data != null) {
+                        PagedResponse<RecentActivityResponse> paged = result.data;
+                        if (paged.page == 0) {
+                            activityList.clear();
+                        }
+                        if (paged.content != null) {
+                            activityList.addAll(paged.content);
+                        }
+                        activityAdapter.notifyDataSetChanged();
+                    }
+                    break;
+                case ERROR:
+                    isActivitiesLoading = false;
+                    break;
+            }
+        });
+    }
+
+    /** Lắng nghe phân trang khoá học */
+    private void observeCoursesPaged() {
+        dashboardViewModel.coursesPaged.observe(getViewLifecycleOwner(), result -> {
+            if (result == null) return;
+            switch (result.status) {
+                case LOADING:
+                    isCoursesLoading = true;
+                    break;
+                case SUCCESS:
+                    isCoursesLoading = false;
+                    if (result.data != null) {
+                        PagedResponse<CourseResponse> paged = result.data;
+                        if (paged.page == 0) {
+                            myCourseList.clear();
+                        }
+                        if (paged.content != null) {
+                            for (CourseResponse dto : paged.content) {
+                                myCourseList.add(Course.fromResponse(dto));
+                            }
+                        }
+                        courseAdapter.notifyDataSetChanged();
+                    }
+                    break;
+                case ERROR:
+                    isCoursesLoading = false;
+                    break;
+            }
+        });
     }
 
     private void observeMyCourses() {

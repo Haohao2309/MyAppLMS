@@ -58,8 +58,10 @@ public class TeacherMyCoursesFragment extends BaseFragment<FragmentTeacherMyCour
             Intent intent = new Intent(getContext(), CourseFormActivity.class);
             intent.putExtra(CourseFormActivity.EXTRA_COURSE_ID, course.id);
             intent.putExtra(CourseFormActivity.EXTRA_COURSE_TITLE, course.title);
+            intent.putExtra(CourseFormActivity.EXTRA_COURSE_DESCRIPTION, course.description);
             intent.putExtra(CourseFormActivity.EXTRA_COURSE_PRICE, course.priceText);
-            intent.putExtra(CourseFormActivity.EXTRA_COURSE_IMAGE_URL, "");
+            intent.putExtra(CourseFormActivity.EXTRA_COURSE_IMAGE_URL, course.imageUrl != null ? course.imageUrl : "");
+            intent.putExtra(CourseFormActivity.EXTRA_COURSE_CATEGORY, course.category != null ? course.category : "");
             courseFormLauncher.launch(intent);
         });
 

@@ -32,9 +32,7 @@ public class RecommendedCourseAdapter extends RecyclerView.Adapter<RecommendedCo
     public void setCourses(List<Course> newCourses) {
         courses.clear();
         if (newCourses != null) {
-            // Hiển thị tối đa 10 khóa gợi ý
-            int limit = Math.min(newCourses.size(), 10);
-            courses.addAll(newCourses.subList(0, limit));
+            courses.addAll(newCourses);
         }
         notifyDataSetChanged();
     }
